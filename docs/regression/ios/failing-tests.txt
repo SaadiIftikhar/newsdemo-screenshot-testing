@@ -1,0 +1,21 @@
+Failing tests:
+	ComponentSnapshotTests.test_breakingBanner_default()
+	ComponentSnapshotTests.test_breakingBanner_default()
+	ComponentSnapshotTests.test_breakingBanner_default()
+	ComponentSnapshotTests.test_breakingBanner_longHeadline()
+	ComponentSnapshotTests.test_breakingBanner_longHeadline()
+	ComponentSnapshotTests.test_teaserCard_premium_longHeadline()
+	ComponentSnapshotTests.test_teaserCard_premium_longHeadline()
+	ComponentSnapshotTests.test_teaserCard_premium()
+	ComponentSnapshotTests.test_teaserCard_premium()
+	ComponentSnapshotTests.test_teaserCard_premium()
+	FeedScreenSnapshotTests.test_feed_default_smallDevice()
+	FeedScreenSnapshotTests.test_feed_default()
+	FeedScreenSnapshotTests.test_feed_default()
+	FeedScreenSnapshotTests.test_feed_default()
+	FeedScreenSnapshotTests.test_feed_longHeadlines()
+	FeedScreenSnapshotTests.test_feed_longHeadlines()
+	FeedScreenSnapshotTests.test_feedScreen_viaViewModel_mockedClient()
+
+** TEST FAILED **
+
