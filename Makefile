@@ -45,12 +45,14 @@ ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=...] [OFF
 # --- Android -----------------------------------------------------------------
 
 android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
+	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi   # stale _compare.png files would mislead reviewers
 	cd $(ANDROID_DIR) && ./gradlew verifyRoborazziDebug --stacktrace
 
 android-record: ## Re-record ALL Android goldens
 	cd $(ANDROID_DIR) && ./gradlew recordRoborazziDebug
 
 android-compare: ## Produce _compare.png diff images without failing the build
+	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi
 	cd $(ANDROID_DIR) && ./gradlew compareRoborazziDebug
 
 android-run: ## Launch the Android app (phone or emulator): same options as ios-run

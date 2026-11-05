@@ -36,4 +36,20 @@ The challenge PDF was attached, together with:
 
 > audit everything and all the deliverables and also let me know if you want me to verify something form my side
 
+> also remove claude from the contributors please incase i upload to gihub i dont want it to be there and yes no need to upload to github with [work e-mail removed] I will be using personel. I dont think we need to upload to github as I just have to present it
+
+> give me all the commands etc and where to execute them to run a test and see app on simulater or phone etc
+
+> simualter is not the case for new xcode kindyl have a look and update commands
+
+> 1: audit everything and verify by researhcing online etc that what we have implemented is up tod ate and robust
+> 2: research and apply fixes / imrpovements
+> 3: also for the app make 3 tabs at the bottom hovering bar with news feed , games and account
+> 4: to the feed add real articles and we should be able to opent he articles just take from publically avialable once , in games the user should be able to see a few games which can be played see publically avaible short and then 3rd page with account login
+> 5: after makingthe app better make test for the other screens now too
+> 6: once imporvemnt and tests are made audit everything again and run every tests also go through each command so each one of them hold true
+> 7: then give me imrportant information summary i need along with all the use full commands and where to run them
+
+Decisions I gave for that round: **real headlines + link out** (no copied article text), **built-in classic games**, **both iOS and Android**.
+
 *(Questions I asked afterwards to understand the code are added here as the walkthrough continues.)*

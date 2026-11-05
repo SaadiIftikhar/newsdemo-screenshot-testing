@@ -9,16 +9,16 @@ Branch **`demo/regression`** contains a plausible "refactor" commit on each plat
 
 | | iOS (swift-snapshot-testing) | Android (Roborazzi) |
 |---|---|---|
-| Failing tests | 8 (of 20) | 8 test methods |
-| Failing snapshots | 17 (of 35) | 17 (of 35) |
-| Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states | same |
+| Failing snapshots | 19 (of 62) | 19 (of 62) |
+| Failing tests | 9 test methods | 9 test methods |
+| Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states, all Games and Account screens | same |
 
-The two platforms fail on **exactly the same 17 snapshots**, because they share fixtures, test names and the variant matrix.
+The two platforms fail on **exactly the same 19 snapshots** (lists in `ios/failing-tests.txt` and `android/failing-snapshots.txt`), because they share fixtures, test names and the variant matrix. The failures include the app shell's feed tab, and a real WELTplus teaser losing its PLUS badge.
 
 ## Review artifacts
 
-- **iOS:** `ios/` has composites from `scripts/diff-report.swift`, showing **golden | this PR | changed pixels (magenta)**. Locally, `make ios-test` writes the full gallery to `artifacts/ios/diffs/index.html`. `failing-tests.txt` is the raw xcodebuild summary.
-- **Android:** `android/` has Roborazzi's built-in `_compare.png` (**Reference | Diff | New**), written to `android/app/build/outputs/roborazzi/`.
+- **iOS:** `ios/` has composites (teaser, breaking banner, whole app shell) from `scripts/diff-report.swift`, showing **golden | this PR | changed pixels (magenta)**. Locally, `make ios-test` writes the full gallery to `artifacts/ios/diffs/index.html`. 
+- **Android:** `android/` has Roborazzi's built-in `_compare.png` for the same three screens (**Reference | Diff | New**), written to `android/app/build/outputs/roborazzi/`.
 
 In CI these are uploaded as run artifacts and linked from an automatic PR comment (see `.github/workflows/screenshots.yml`).
 

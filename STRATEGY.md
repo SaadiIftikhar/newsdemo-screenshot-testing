@@ -12,7 +12,7 @@
 |---|---|---|
 | **PR gate (Layer 1)** | [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) 1.19, pinned exactly | [Roborazzi](https://github.com/takahirom/roborazzi) 1.77 on Robolectric, pinned exactly |
 | Renders | real SwiftUI/UIKit views, in the test process, on a pinned simulator | real Compose/View UI on the JVM (Robolectric Native Graphics), no emulator |
-| Why | Same authors as TCA (the WELT iOS stack), so data mocking reuses `withDependencies`. Swift Testing support. Very widely adopted | Runs inside the normal `test` task and works with **Hilt** (fakes via `@TestInstallIn`). Supports interactions. Creates `_compare.png` diff images. Used by Google's *Now in Android* |
+| Why | Same authors as TCA (the WELT iOS stack), so data mocking reuses `withDependencies`. Swift Testing support. Very widely adopted | Runs inside the normal `test` task and works with **Hilt** (fakes via `@TestInstallIn`). The same JVM run also drives **UI interaction tests** (tap, type, switch tabs). Creates `_compare.png` diff images. Used by Google's *Now in Android* |
 | **Nightly (Layer 2)** | Maestro flows on simulator, app started with `-fixture <name>` | Maestro on emulator, `--es fixture <name>` |
 
 **Alternatives considered:**
@@ -31,15 +31,19 @@
 |---|---|---|
 | Feed data | TCA `@DependencyClient` → `withDependencies { $0.feedClient = .fixture("feed_default") }` | Hilt: `@TestInstallIn` replaces `NetworkModule`, or `@BindValue` a fixture-backed repository |
 | Images | Inject a Kingfisher/Nuke pipeline whose data loader reads `/fixtures/images` synchronously | Coil `FakeImageLoaderEngine` |
+| Login | `AuthClient` value with an offline `.demo` backend | `AuthClient` interface with the same demo backend |
 | Integration level | `URLProtocol` stub serving fixture files | OkHttp `MockWebServer` serving the same files |
 
 **Everything else that varies is pinned too:**
-- clock (`now = 2023-11-14T22:13:20Z`), locale `de_DE`, time zone `Europe/Berlin`
+- clock (`now = 2026-11-05T14:13:20Z`, the day the demo's real headlines were fetched), locale `de_DE`, time zone `Europe/Berlin`
+- randomness: games deal from a **seeded generator implemented identically on both platforms**, so a seed gives the same board on iOS and Android (asserted by one shared literal)
 - animations off (the live-ticker pulse has a switch)
 - fixed device geometry, theme and text size for each variant
 - ads and WebViews replaced by fixed-size placeholders, so third-party SDKs never render in tests
 
 **Error and offline states** are injected as client failures (`FeedError.offline`, `.server(503)`), not as data.
+
+**Real content, legally:** fixtures use real public headlines and links (WELT/BILD RSS) with our own one-line teasers. Article text is never copied: tapping opens the publisher's page in an in-app browser. A contract test asserts every item links out over HTTPS and credits its source.
 
 ## 3. Golden images: storage and review
 
@@ -54,7 +58,7 @@
 
 ## 4. CI/CD and the Scrum process
 
-- **Every PR:** iOS (macOS runner) and Android (Linux runner) jobs run in parallel. Target time is under 10 minutes. In the demo, 35 snapshots per platform run in about 16s (iOS) and 14s (Android) after the build.
+- **Every PR:** iOS (macOS runner) and Android (Linux runner) jobs run in parallel. Target time is under 10 minutes. In the demo, 62 snapshots per platform run in about IOS_SECS s (iOS) and ANDROID_SECS s (Android) after the build.
 - **Rollout of the gate:** report-only at first, then a required check. At scale only affected modules run (Gradle's task graph on Android; per-module test plans or Tuist selective testing on iOS).
 - **Nightly:** Layer 2 Maestro flows plus a full matrix run. Results go to the QA channel.
 - **Release branch:** the same gate. Manual visual regression testing shrinks to exploratory testing.
@@ -73,6 +77,13 @@ Snapshot tests should be deterministic by construction rather than retried until
    - The tolerance is never loosened globally.
 4. **No automatic retries for snapshots.** A flaky snapshot is quarantined within 24 hours with an owner and a fix-by date. The flake rate is tracked, with a target below 1%.
 5. **The harness is tested too.** Components taller than the screen were silently clipped; the fix was to measure and host them without safe areas.
+6. **A green test can protect nothing.** After moving Android to SDK 37, **44 of 62 captures were blank** on Robolectric's SDK 37 runtime, and verify still passed, because blank equals blank. The fixes:
+   - pin the test runtime to SDK 36 (the app still targets 37)
+   - a capture guard that refuses to record or compare an undrawn frame
+   - `make lint-goldens`, a CI job that fails on any blank golden
+7. **Pin test dependencies, not just app dependencies.** Compose UI tests pulled in Espresso 3.5.1 transitively, which calls an API removed in SDK 37, so every UI test crashed. Pinning Espresso 3.7.0 fixed it.
+8. **What can't be captured can't be protected.** iOS 26's Liquid Glass tab bar renders blank in in-process snapshots (an [open upstream question](https://github.com/pointfreeco/swift-snapshot-testing/discussions/1036)). The app therefore uses its own floating bar, identical on both platforms, with accessibility implemented explicitly. System-bar fidelity belongs to Layer 2.
+9. **Clear old diff output before every run.** Stale `_compare.png` files from a previous run showed up next to the real failures and would have misled a reviewer.
 
 ## 6. Integration into the existing production codebase
 
@@ -110,12 +121,13 @@ Snapshot tests should be deterministic by construction rather than retried until
 | "QA should own the tests." | No. Developers own them (shift-left). QA owns the system around them |
 | "AI could approve diffs." | AI can *triage* (summarise the diff in the PR comment, flag likely-intended changes, generate edge-case fixtures like long German compound words). A human always approves goldens |
 
-**What the demo caught before any deliberate regression:**
+**What the demo caught before any deliberate regression** (product issues; tooling issues are in §5):
 1. The breaking-banner timestamp was grey on red in light mode (a contrast bug).
 2. The kicker was truncated next to the PLUS badge at accessibility text sizes.
 3. "EILMELDUNG" was hyphenated at the same text sizes.
 4. **Cross-platform divergence:** Android didn't hyphenate German headlines (Compose defaults to `Hyphens.None`) while iOS did. This was visible only because both platforms render the same fixture.
 5. A 60-letter compound word still breaks mid-word on **both** platforms. This was handed over as a **content finding**: the fix is soft hyphens from the CMS, not UI code.
 6. **Found only by running the real app (Layer 2), never by snapshots:** on an en_US device the 12-hour preference leaked into German dates ("11:05 PM Uhr"). Snapshots pin `de_DE`, so they can't see it. A pinned environment proves the UI is *stable*, not that it's *right everywhere*. That's why Layer 2 exists, and why the matrix should carry one "hostile device settings" variant.
+7. The login e-mail placeholder rendered as a **blue link**: SwiftUI parsed the string as Markdown.
 
-Seven issues (with the §5 harness bug) before any deliberate regression. That regression (badge dropped, 2pt padding) then failed **the same 17 of 35 snapshots on both platforms** ([docs/regression](docs/regression/)).
+The deliberate regression (a "refactor" that drops the PLUS badge and tightens the banner by 2pt) then failed **the same 19 of 62 snapshots on both platforms**. That includes a real WELTplus teaser losing its paywall badge, while every unaffected screen stayed green ([docs/regression](docs/regression/)).

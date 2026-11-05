@@ -1,4 +1,5 @@
-Failing tests:
+	AppShellSnapshotTests.test_appShell_feedTab()
+	AppShellSnapshotTests.test_appShell_feedTab()
 	ComponentSnapshotTests.test_breakingBanner_default()
 	ComponentSnapshotTests.test_breakingBanner_default()
 	ComponentSnapshotTests.test_breakingBanner_default()
@@ -16,6 +17,3 @@ Failing tests:
 	FeedScreenSnapshotTests.test_feed_longHeadlines()
 	FeedScreenSnapshotTests.test_feed_longHeadlines()
 	FeedScreenSnapshotTests.test_feedScreen_viaViewModel_mockedClient()
-
-** TEST FAILED **
-
