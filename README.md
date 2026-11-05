@@ -56,10 +56,16 @@ Pre-captured output is in [docs/regression/](docs/regression/), in case you don'
 ## Run the apps (mock mode)
 
 ```bash
-make ios-app      # builds for the pinned simulator; launch args: -fixture feed_long_headlines | -offline | -baseURL http://localhost:8080
-cd android && ./gradlew installDebug
-adb shell am start -n com.example.newsdemo/.MainActivity --es fixture feed_long_headlines
+make ios-run                                  # builds if needed, boots the pinned simulator, opens it, launches
+make ios-run FIXTURE=feed_long_headlines      # any fixture name: feed_default | feed_long_headlines | feed_empty
+make ios-run OFFLINE=1                        # offline state
+make android-run                              # connected phone, running emulator, or starts NewsDemo_API34
+make android-run FIXTURE=feed_empty           # same options as iOS
 ```
+
+Xcode 27 replaced Simulator.app with **DeviceHub** (`open -a DeviceHub`). The script falls back to Simulator.app on older Xcode.
+Demo toggles: `xcrun simctl ui booted appearance dark` / `content_size accessibility-extra-extra-extra-large`;
+Android: `adb shell cmd uimode night yes` / `adb shell settings put system font_scale 2.0`.
 
 The same fixture names drive the tests, the apps' mock mode and (in the strategy) nightly Maestro flows.
 

@@ -13,7 +13,7 @@ struct Variant: Sendable {
 
     static let light = Variant(name: "light", colorScheme: .light, dynamicType: .large)
     static let dark = Variant(name: "dark", colorScheme: .dark, dynamicType: .large)
-    /// Largest accessibility text size — where truncation/overlap bugs live.
+    /// Accessibility size AX3 (iOS goes up to AX5), where truncation/overlap bugs start to appear.
     static let largeText = Variant(name: "light_xxxl", colorScheme: .light, dynamicType: .accessibility3)
 
     /// Curated default matrix (not a full cartesian product — see STRATEGY.md "Scaling").

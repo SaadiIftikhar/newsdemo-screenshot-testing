@@ -48,7 +48,7 @@
 - **Review:** on failure, CI uploads a diff report (golden | this PR | changed pixels, plus an HTML gallery) and comments on the PR. `CODEOWNERS` requires **design or QA approval for any golden change**, which is what stops "re-record and merge" from turning the tests into a rubber stamp.
 - **Matrix (curated, not every combination):**
   - every component: light + dark
-  - text-heavy components: + largest accessibility size (iOS) / font scale 2.0 (Android)
+  - text-heavy components: + accessibility size AX3 (iOS) / font scale 2.0, Android's maximum. AX5 is deliberately left to Layer 2: running the app at AX5 shows the title hyphenating ("NewsDe-mo"), a cost/coverage trade-off worth revisiting
   - screens: + smallest phone
   - premium/paywall: both themes, always
 

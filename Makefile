@@ -5,7 +5,7 @@ IOS_PKG := ios/NewsKit
 IOS_ARTIFACTS := $(ROOT)/artifacts/ios
 ANDROID_DIR := android
 
-.PHONY: help ios-test ios-record ios-record-missing ios-app android-test android-record android-compare clean
+.PHONY: help ios-test ios-record ios-record-missing ios-app ios-run android-test android-record android-compare android-run clean
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -37,6 +37,11 @@ ios-app: ## Generate the Xcode project and build the demo app for the pinned sim
 	@UDID=$$(scripts/ios-sim.sh) && xcodebuild build -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
 	  -destination "platform=iOS Simulator,id=$$UDID" -quiet
 
+FIXTURE ?= feed_default
+
+ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=feed_long_headlines] [OFFLINE=1]
+	@OFFLINE=$(OFFLINE) scripts/ios-run.sh $(FIXTURE)
+
 # --- Android -----------------------------------------------------------------
 
 android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
@@ -47,6 +52,9 @@ android-record: ## Re-record ALL Android goldens
 
 android-compare: ## Produce _compare.png diff images without failing the build
 	cd $(ANDROID_DIR) && ./gradlew compareRoborazziDebug
+
+android-run: ## Launch the Android app (phone or emulator): make android-run [FIXTURE=...] [OFFLINE=1]
+	@OFFLINE=$(OFFLINE) scripts/android-run.sh $(FIXTURE)
 
 clean:
 	rm -rf artifacts ios/NewsKit/.build $(ANDROID_DIR)/build $(ANDROID_DIR)/app/build
