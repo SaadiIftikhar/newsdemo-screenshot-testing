@@ -27,7 +27,7 @@ The challenge PDF was attached, together with:
 
 - **Research:** current versions and status of swift-snapshot-testing, Roborazzi, Paparazzi, Compose Preview Screenshot Testing and Sentry/Emerge Snapshots. Known flakiness causes (simulator/GPU differences). Golden storage patterns. Public job postings to infer the BILD/WELT stack (Swift 6/SwiftUI/TCA, Kotlin/Compose/Hilt). Version numbers were checked against Maven/GitHub release pages, not taken from memory.
 - **Devil's advocate:** objections and answers are in STRATEGY.md §9.
-- **Build and verification:** the agent ran every build and test locally and **looked at every new golden before accepting it**. That review caught real UI bugs (banner contrast, truncated kicker, hyphenated label, missing Android hyphenation) and one test-harness bug (tall components clipped). See STRATEGY.md §9.
+- **Build and verification:** the agent ran every build and test locally and **looked at every new golden before accepting it**. That review caught real UI bugs (banner contrast, truncated kicker, hyphenated label, missing Android hyphenation) and one test-harness bug (tall components clipped). Launching the real app then found a locale bug the snapshots structurally couldn't see. See STRATEGY.md §9.
 - **What I would never delegate to AI:** approving golden changes. In the proposed process, AI may *triage* diffs or *generate* edge-case fixtures; a human code-owner approves.
 
 ## 4. Follow-up prompts

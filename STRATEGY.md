@@ -116,4 +116,6 @@ Snapshot tests should be deterministic by construction rather than retried until
 4. **Cross-platform divergence:** Android didn't hyphenate German headlines (Compose defaults to `Hyphens.None`) while iOS did. This was visible only because both platforms render the same fixture.
 5. A 60-letter compound word still breaks mid-word on **both** platforms. This was handed over as a **content finding**: the fix is soft hyphens from the CMS, not UI code.
 
-Six issues (with the §5 harness bug) before any deliberate regression. That regression (badge dropped, 2pt padding) then failed **the same 17 of 35 snapshots on both platforms** ([docs/regression](docs/regression/)).
+6. **Found only by running the real app (Layer 2), never by snapshots:** on an en_US device the 12-hour preference leaked into German dates ("11:05 PM Uhr"). Snapshots pin `de_DE`, so they can't see it. A pinned environment proves the UI is *stable*, not that it's *right everywhere*. That's why Layer 2 exists, and why the matrix should carry one "hostile device settings" variant.
+
+Seven issues (with the §5 harness bug) before any deliberate regression. That regression (badge dropped, 2pt padding) then failed **the same 17 of 35 snapshots on both platforms** ([docs/regression](docs/regression/)).

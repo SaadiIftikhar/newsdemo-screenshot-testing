@@ -12,10 +12,16 @@ import SwiftUI
 struct NewsDemoApp: App {
     private let viewModel: FeedViewModel
     private let imageProvider: ImageProvider
+    /// Fixture mode pins the clock + zone too, so Layer 2 (Maestro) screenshots are deterministic.
+    private let now: Date?
+    private let timeZone: TimeZone
 
     init() {
         let defaults = UserDefaults.standard // launch arguments land here: -key value
         let fixtures = FixtureStore.bundled()
+        let usesFixtures = defaults.string(forKey: "baseURL") == nil
+        now = usesFixtures ? FixtureEnvironment.now : nil
+        timeZone = usesFixtures ? FixtureEnvironment.timeZone : .current
 
         if ProcessInfo.processInfo.arguments.contains("-offline") {
             viewModel = FeedViewModel(client: .failing(.offline))
@@ -38,6 +44,12 @@ struct NewsDemoApp: App {
         WindowGroup {
             FeedScreen(viewModel: viewModel)
                 .environment(\.imageProvider, imageProvider)
+                // German-language product: never format with the device locale. On an en_US device the
+                // 12-hour preference leaked in ("11:05 PM Uhr"). Found by running the real app, not by
+                // snapshots (those pin de_DE): the reason Layer 2 exists.
+                .environment(\.locale, Locale(identifier: "de_DE"))
+                .environment(\.timeZone, timeZone)
+                .environment(\.now, now ?? Date())
         }
     }
 }
