@@ -1,0 +1,114 @@
+# Screenshot-test gate for every PR, on both platforms.
+#
+#  - verify (default): fail the PR on any unintended pixel change, upload diffs, comment on the PR.
+#  - record: add the label `record-snapshots` to a PR (or run manually). CI re-records the goldens on
+#    the pinned runner image and pushes them as a bot commit, so goldens never come from someone's
+#    laptop. The resulting golden diff is then reviewed in the PR like any other code change.
+name: screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      record:
+        description: "Re-record goldens instead of verifying"
+        type: boolean
+        default: false
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RECORD: ${{ github.event.label.name == 'record-snapshots' || inputs.record == true }}
+
+jobs:
+  ios:
+    runs-on: macos-26            # pinned image; bump together with Xcode + goldens in ONE PR
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          ref: ${{ github.head_ref || github.ref }}
+      - name: Select pinned Xcode
+        run: sudo xcode-select -s /Applications/Xcode_27.2.app
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: ios/NewsKit/.build
+          key: spm-${{ hashFiles('ios/NewsKit/Package.resolved', 'ios/NewsKit/Package.swift') }}
+      - name: Verify snapshots
+        if: env.RECORD != 'true'
+        run: make ios-test
+      - name: Re-record snapshots
+        if: env.RECORD == 'true'
+        run: make ios-record || true   # record mode always "fails"; the diff is what matters
+      - name: Upload diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-snapshot-diffs
+          path: artifacts/ios/diffs
+      - name: Push re-recorded goldens
+        if: env.RECORD == 'true'
+        uses: ./.github/actions/commit-goldens
+        with:
+          paths: ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
+          message: "chore(snapshots): re-record iOS goldens"
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+          ref: ${{ github.head_ref || github.ref }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify snapshots
+        if: env.RECORD != 'true'
+        run: make android-test
+      - name: Re-record snapshots
+        if: env.RECORD == 'true'
+        run: make android-record
+      - name: Upload diffs (_compare.png)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-snapshot-diffs
+          path: android/app/build/outputs/roborazzi
+      - name: Push re-recorded goldens
+        if: env.RECORD == 'true'
+        uses: ./.github/actions/commit-goldens
+        with:
+          paths: android/app/src/test/screenshots
+          message: "chore(snapshots): re-record Android goldens"
+
+  report:
+    needs: [ios, android]
+    if: failure() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number,
+              body: [
+                '### 📸 Screenshot tests found visual changes',
+                `Diff images (reference / actual / difference) are attached to [this run](${run}).`,
+                '',
+                '- **Unintended?** Fix the code and push.',
+                '- **Intended?** Add the `record-snapshots` label. CI re-records the goldens and pushes them;',
+                '  a designer/QA code-owner then approves the golden diff in this PR.',
+              ].join('\n'),
+            });

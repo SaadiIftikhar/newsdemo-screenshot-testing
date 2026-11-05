@@ -1,0 +1,33 @@
+# XcodeGen spec for the demo app shell (`make ios-app`). The .xcodeproj is generated, not committed.
+name: NewsDemo
+options:
+  bundleIdPrefix: com.example.newsdemo
+  deploymentTarget:
+    iOS: "17.0"
+packages:
+  NewsKit:
+    path: NewsKit
+targets:
+  NewsDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: ../fixtures
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - package: NewsKit
+        product: NewsCore
+      - package: NewsKit
+        product: NewsUI
+      - package: NewsKit
+        product: NewsFixtures
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.newsdemo
+        SWIFT_VERSION: "6.0"
+        CODE_SIGNING_ALLOWED: NO

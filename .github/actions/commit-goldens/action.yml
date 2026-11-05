@@ -1,0 +1,21 @@
+name: commit-goldens
+description: Commit re-recorded golden images back to the PR branch as a bot commit.
+inputs:
+  paths:
+    description: Golden directory to commit
+    required: true
+  message:
+    description: Commit message
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        git config user.name "snapshot-bot"
+        git config user.email "snapshot-bot@users.noreply.github.com"
+        git add ${{ inputs.paths }}
+        if git diff --cached --quiet; then echo "goldens unchanged"; exit 0; fi
+        git commit -m "${{ inputs.message }}"
+        git pull --rebase
+        git push

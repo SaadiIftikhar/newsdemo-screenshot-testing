@@ -1,0 +1,67 @@
+{
+  "breaking": {
+    "id": "brk-001",
+    "headline": "Bundestag beschließt neues Gesetz zur Energiewende",
+    "publishedAt": "2023-11-14T22:05:00Z"
+  },
+  "items": [
+    {
+      "type": "liveTicker",
+      "id": "live-001",
+      "kicker": "LIVE",
+      "headline": "Champions League: Alle Spiele des Abends im Ticker",
+      "latestUpdate": "78. Minute: Ausgleich durch Kopfball nach Ecke",
+      "updatedAt": "2023-11-14T22:12:00Z"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-001",
+      "kicker": "POLITIK",
+      "headline": "Kanzler trifft Ministerpräsidenten zum Krisengipfel",
+      "summary": "Bund und Länder ringen um die Verteilung der Kosten. Ein Ergebnis wird noch in dieser Nacht erwartet.",
+      "image": "politics.png",
+      "publishedAt": "2023-11-14T21:40:00Z",
+      "premium": false
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-002",
+      "kicker": "WIRTSCHAFT",
+      "headline": "Was die neue Zinsentscheidung für Sparer bedeutet",
+      "summary": "Experten erklären, welche Anlagen sich jetzt noch lohnen.",
+      "image": "economy.png",
+      "publishedAt": "2023-11-14T19:13:20Z",
+      "premium": true
+    },
+    {
+      "type": "ad",
+      "id": "ad-001",
+      "slot": "feed_top",
+      "height": 120
+    },
+    {
+      "type": "video",
+      "id": "vid-001",
+      "kicker": "SPORT",
+      "headline": "Die besten Tore des Spieltags im Video",
+      "image": "sport.png",
+      "durationSeconds": 134,
+      "publishedAt": "2023-11-14T18:00:00Z"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-003",
+      "kicker": "WETTER",
+      "headline": "Erster Frost: Hier wird es heute Nacht glatt",
+      "summary": null,
+      "image": null,
+      "publishedAt": "2023-11-13T08:30:00Z",
+      "premium": false
+    },
+    {
+      "type": "podcast",
+      "id": "pod-001",
+      "headline": "Unknown item types must be ignored, not crash the feed"
+    }
+  ]
+}

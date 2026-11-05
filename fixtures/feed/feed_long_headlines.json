@@ -1,0 +1,29 @@
+{
+  "breaking": {
+    "id": "brk-002",
+    "headline": "Bundesverfassungsgericht kippt Rindfleischetikettierungsüberwachungsaufgabenübertragungsgesetz – Länder müssen Haushaltsplanungen bis Jahresende vollständig überarbeiten",
+    "publishedAt": "2023-11-14T22:10:00Z"
+  },
+  "items": [
+    {
+      "type": "teaser",
+      "id": "tsr-101",
+      "kicker": "GESELLSCHAFT UND VERBRAUCHERSCHUTZ",
+      "headline": "Donaudampfschifffahrtsgesellschaftskapitän erklärt, warum die Grundstücksverkehrsgenehmigungszuständigkeitsübertragungsverordnung niemandem hilft",
+      "summary": "Ein ungewöhnlich langer Vorspann, der prüft, ob Zeilenumbrüche, Silbentrennung und Abschneiden auch bei sehr großen Schriftgrößen sauber funktionieren und nichts überlappt.",
+      "image": "politics.png",
+      "publishedAt": "2023-11-14T20:00:00Z",
+      "premium": true
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-102",
+      "kicker": "REGIONAL",
+      "headline": "Kraftfahrzeughaftpflichtversicherungsbeitragserhöhung trifft Nordrhein-Westfalen besonders hart",
+      "summary": null,
+      "image": null,
+      "publishedAt": "2023-11-14T12:00:00Z",
+      "premium": false
+    }
+  ]
+}

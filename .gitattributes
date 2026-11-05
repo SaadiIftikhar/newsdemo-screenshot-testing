@@ -1,0 +1,5 @@
+# Golden images are binary. In the demo they are committed directly (small, easy to clone);
+# at production scale switch these to Git LFS (see STRATEGY.md "Golden management"):
+#   **/__Snapshots__/**/*.png filter=lfs diff=lfs merge=lfs -text
+#   android/app/src/test/screenshots/**/*.png filter=lfs diff=lfs merge=lfs -text
+*.png binary
