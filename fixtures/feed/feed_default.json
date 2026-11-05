@@ -1,37 +1,45 @@
 {
   "breaking": {
     "id": "brk-001",
-    "headline": "Bundestag beschließt neues Gesetz zur Energiewende",
-    "publishedAt": "2023-11-14T22:05:00Z"
+    "headline": "Handel zeitweise ausgesetzt - Rheinmetall-Aktie stürzt zweistellig ab!",
+    "publishedAt": "2026-11-05T14:00:55Z",
+    "url": "https://www.bild.de/politik/inland/rheinmetall-aktie-stuerzt-um-16-prozent-ab-das-sind-die-gruende-6aec3f1fd913494ed7629ae5",
+    "source": "BILD"
   },
   "items": [
     {
       "type": "liveTicker",
       "id": "live-001",
       "kicker": "LIVE",
-      "headline": "Champions League: Alle Spiele des Abends im Ticker",
-      "latestUpdate": "78. Minute: Ausgleich durch Kopfball nach Ecke",
-      "updatedAt": "2023-11-14T22:12:00Z"
+      "headline": "17‑Jähriger dabei – auf diese 24 Spieler setzt Klopp",
+      "latestUpdate": "Der Bundestrainer hat seinen Kader benannt – alle 24 Namen im Überblick.",
+      "updatedAt": "2026-11-05T12:12:33Z",
+      "url": "https://www.welt.de/sport/video6aec7277a389bc337cfc6a08/nationalmannschaft-17jaehriger-dabei-auf-diese-24-spieler-setzt-klopp.html",
+      "source": "WELT"
     },
     {
       "type": "teaser",
       "id": "tsr-001",
-      "kicker": "POLITIK",
-      "headline": "Kanzler trifft Ministerpräsidenten zum Krisengipfel",
-      "summary": "Bund und Länder ringen um die Verteilung der Kosten. Ein Ergebnis wird noch in dieser Nacht erwartet.",
+      "kicker": "AUSLAND",
+      "headline": "EU überweist Ukraine weitere 4,36 Milliarden Euro – von der Leyen bekräftigt EU-Hilfe",
+      "summary": "Brüssel zahlt eine weitere Tranche aus – die Kommissionspräsidentin bekräftigt die Unterstützung.",
       "image": "politics.png",
-      "publishedAt": "2023-11-14T21:40:00Z",
-      "premium": false
+      "publishedAt": "2026-11-05T14:03:50Z",
+      "premium": false,
+      "url": "https://www.welt.de/politik/ausland/article6aec8569a389bc337cfc6c68/ukraine-krieg-eu-ueberweist-ukraine-weitere-4-36-milliarden-euro-von-der-leyen-bekraeftigt-eu-hilfe.html",
+      "source": "WELT"
     },
     {
       "type": "teaser",
       "id": "tsr-002",
       "kicker": "WIRTSCHAFT",
-      "headline": "Was die neue Zinsentscheidung für Sparer bedeutet",
-      "summary": "Experten erklären, welche Anlagen sich jetzt noch lohnen.",
+      "headline": "Tesla, SpaceX, Nebius – die neuen Verlierer des Jahrhundert-Hypes",
+      "summary": "Welche Tech-Werte nach dem großen Boom zuletzt verloren haben.",
       "image": "economy.png",
-      "publishedAt": "2023-11-14T19:13:20Z",
-      "premium": true
+      "publishedAt": "2026-11-05T13:33:06Z",
+      "premium": true,
+      "url": "https://www.welt.de/wirtschaft/plus6aec40870ed738572938c34f/tesla-spacex-nebius-die-neuen-verlierer-des-jahrhundert-hypes.html",
+      "source": "WELT"
     },
     {
       "type": "ad",
@@ -42,21 +50,25 @@
     {
       "type": "video",
       "id": "vid-001",
-      "kicker": "SPORT",
-      "headline": "Die besten Tore des Spieltags im Video",
+      "kicker": "FUSSBALL",
+      "headline": "Stürmerstar Harry Kane verlängert bis 2029 beim Rekordmeister",
       "image": "sport.png",
-      "durationSeconds": 134,
-      "publishedAt": "2023-11-14T18:00:00Z"
+      "durationSeconds": 95,
+      "publishedAt": "2026-11-05T09:02:00Z",
+      "url": "https://www.welt.de/sport/fussball/video6aec4283eca9cecdd5d4777e/fc-bayern-muenchen-stuermerstar-harry-kane-verlaengert-bis-2029-beim-rekordmeister.html",
+      "source": "WELT"
     },
     {
       "type": "teaser",
       "id": "tsr-003",
-      "kicker": "WETTER",
-      "headline": "Erster Frost: Hier wird es heute Nacht glatt",
+      "kicker": "DIGITAL",
+      "headline": "Ab Dezember - 007 beim ZDF! 24 Filme kostenlos streamen",
       "summary": null,
       "image": null,
-      "publishedAt": "2023-11-13T08:30:00Z",
-      "premium": false
+      "publishedAt": "2026-11-05T13:55:10Z",
+      "premium": false,
+      "url": "https://www.bild.de/leben-wissen/digital/007-beim-zdf-24-filme-ab-dezember-kostenlos-streamen-6aec6b4993d31cdb1e6ce681",
+      "source": "BILD"
     },
     {
       "type": "podcast",

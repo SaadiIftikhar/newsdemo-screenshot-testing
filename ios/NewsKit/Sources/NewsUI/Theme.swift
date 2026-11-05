@@ -15,6 +15,11 @@ public enum NewsTheme {
     public static let kicker = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
         ? UIColor(red: 1.0, green: 0.45, blue: 0.45, alpha: 1) : UIColor(red: 0.75, green: 0.0, blue: 0.1, alpha: 1) })
     public static let adBackground = Color(uiColor: .tertiarySystemFill)
+    /// Solid (not blurred) so the floating tab bar renders identically in snapshots and on device.
+    public static let tabBar = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+        ? UIColor(white: 0.16, alpha: 0.97) : UIColor(white: 1.0, alpha: 0.97) })
+    public static let tabBarBorder = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+        ? UIColor(white: 1, alpha: 0.12) : UIColor(white: 0, alpha: 0.08) })
 
     public static let spacing: CGFloat = 12
     public static let cornerRadius: CGFloat = 10

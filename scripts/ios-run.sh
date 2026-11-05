@@ -2,6 +2,7 @@
 # Launch the iOS demo app on the pinned simulator in a chosen state.
 #   scripts/ios-run.sh [fixture]        e.g. feed_default | feed_long_headlines | feed_empty
 #   OFFLINE=1 scripts/ios-run.sh        offline state
+#   TAB=games|account, SIGNED_IN=1      start on another tab / logged in as the demo user
 # Xcode 27+ ships the simulator UI inside DeviceHub.app; older Xcode uses Simulator.app.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -25,10 +26,9 @@ open -a DeviceHub 2>/dev/null || open -a Simulator 2>/dev/null || true   # show 
 
 xcrun simctl install "$UDID" "$APP"
 xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2>/dev/null || true
-if [[ -n "${OFFLINE:-}" ]]; then
-  xcrun simctl launch "$UDID" "$BUNDLE_ID" -offline
-  echo "Launched NewsDemo (offline) on simulator $UDID"
-else
-  xcrun simctl launch "$UDID" "$BUNDLE_ID" -fixture "$FIXTURE"
-  echo "Launched NewsDemo with fixture '$FIXTURE' on simulator $UDID"
-fi
+args=()
+if [[ -n "${OFFLINE:-}" ]]; then args+=(-offline); else args+=(-fixture "$FIXTURE"); fi
+[[ -n "${TAB:-}" ]] && args+=(-tab "$TAB")
+[[ -n "${SIGNED_IN:-}" ]] && args+=(-signedIn)
+xcrun simctl launch "$UDID" "$BUNDLE_ID" "${args[@]}" >/dev/null
+echo "Launched NewsDemo (${args[*]}) on simulator $UDID"

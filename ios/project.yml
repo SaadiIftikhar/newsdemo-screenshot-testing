@@ -23,6 +23,10 @@ targets:
         product: NewsUI
       - package: NewsKit
         product: NewsFixtures
+      - package: NewsKit
+        product: Account
+      - package: NewsKit
+        product: AppShell
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

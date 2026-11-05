@@ -8,14 +8,22 @@ struct Timestamp: View {
     /// Explicit colour: an outer `.foregroundStyle` does not override an inner one, which made the
     /// banner timestamp grey-on-red in light mode (caught while reviewing the first goldens).
     var color: Color = NewsTheme.textSecondary
+    /// Publisher credit ("WELT · vor 9 Min.") — required when we link out to someone else's article.
+    var source: String? = nil
+    /// Shows ↗ so readers know the item opens the publisher's page.
+    var isLink: Bool = false
     @Environment(\.now) private var now
     @Environment(\.locale) private var locale
     @Environment(\.timeZone) private var timeZone
 
     var body: some View {
-        Text(NewsDateFormatter.relative(date, now: now, locale: locale, timeZone: timeZone))
-            .font(.caption)
-            .foregroundStyle(color)
+        let relative = NewsDateFormatter.relative(date, now: now, locale: locale, timeZone: timeZone)
+        HStack(spacing: 3) {
+            Text(source.map { "\($0) · \(relative)" } ?? relative)
+            if isLink { Image(systemName: "arrow.up.right").imageScale(.small).accessibilityHidden(true) }
+        }
+        .font(.caption)
+        .foregroundStyle(color)
     }
 }
 
@@ -90,7 +98,7 @@ public struct BreakingNewsBanner: View {
                     .lineLimit(1)
                     .fixedSize()
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                Timestamp(date: news.publishedAt, color: .white.opacity(0.85))
+                Timestamp(date: news.publishedAt, color: .white.opacity(0.85), source: news.source, isLink: news.url != nil)
             }
             Text(news.headline)
                 .font(.headline)
@@ -122,7 +130,7 @@ public struct LiveTickerCard: View {
                     .opacity(pulse ? 0.3 : 1)
                 Text(ticker.kicker).font(.caption.weight(.black)).foregroundStyle(NewsTheme.liveRed)
                 Spacer(minLength: 0)
-                Timestamp(date: ticker.updatedAt)
+                Timestamp(date: ticker.updatedAt, source: ticker.source, isLink: ticker.url != nil)
             }
             Text(ticker.headline).font(.headline).foregroundStyle(NewsTheme.textPrimary)
             Text(ticker.latestUpdate).font(.subheadline).foregroundStyle(NewsTheme.textSecondary)
@@ -176,7 +184,7 @@ public struct TeaserCard: View {
                         .foregroundStyle(NewsTheme.textSecondary)
                         .lineLimit(3)
                 }
-                Timestamp(date: teaser.publishedAt)
+                Timestamp(date: teaser.publishedAt, source: teaser.source, isLink: teaser.url != nil)
             }
             .padding(NewsTheme.spacing)
         }
@@ -215,7 +223,7 @@ public struct VideoTeaserCard: View {
             VStack(alignment: .leading, spacing: 6) {
                 Kicker(text: video.kicker)
                 Text(video.headline).font(.headline).foregroundStyle(NewsTheme.textPrimary)
-                Timestamp(date: video.publishedAt)
+                Timestamp(date: video.publishedAt, source: video.source, isLink: video.url != nil)
             }
             .padding(NewsTheme.spacing)
         }

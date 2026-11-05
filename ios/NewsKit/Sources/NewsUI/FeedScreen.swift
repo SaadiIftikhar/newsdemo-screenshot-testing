@@ -33,11 +33,15 @@ public final class FeedViewModel {
 /// The screen as shipped: owns a view model, loads on appear.
 public struct FeedScreen: View {
     @State private var viewModel: FeedViewModel
+    private let onOpenArticle: (URL) -> Void
 
-    public init(viewModel: FeedViewModel) { _viewModel = State(initialValue: viewModel) }
+    public init(viewModel: FeedViewModel, onOpenArticle: @escaping (URL) -> Void = { _ in }) {
+        _viewModel = State(initialValue: viewModel)
+        self.onOpenArticle = onOpenArticle
+    }
 
     public var body: some View {
-        FeedView(state: viewModel.state, onRetry: { Task { await viewModel.load() } })
+        FeedView(state: viewModel.state, onRetry: { Task { await viewModel.load() } }, onOpenArticle: onOpenArticle)
             .task { if viewModel.state == .loading { await viewModel.load() } }
     }
 }
@@ -46,10 +50,12 @@ public struct FeedScreen: View {
 public struct FeedView: View {
     let state: FeedState
     var onRetry: () -> Void
+    var onOpenArticle: (URL) -> Void
 
-    public init(state: FeedState, onRetry: @escaping () -> Void = {}) {
+    public init(state: FeedState, onRetry: @escaping () -> Void = {}, onOpenArticle: @escaping (URL) -> Void = { _ in }) {
         self.state = state
         self.onRetry = onRetry
+        self.onOpenArticle = onOpenArticle
     }
 
     public var body: some View {
@@ -87,14 +93,32 @@ public struct FeedView: View {
             ScrollView {
                 LazyVStack(spacing: NewsTheme.spacing) {
                     if let breaking = feed.breaking {
-                        BreakingNewsBanner(news: breaking)
+                        ArticleLink(url: breaking.url, open: onOpenArticle) { BreakingNewsBanner(news: breaking) }
                     }
                     ForEach(feed.items) { item in
-                        FeedItemView(item: item).padding(.horizontal, NewsTheme.spacing)
+                        ArticleLink(url: item.articleURL, open: onOpenArticle) { FeedItemView(item: item) }
+                            .padding(.horizontal, NewsTheme.spacing)
                     }
                 }
                 .padding(.bottom, NewsTheme.spacing)
             }
+        }
+    }
+}
+
+/// Makes a feed card tappable when it has a public article URL; otherwise renders it unchanged.
+struct ArticleLink<Content: View>: View {
+    let url: URL?
+    let open: (URL) -> Void
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        if let url {
+            Button { open(url) } label: { content }
+                .buttonStyle(.plain)
+                .accessibilityHint("Öffnet den Artikel beim Herausgeber")
+        } else {
+            content
         }
     }
 }

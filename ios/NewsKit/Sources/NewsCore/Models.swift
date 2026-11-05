@@ -25,6 +25,10 @@ public struct BreakingNews: Equatable, Sendable, Decodable, Identifiable {
     public var id: String
     public var headline: String
     public var publishedAt: Date
+    /// Public article this item links out to (opened in the in-app browser). Nil = not tappable.
+    public var url: URL?
+    /// Publisher credit shown next to the timestamp, e.g. "WELT".
+    public var source: String?
 }
 
 public enum FeedItem: Equatable, Sendable, Decodable, Identifiable {
@@ -41,6 +45,16 @@ public enum FeedItem: Equatable, Sendable, Decodable, Identifiable {
         case .video(let v): v.id
         case .ad(let a): a.id
         case .unsupported: "unsupported"
+        }
+    }
+
+    /// The public article this item opens, if any.
+    public var articleURL: URL? {
+        switch self {
+        case .teaser(let t): t.url
+        case .liveTicker(let l): l.url
+        case .video(let v): v.url
+        case .ad, .unsupported: nil
         }
     }
 
@@ -66,9 +80,11 @@ public struct Teaser: Equatable, Sendable, Decodable, Identifiable {
     public var image: String?
     public var publishedAt: Date
     public var isPremium: Bool
+    public var url: URL?
+    public var source: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, kicker, headline, summary, image, publishedAt
+        case id, kicker, headline, summary, image, publishedAt, url, source
         case isPremium = "premium"
     }
 }
@@ -79,6 +95,8 @@ public struct LiveTicker: Equatable, Sendable, Decodable, Identifiable {
     public var headline: String
     public var latestUpdate: String
     public var updatedAt: Date
+    public var url: URL?
+    public var source: String?
 }
 
 public struct VideoTeaser: Equatable, Sendable, Decodable, Identifiable {
@@ -88,6 +106,8 @@ public struct VideoTeaser: Equatable, Sendable, Decodable, Identifiable {
     public var image: String
     public var durationSeconds: Int
     public var publishedAt: Date
+    public var url: URL?
+    public var source: String?
 }
 
 public struct AdSlot: Equatable, Sendable, Decodable, Identifiable {

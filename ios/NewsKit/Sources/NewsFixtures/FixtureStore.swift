@@ -39,7 +39,7 @@ public struct FixtureStore: Sendable {
 
 /// Fixed values every deterministic render uses (documented in fixtures/README.md).
 public enum FixtureEnvironment {
-    public static let now = Date(timeIntervalSince1970: 1_700_000_000) // 2023-11-14T22:13:20Z
+    public static let now = Date(timeIntervalSince1970: 1_793_888_000) // 2026-11-05T14:13:20Z (headlines fetched that day)
     public static let locale = Locale(identifier: "de_DE")
     public static let timeZone = TimeZone(identifier: "Europe/Berlin")!
 }

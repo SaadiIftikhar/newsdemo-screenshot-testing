@@ -5,7 +5,7 @@ IOS_PKG := ios/NewsKit
 IOS_ARTIFACTS := $(ROOT)/artifacts/ios
 ANDROID_DIR := android
 
-.PHONY: help ios-test ios-record ios-record-missing ios-app ios-run android-test android-record android-compare android-run clean
+.PHONY: help ios-test ios-record ios-record-missing ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -39,8 +39,8 @@ ios-app: ## Generate the Xcode project and build the demo app for the pinned sim
 
 FIXTURE ?= feed_default
 
-ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=feed_long_headlines] [OFFLINE=1]
-	@OFFLINE=$(OFFLINE) scripts/ios-run.sh $(FIXTURE)
+ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=...] [OFFLINE=1] [TAB=games|account] [SIGNED_IN=1]
+	@OFFLINE=$(OFFLINE) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/ios-run.sh $(FIXTURE)
 
 # --- Android -----------------------------------------------------------------
 
@@ -53,8 +53,11 @@ android-record: ## Re-record ALL Android goldens
 android-compare: ## Produce _compare.png diff images without failing the build
 	cd $(ANDROID_DIR) && ./gradlew compareRoborazziDebug
 
-android-run: ## Launch the Android app (phone or emulator): make android-run [FIXTURE=...] [OFFLINE=1]
-	@OFFLINE=$(OFFLINE) scripts/android-run.sh $(FIXTURE)
+android-run: ## Launch the Android app (phone or emulator): same options as ios-run
+	@OFFLINE=$(OFFLINE) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/android-run.sh $(FIXTURE)
+
+lint-goldens: ## Fail if any golden image is blank/uniform (a blank golden makes a test pass while protecting nothing)
+	@swift scripts/lint-goldens.swift ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__ $(ANDROID_DIR)/app/src/test/screenshots
 
 clean:
 	rm -rf artifacts ios/NewsKit/.build $(ANDROID_DIR)/build $(ANDROID_DIR)/app/build
