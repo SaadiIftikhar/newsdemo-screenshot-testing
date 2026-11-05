@@ -67,4 +67,5 @@ The same fixture names drive the tests, the apps' mock mode and (in the strategy
 
 - The committed goldens were recorded on an Apple Silicon Mac. iOS goldens are only valid for the pinned Xcode and simulator. Android goldens recorded on macOS can differ in font rasterisation from Linux CI runners. That's why the strategy makes CI the only recorder of goldens. The first CI run would re-baseline via the `record-snapshots` label.
 - The CI workflow is written but has not run (this repo has no remote yet).
+- Verified from a fresh clone: both suites pass on `main` and fail with 17 diffs each on `demo/regression`. Both apps were launched in mock mode (iOS simulator, Android emulator) and match the goldens. On the device, Android's font rasterises slightly differently from Robolectric, which is the "in-process isn't the real device" trade-off from STRATEGY.md §9.
 - Ads, WebViews and remote image loading are replaced by placeholders and local images in tests on purpose (see STRATEGY.md §2).
