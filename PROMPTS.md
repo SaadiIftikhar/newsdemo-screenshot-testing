@@ -19,7 +19,7 @@ The challenge PDF was attached, together with:
 | Question from the agent | My answer |
 |---|---|
 | Which platform gets the working demo? | **iOS first, then Android**, using the same shared fixtures |
-| Which platform can you defend in the interview? | "I am a QA engineer, so once the functionality is implemented I will ask you about the code and learn that way, so no documentation needed per se for me; if it's related to the task then you can do it" |
+| Which platform can you defend in the interview? | "I am a qa engineer so once the funiotnlity is implemented I will ask you about the code and learn that way so no documentation needed persay for me if it related to the task then you can do" |
 | Strategy document format? | **Markdown in the repo + PDF** |
 | Packaging? | **Local git repo + CI workflow**, regression on its own branch |
 
@@ -31,5 +31,9 @@ The challenge PDF was attached, together with:
 - **What I would never delegate to AI:** approving golden changes. In the proposed process, AI may *triage* diffs or *generate* edge-case fixtures; a human code-owner approves.
 
 ## 4. Follow-up prompts
+
+> Continue from where you left off.
+
+> audit everything and all the deliverables and also let me know if you want me to verify something form my side
 
 *(Questions I asked afterwards to understand the code are added here as the walkthrough continues.)*

@@ -55,7 +55,7 @@
 ## 4. CI/CD and the Scrum process
 
 - **Every PR:** iOS (macOS runner) and Android (Linux runner) jobs run in parallel. Target time is under 10 minutes. In the demo, 35 snapshots per platform run in about 16s (iOS) and 14s (Android) after the build.
-- **Rollout of the gate:** report-only at first, then a required check. Only affected modules run at scale (Gradle task graph / Xcode test plans with selective testing).
+- **Rollout of the gate:** report-only at first, then a required check. At scale only affected modules run (Gradle's task graph on Android; per-module test plans or Tuist selective testing on iOS).
 - **Nightly:** Layer 2 Maestro flows plus a full matrix run. Results go to the QA channel.
 - **Release branch:** the same gate. Manual visual regression testing shrinks to exploratory testing.
 - **Definition of Done:** a new UI state ships with a fixture and a snapshot. Designers review goldens in the PR, instead of in a pre-release screenshot session.
@@ -84,7 +84,8 @@ Snapshot tests should be deterministic by construction rather than retried until
 
 - **Four apps:** one design system means component goldens are shared. App-specific modules (WELT premium, Sport BILD tickers) own their own screens and fixtures.
 - **Cost control:** run only affected modules, shard on CI, use Git LFS, and review the matrix every quarter (remove variants that never fail).
-- **Ownership:** developers write and maintain the tests. QA owns the strategy, the fixture catalog and the matrix rules, and coaches the team. Design owns golden approval.
+- **Ownership:** developers write and maintain the tests. QA owns the strategy, the fixture catalog and the matrix rules. Design owns golden approval.
+- **Enablement (how QA mentors the team):** a one-page "add a snapshot in 5 lines" guide, pairing with each squad in sprint 2, a short diff-review session for designers, office hours during the first month, and fixture review as part of story refinement ("which states does this story add?").
 - **Metrics:** escaped visual bugs per release, PR gate time, flake rate, and the share of UI states with fixtures.
 
 ## 8. Rollout plan (about 4 sprints, non-disruptive)
@@ -109,13 +110,12 @@ Snapshot tests should be deterministic by construction rather than retried until
 | "QA should own the tests." | No. Developers own them (shift-left). QA owns the system around them |
 | "AI could approve diffs." | AI can *triage* (summarise the diff in the PR comment, flag likely-intended changes, generate edge-case fixtures like long German compound words). A human always approves goldens |
 
-**What the demo caught while recording its own first goldens:**
+**What the demo caught before any deliberate regression:**
 1. The breaking-banner timestamp was grey on red in light mode (a contrast bug).
 2. The kicker was truncated next to the PLUS badge at accessibility text sizes.
 3. "EILMELDUNG" was hyphenated at the same text sizes.
 4. **Cross-platform divergence:** Android didn't hyphenate German headlines (Compose defaults to `Hyphens.None`) while iOS did. This was visible only because both platforms render the same fixture.
 5. A 60-letter compound word still breaks mid-word on **both** platforms. This was handed over as a **content finding**: the fix is soft hyphens from the CMS, not UI code.
-
 6. **Found only by running the real app (Layer 2), never by snapshots:** on an en_US device the 12-hour preference leaked into German dates ("11:05 PM Uhr"). Snapshots pin `de_DE`, so they can't see it. A pinned environment proves the UI is *stable*, not that it's *right everywhere*. That's why Layer 2 exists, and why the matrix should carry one "hostile device settings" variant.
 
 Seven issues (with the §5 harness bug) before any deliberate regression. That regression (badge dropped, 2pt padding) then failed **the same 17 of 35 snapshots on both platforms** ([docs/regression](docs/regression/)).

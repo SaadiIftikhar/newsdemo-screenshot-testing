@@ -27,6 +27,8 @@ jobs:
   ios:
     runs-on: macos-26            # pinned image; bump together with Xcode + goldens in ONE PR
     timeout-minutes: 30
+    permissions:
+      contents: write            # record mode pushes the re-recorded goldens back to the PR branch
     steps:
       - uses: actions/checkout@v5
         with:
@@ -61,6 +63,8 @@ jobs:
   android:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
         with:

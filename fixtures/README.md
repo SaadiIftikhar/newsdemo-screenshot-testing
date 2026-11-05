@@ -14,5 +14,5 @@ Error/offline states are not data — they are injected as client failures (`Fee
 
 Conventions
 - **Fixed clock:** all tests use `now = 2023-11-14T22:13:20Z` (epoch `1_700_000_000`), locale `de_DE`, time zone `Europe/Berlin`. Timestamps in fixtures are relative to that.
-- **Adding a state** = add/extend a fixture here, then reference it by name in both test suites. Snapshot names are kept identical across platforms (`feed_default_light`, ...).
+- **Adding a state** = add/extend a fixture here, then reference it by name in both test suites. Snapshot names are kept identical across platforms (`FeedScreenSnapshotTests/test_feed_default.light.png`, ...).
 - Fixtures are reviewed like API contracts: if the backend changes shape, a fixture changes, and both platforms' decoders are exercised by it.
