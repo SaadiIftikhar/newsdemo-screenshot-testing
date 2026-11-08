@@ -34,8 +34,9 @@ ios-record-missing: ## Record only goldens that don't exist yet (new tests)
 
 ios-app: ## Generate the Xcode project and build the demo app for the pinned simulator
 	cd ios && xcodegen generate --quiet
+	@# Project-local build folder: ios-run always launches THIS build, never a stale one from Xcode's shared cache.
 	@UDID=$$(scripts/ios-sim.sh) && xcodebuild build -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
-	  -destination "platform=iOS Simulator,id=$$UDID" -quiet
+	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet
 
 FIXTURE ?= feed_default
 
@@ -62,4 +63,4 @@ lint-goldens: ## Fail if any golden image is blank/uniform (a blank golden makes
 	@swift scripts/lint-goldens.swift ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__ $(ANDROID_DIR)/app/src/test/screenshots
 
 clean:
-	rm -rf artifacts ios/NewsKit/.build $(ANDROID_DIR)/build $(ANDROID_DIR)/app/build
+	rm -rf artifacts ios/NewsKit/.build ios/DerivedData $(ANDROID_DIR)/build $(ANDROID_DIR)/app/build

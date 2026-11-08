@@ -14,7 +14,7 @@ Every screen is covered by screenshot tests driven by **one shared set of JSON f
 | Screenshot tool | swift-snapshot-testing 1.19.7 | Roborazzi 1.77.0 on Robolectric 4.17 |
 | Golden images | 62 | 62 (identical names) |
 | Other tests | 16 logic/contract tests | 16 logic/contract tests + 5 UI interaction tests |
-| Runtime | about 20 s after build | about 30 s after build |
+| Test runtime (after build) | about 30 s | about 12 s |
 
 - **Strategy:** [STRATEGY.md](STRATEGY.md) (PDF: [STRATEGY.pdf](STRATEGY.pdf))
 - **Prompts used:** [PROMPTS.md](PROMPTS.md)
@@ -75,7 +75,7 @@ Pre-captured output is in [docs/regression/](docs/regression/).
 ## Run the apps (mock mode)
 
 ```bash
-make ios-run                                  # builds if needed, boots the pinned simulator, opens it, launches
+make ios-run                                  # (re)builds, boots the pinned simulator, opens it, launches (first time ~75 s, then ~15 s)
 make ios-run FIXTURE=feed_long_headlines      # feed_default | feed_long_headlines | feed_empty
 make ios-run OFFLINE=1                        # offline state
 make ios-run TAB=games                        # start on Spiele (or TAB=account)

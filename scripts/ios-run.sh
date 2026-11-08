@@ -11,14 +11,11 @@ FIXTURE="${1:-feed_default}"
 BUNDLE_ID="com.example.newsdemo"
 UDID=$(scripts/ios-sim.sh)
 
-APP=$(find ~/Library/Developer/Xcode/DerivedData -maxdepth 6 \
-  -path "*NewsDemo-*/Build/Products/Debug-iphonesimulator/NewsDemo.app" 2>/dev/null | head -1)
-if [[ -z "$APP" ]]; then
-  echo "App not built yet; building (make ios-app)…"
-  make ios-app
-  APP=$(find ~/Library/Developer/Xcode/DerivedData -maxdepth 6 \
-    -path "*NewsDemo-*/Build/Products/Debug-iphonesimulator/NewsDemo.app" | head -1)
-fi
+# Always (re)build: incremental, so a few seconds when nothing changed. Picking whatever build happened to be
+# in Xcode's shared DerivedData once launched a stale pre-redesign app (caught in the final audit).
+echo "Building the app (incremental)…"
+make -s ios-app
+APP="ios/DerivedData/Build/Products/Debug-iphonesimulator/NewsDemo.app"
 
 xcrun simctl boot "$UDID" 2>/dev/null || true          # already booted is fine
 xcrun simctl bootstatus "$UDID" -b >/dev/null

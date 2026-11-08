@@ -58,7 +58,7 @@
 
 ## 4. CI/CD and the Scrum process
 
-- **Every PR:** iOS (macOS runner) and Android (Linux runner) jobs run in parallel. Target time is under 10 minutes. In the demo, 62 snapshots per platform run in about IOS_SECS s (iOS) and ANDROID_SECS s (Android) after the build.
+- **Every PR:** iOS (macOS runner) and Android (Linux runner) jobs run in parallel. Target time is under 10 minutes. In the demo, 62 snapshots per platform run in about 30 s (iOS) and 12 s (Android) after the build.
 - **Rollout of the gate:** report-only at first, then a required check. At scale only affected modules run (Gradle's task graph on Android; per-module test plans or Tuist selective testing on iOS).
 - **Nightly:** Layer 2 Maestro flows plus a full matrix run. Results go to the QA channel.
 - **Release branch:** the same gate. Manual visual regression testing shrinks to exploratory testing.

@@ -44,10 +44,20 @@ while i < len(lines):
         ordered = bool(re.match(r"^\d+\. ", line))
         tag = "ol" if ordered else "ul"
         out.append(f"<{tag}>")
+        open_li = False
         while i < len(lines) and re.match(r"^\s*(- |\d+\. )", lines[i]):
-            item = re.sub(r"^\s*(- |\d+\. )", "", lines[i])
-            nested = lines[i].startswith("  ")
-            out.append(f"<li{' class=nested' if nested else ''}>{inline(item)}</li>")
+            item = inline(re.sub(r"^\s*(- |\d+\. )", "", lines[i]))
+            if lines[i].startswith("  ") and open_li:
+                # Indented sub-bullets belong inside the previous item, so they don't consume list numbers.
+                sub = []
+                while i < len(lines) and lines[i].startswith("  ") and re.match(r"^\s+- ", lines[i]):
+                    text = inline(re.sub(r"^\s+- ", "", lines[i]))
+                    sub.append("<li>" + text + "</li>")
+                    i += 1
+                out[-1] = out[-1][: -len("</li>")] + "<ul>" + "".join(sub) + "</ul></li>"
+                continue
+            out.append(f"<li>{item}</li>")
+            open_li = True
             i += 1
         out.append(f"</{tag}>")
     else:
