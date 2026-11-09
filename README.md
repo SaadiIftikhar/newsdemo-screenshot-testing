@@ -127,8 +127,8 @@ make android-run                              # same options; uses a plugged-in 
 
 ## Honest notes
 
-- **Goldens were recorded on an Apple Silicon Mac.** Android goldens recorded on macOS can differ in font rasterisation from Linux CI, which is why only CI records (the strategy plans a Docker image for local parity).
-- **The CI workflow has never run.** There is no remote yet; re-recording on CI also needs a `SNAPSHOT_BOT_TOKEN` secret.
+- **Goldens are recorded by CI** (the first ones came from the `record-snapshots` run in PR #1). This Mac verifies them on both platforms, so local and CI agree. Android renders on macOS and Linux within 2/255 on about 0.005% of pixels, inside Roborazzi's per-pixel tolerance.
+- **CI runs on GitHub** (private repo). Without a `SNAPSHOT_BOT_TOKEN` secret the bot's golden commit does not start a new run; push any commit (or re-run) to verify it.
 - **Android tests run on Robolectric's SDK 36 runtime**, while the app compiles against and targets SDK 37. On the SDK 37 runtime most captures came out blank (STRATEGY, Appendix A).
 - **Keep the Mac awake for long runs.** A laptop that sleeps mid-run turns green tests into timeouts. The `make` test targets wrap the runs in `caffeinate -i`.
 - **Verified on this machine** (see STRATEGY §6 and Appendix A):

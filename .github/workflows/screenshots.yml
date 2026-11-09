@@ -105,9 +105,17 @@ jobs:
       - name: Verify snapshots + logic tests
         if: env.RECORD != 'true'
         run: make ios-test
+      - name: Install XcodeGen 2.46.0 (pinned, same as the dev Macs; not on the runner image)
+        if: env.RECORD != 'true'
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
       - name: UI interaction tests + accessibility audit (XCUITest)
         if: env.RECORD != 'true'
-        run: make ios-ui-test
+        run: |
+          xcodegen --version
+          make ios-ui-test
       - name: Re-record, then prove the new goldens
         if: env.RECORD == 'true'
         run: |

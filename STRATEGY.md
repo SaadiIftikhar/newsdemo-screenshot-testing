@@ -105,10 +105,10 @@
 2. **Pin the inputs** (§2). A `Date()`, network image, animation or unseeded random value in a view is a test-design bug.
 3. **Tolerance:**
    - iOS: every pixel is compared, with `perceptualPrecision 0.98`. That absorbs GPU anti-aliasing noise but fails on a 2pt shift (proven in the regression demo). Its blind spot is a colour change under ΔE≈2, which the token contrast tests and design review cover.
-   - Android: zero tolerance.
+   - Android: no pixel may change (`changeThreshold = 0`) beyond Roborazzi's built-in per-pixel colour tolerance. Measured on the first CI run: Mac- and Linux-rendered goldens differ on about 0.005% of pixels by at most 2/255, which that tolerance absorbs. A real change (a 2pt shift, a missing badge) changes thousands of pixels.
    - Tolerance is never loosened globally. A per-test exception is allowed only with a comment saying why (for example, a component with a blur), and is reviewed like code.
    - No "small diff = auto-pass" rule. A 2pt shift and a dropped PLUS badge are both small; whether a change is intended is a product decision, not a pixel count.
-4. **Android local runs vs Linux CI:** CI is the source of truth. Developers reproduce CI failures in the same pinned Docker image (planned `make android-test-docker`); plain local Mac runs are advisory.
+4. **Local runs vs CI** (measured on the first CI runs): CI is the source of truth and records the goldens. A Mac verifies the CI-recorded goldens on both platforms, so a CI failure reproduces locally. One condition: the same pinned simulator runtime. The CI image did not have the first pin (iOS 26.5), so it was re-pinned to 27.0 in one reviewed PR that also re-baselined (§5).
 5. **No automatic retries.** A flaky snapshot is quarantined within 24 hours with an owner. Target flake rate: under 1%. **Measured:** 10 consecutive full runs per platform, all green (iOS 71 tests, Android 116 tests, no retries). The first Android loop "failed" 3 of 10 only because the Mac went to sleep mid-run (wall-clock timeouts in the power log), so long local runs use `caffeinate`; a CI runner never sleeps.
 
 ## 7. Integration into the existing apps
@@ -174,6 +174,7 @@
 - stale diff files shown to reviewers (cleared before every run)
 - a stale app build launched by the run script (project-local build, always rebuilt)
 - the pinned simulator runtime vanished mid-session (re-pin plus re-baseline in one commit)
+- the first CI run failed before any test: the pinned iOS runtime was not on the CI image, and the fallback silently installed a different one (now: pin a runtime that exists on both, fetch exactly that version or fail)
 
 **Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found:
 - the missing paywall/entitlement states
