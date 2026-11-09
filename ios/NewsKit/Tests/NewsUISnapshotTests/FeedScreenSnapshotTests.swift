@@ -31,6 +31,29 @@ final class FeedScreenSnapshotTests: XCTestCase {
                      device: .iPhone13FullHeight, variants: [.light])
     }
 
+    /// Messy CMS text (HTML entities, stray line breaks, soft hyphens, emoji, non-Latin names), a ticker before its
+    /// first entry, a video longer than an hour and a timestamp in the future. Full length and at the largest text
+    /// size, where long German words have to break.
+    func test_feed_hostileContent() throws {
+        assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_hostile_content"))),
+                     device: .iPhone13FullHeight, variants: [.light, .largeText])
+    }
+
+    /// Offline after a successful load: the cached feed stays on screen with "Stand 15:02 Uhr" on top,
+    /// instead of an error screen replacing the news.
+    func test_feed_offlineCached() throws {
+        let since = FixtureEnvironment.now.addingTimeInterval(-11 * 60)
+        assertScreen(FeedView(state: .stale(try Snap.store.feed("feed_default"), since: since, reason: .offline)),
+                     variants: [.light, .dark])
+    }
+
+    /// Server error on refresh, content loaded yesterday: the notice shows the full date.
+    func test_feed_refreshFailed() throws {
+        let since = FixtureEnvironment.now.addingTimeInterval(-24 * 3600)
+        assertScreen(FeedView(state: .stale(try Snap.store.feed("feed_default"), since: since, reason: .server(status: 503))),
+                     variants: [.light])
+    }
+
     func test_feed_loading() {
         assertScreen(FeedView(state: .loading), variants: [.light, .dark])
     }

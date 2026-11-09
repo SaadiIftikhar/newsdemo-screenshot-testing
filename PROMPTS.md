@@ -57,6 +57,13 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 > now put sub agenets one as Product manager, one as senior developer, one as senior qa etc which you think will be beneficail for this prodect and get an audit form them too , do the imrpovements they mention scenarios coerd. they think of etc, then give me commands again weather these irpovement are to the app to cover more scneraios etc or to the way we are using se=creenshots
 
+> do the imrpvements accouring to the agents responses then a few questions/ things to do
+>
+> 1: are we using mock data as for examkple our app is a news app or somerhing simlar where content can change so hw chould the golden sample work if they are old , hos do we deal with that
+> 2: when in the CI/CD piepline it should run ? and I will soon give you. github to connect to you are ready to interact with it
+> 3: how do we deal with just a litle diference and that has human confimartion to do ? etc . and what type and scale of differnece do we allow or do we have flags for those too for user confirmation is that the best solution or not etc
+> 4: and now that you hae more knoeldge of the type of app to keep in mind come up with more edge canses so we can implement those and wat is the best solution to deal with apps that have contnuesly changing data ,so do we mock data etc those kind of thinking behind the reserch you do for the latest best solution for our case
+
 ## 3. How the AI was used
 
 - **Research:**
@@ -66,4 +73,5 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
   - versions were checked against release pages, not taken from memory
 - **Stack assumptions:** the BILD/WELT stack (Swift 6/SwiftUI/TCA, Kotlin/Compose/Hilt) was **inferred from public job postings** and is labelled as an assumption in the strategy.
 - **Reviews:** a devil's-advocate pass, two full audits, and five parallel role-based reviews. Each finding was verified in the code before it was acted on.
+- **Checks that must be able to fail:** every new guard (fuzz test, image contract, accessibility checks) was first shown to fail on a deliberately broken input. One didn't: Google's Compose accessibility hook silently checks nothing under Robolectric, so it was replaced.
 - **Never delegated:** approving golden changes.

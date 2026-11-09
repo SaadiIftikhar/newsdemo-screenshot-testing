@@ -7,6 +7,17 @@ public enum FeedState: Equatable, Sendable {
     case loaded(Feed)
     case empty
     case failed(FeedError)
+    /// A refresh failed but earlier content exists: keep showing it, with a notice and the time it was loaded.
+    /// (Wiping a full feed off the screen because a train went into a tunnel is the worst offline behaviour.)
+    case stale(Feed, since: Date, reason: FeedError)
+
+    /// The feed currently on screen, if any.
+    public var feed: Feed? {
+        switch self {
+        case .loaded(let feed), .stale(let feed, _, _): feed
+        default: nil
+        }
+    }
 }
 
 /// A tap on an article. The app shell decides (ArticleAccess) whether it opens or shows the paywall.
@@ -25,21 +36,33 @@ public struct ArticleRequest: Equatable, Sendable {
 public final class FeedViewModel {
     public private(set) var state: FeedState = .loading
     private let client: FeedClient
+    private let now: @Sendable () -> Date
     private var loadTask: Task<Void, Never>?
+    private var loadedAt: Date?
 
-    public init(client: FeedClient) { self.client = client }
+    public init(client: FeedClient, now: @escaping @Sendable () -> Date = { Date() }) {
+        self.client = client
+        self.now = now
+    }
 
+    /// First load and pull-to-refresh. Content already on screen stays there while refreshing, and stays
+    /// there (marked stale) if the refresh fails.
     public func load() async {
-        state = .loading
+        let shown = state.feed
+        if shown == nil { state = .loading }
         do {
             let feed = try await client.fetchFeed()
             state = feed.isEmpty ? .empty : .loaded(feed)
+            loadedAt = now()
         } catch is CancellationError {
             return // superseded by a newer load: not an error the user should see
-        } catch let error as FeedError {
-            state = .failed(error)
         } catch {
-            state = .failed(.server(status: -1))
+            let reason = (error as? FeedError) ?? .server(status: -1)
+            if let shown, let loadedAt {
+                state = .stale(shown, since: loadedAt, reason: reason)
+            } else {
+                state = .failed(reason)
+            }
         }
     }
 
@@ -61,7 +84,8 @@ public struct FeedScreen: View {
     }
 
     public var body: some View {
-        FeedView(state: viewModel.state, onRetry: viewModel.reload, onOpenArticle: onOpenArticle)
+        FeedView(state: viewModel.state, onRetry: viewModel.reload, onRefresh: { await viewModel.load() },
+                 onOpenArticle: onOpenArticle)
             .task { if viewModel.state == .loading { await viewModel.load() } }
     }
 }
@@ -70,15 +94,17 @@ public struct FeedScreen: View {
 public struct FeedView: View {
     let state: FeedState
     var onRetry: () -> Void
+    var onRefresh: () async -> Void
     var onOpenArticle: (ArticleRequest) -> Void
 
     /// Feed column width cap: on tablets the cards stay readable instead of stretching edge to edge.
     static let maxContentWidth: CGFloat = 640
 
-    public init(state: FeedState, onRetry: @escaping () -> Void = {},
+    public init(state: FeedState, onRetry: @escaping () -> Void = {}, onRefresh: @escaping () async -> Void = {},
                 onOpenArticle: @escaping (ArticleRequest) -> Void = { _ in }) {
         self.state = state
         self.onRetry = onRetry
+        self.onRefresh = onRefresh
         self.onOpenArticle = onOpenArticle
     }
 
@@ -116,8 +142,16 @@ public struct FeedView: View {
             StatusMessage(icon: "exclamationmark.triangle", title: "Etwas ist schiefgelaufen",
                           message: "Der Feed konnte nicht geladen werden.", actionTitle: "Erneut versuchen", action: onRetry)
         case .loaded(let feed):
+            list(feed, notice: nil)
+        case .stale(let feed, let since, let reason):
+            list(feed, notice: StaleNotice(since: since, reason: reason))
+        }
+    }
+
+    private func list(_ feed: Feed, notice: StaleNotice?) -> some View {
             ScrollView {
                 LazyVStack(spacing: NewsTheme.spacing) {
+                    if let notice { notice.padding(.horizontal, NewsTheme.spacing) }
                     if let breaking = feed.breaking {
                         ArticleLink(request: breaking.url.map { ArticleRequest(url: $0, isPremium: false) }, open: onOpenArticle) {
                             BreakingNewsBanner(news: breaking)
@@ -134,7 +168,7 @@ public struct FeedView: View {
                 .frame(maxWidth: Self.maxContentWidth)
                 .frame(maxWidth: .infinity)
             }
-        }
+            .refreshable { await onRefresh() } // pull to refresh
     }
 }
 

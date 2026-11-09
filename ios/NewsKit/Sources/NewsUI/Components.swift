@@ -77,9 +77,12 @@ struct PremiumBadge: View {
 struct Kicker: View {
     let text: String
     var body: some View {
-        Text(text)
-            .font(.caption.weight(.bold))
-            .foregroundStyle(NewsTheme.kicker)
+        // The CMS sometimes sends no kicker (or only whitespace, cleaned to ""): render nothing, not an empty line.
+        if !text.isEmpty {
+            Text(text)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(NewsTheme.kicker)
+        }
     }
 }
 
@@ -140,14 +143,19 @@ public struct LiveTickerCard: View {
                     .opacity(pulse ? 0.3 : 1)
                     .accessibilityHidden(true)
                 // Text uses accentText: liveRed as small text is only ≈4.3:1 on the light card.
-                Text(ticker.isLive ? ticker.kicker : "BEENDET")
+                Text(ticker.isLive ? (ticker.kicker.isEmpty ? "LIVE" : ticker.kicker) : "BEENDET")
                     .font(.caption.weight(.black))
                     .foregroundStyle(ticker.isLive ? NewsTheme.accentText : NewsTheme.textSecondary)
                 Spacer(minLength: 0)
                 Timestamp(date: ticker.updatedAt, source: ticker.source, isLink: ticker.url != nil)
             }
             Text(ticker.headline).font(.headline).foregroundStyle(NewsTheme.textPrimary)
-            Text(ticker.latestUpdate).font(.subheadline).foregroundStyle(NewsTheme.textSecondary)
+            if let update = ticker.latestUpdate {
+                Text(update).font(.subheadline).foregroundStyle(NewsTheme.textSecondary)
+            } else {
+                // Ticker opened before the first entry (e.g. before kick-off).
+                Text("Noch keine Einträge").font(.subheadline.italic()).foregroundStyle(NewsTheme.textSecondary)
+            }
         }
         .padding(NewsTheme.spacing)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -186,9 +194,11 @@ public struct TeaserCard: View {
                     .clipped()
             }
             VStack(alignment: .leading, spacing: 6) {
-                badgeLayout {
-                    if teaser.isPremium { PremiumBadge() }
-                    Kicker(text: teaser.kicker)
+                if teaser.isPremium || !teaser.kicker.isEmpty {
+                    badgeLayout {
+                        if teaser.isPremium { PremiumBadge() }
+                        Kicker(text: teaser.kicker)
+                    }
                 }
                 Text(teaser.headline)
                     .font(.title3.weight(.bold))
@@ -270,5 +280,30 @@ public struct AdSlotView: View {
                 .frame(height: slot.height)
                 .overlay(Text(slot.slot).font(.caption.monospaced()).foregroundStyle(NewsTheme.textSecondary))
         }
+    }
+}
+
+// MARK: - Offline / refresh-failed notice (content stays visible)
+
+/// Shown above cached content when a refresh failed: readers keep the last feed instead of an error screen.
+struct StaleNotice: View {
+    let since: Date
+    let reason: FeedError
+    @Environment(\.now) private var now
+    @Environment(\.timeZone) private var timeZone
+
+    private var title: String { reason == .offline ? "Offline – gespeicherte Artikel" : "Aktualisierung fehlgeschlagen" }
+
+    var body: some View {
+        let asOf = NewsDateFormatter.asOf(since, now: now, timeZone: timeZone)
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(NewsTheme.textPrimary)
+            Text("Stand \(asOf) · Zum Aktualisieren nach unten ziehen")
+                .font(.caption).foregroundStyle(NewsTheme.textSecondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(NewsTheme.card, in: RoundedRectangle(cornerRadius: NewsTheme.cornerRadius))
+        .accessibilityElement(children: .combine)
     }
 }

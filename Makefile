@@ -7,7 +7,7 @@ ANDROID_DIR := android
 # Keep the Mac awake during long runs: a sleeping laptop turned green runs into wall-clock timeouts (STRATEGY §6).
 AWAKE := $(shell command -v caffeinate >/dev/null 2>&1 && echo "caffeinate -i")
 
-.PHONY: help ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
+.PHONY: help gallery ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -52,8 +52,8 @@ ios-app: ## Generate the Xcode project and build the demo app for the pinned sim
 
 FIXTURE ?= feed_default
 
-ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=...] [OFFLINE=1] [TAB=games|account] [SIGNED_IN=1]
-	@OFFLINE=$(OFFLINE) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/ios-run.sh $(FIXTURE)
+ios-run: ## Launch the iOS app: make ios-run [FIXTURE=...] [OFFLINE=1] [DROP_CONNECTION=1] [TAB=games|account] [SIGNED_IN=1]
+	@OFFLINE=$(OFFLINE) DROP_CONNECTION=$(DROP_CONNECTION) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/ios-run.sh $(FIXTURE)
 
 # --- Android -----------------------------------------------------------------
 
@@ -73,7 +73,10 @@ android-compare: ## Produce _compare.png diff images without failing the build
 	cd $(ANDROID_DIR) && ./gradlew compareRoborazziDebug
 
 android-run: ## Launch the Android app (phone or emulator): same options as ios-run
-	@OFFLINE=$(OFFLINE) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/android-run.sh $(FIXTURE)
+	@OFFLINE=$(OFFLINE) DROP_CONNECTION=$(DROP_CONNECTION) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/android-run.sh $(FIXTURE)
+
+gallery: ## iOS vs Android goldens side by side (artifacts/side-by-side/index.html) for cross-platform design review
+	@swift scripts/side-by-side.swift $(IOS_GOLDENS) $(ANDROID_GOLDENS) artifacts/side-by-side
 
 lint-goldens: ## Fail if any golden image is blank/uniform (a blank golden makes a test pass while protecting nothing)
 	@swift scripts/lint-goldens.swift ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__ $(ANDROID_DIR)/app/src/test/screenshots

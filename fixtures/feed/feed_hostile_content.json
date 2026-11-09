@@ -1,0 +1,64 @@
+{
+  "_comment": "Synthetic stress data (not real articles). Pins how messy CMS/RSS text is cleaned and rendered. Contract: ContractAndPolicyTests (iOS) and FeatureLogicTests (Android) assert the same cleaned literal.",
+  "breaking": {
+    "id": "brk-301",
+    "headline": "  Bundestag stimmt über\n„Sondervermögen“ ab &amp; Opposition   kündigt Klage an ",
+    "publishedAt": "2026-11-05T14:15:00Z",
+    "source": "WELT"
+  },
+  "items": [
+    {
+      "type": "liveTicker",
+      "id": "live-301",
+      "kicker": "",
+      "headline": "Bundesliga: Bayern – Dortmund, Anpfiff um 18:30 Uhr",
+      "updatedAt": "2026-11-05T14:00:00Z",
+      "source": "BILD"
+    },
+    {
+      "type": "teaser",
+      "id": "brk-301",
+      "kicker": "DUPLIKAT",
+      "headline": "Uses the banner's id: must be dropped",
+      "publishedAt": "2026-11-05T14:00:00Z"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-301",
+      "kicker": "  \n ",
+      "headline": "Bundes­verfassungs­gerichts­entscheidung zur Grund­steuer­reform",
+      "summary": "Was das Urteil für Mieter bedeutet – und was nicht. 🇩🇪",
+      "publishedAt": "2026-10-25T00:30:00Z",
+      "image": "politics.png",
+      "source": "WELT"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-302",
+      "kicker": "KULTUR &amp; MEDIEN",
+      "headline": "&quot;Tatort&quot;-Kritik: &#8222;Zu laut, zu lang&#8220; &ndash; Müller &amp; Söhne &#x1F3AC;",
+      "summary": "   ",
+      "publishedAt": "2026-11-05T13:13:20Z",
+      "source": "BILD"
+    },
+    {
+      "type": "video",
+      "id": "vid-301",
+      "kicker": "VIDEO",
+      "headline": "Die komplette Pressekonferenz zum Nachsehen",
+      "image": "sport.png",
+      "durationSeconds": 3723,
+      "publishedAt": "2026-11-05T12:00:00Z",
+      "source": "WELT"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-303",
+      "kicker": "AUSLAND",
+      "headline": "Erdoğan, Selenskyj und Ørsted-Chef in İstanbul: Was der Gipfel bringt 🤝",
+      "summary": "Zeile eins\r\nZeile zwei\tmit Tab",
+      "publishedAt": "2026-11-05T16:13:20Z",
+      "source": "WELT"
+    }
+  ]
+}

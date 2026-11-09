@@ -18,7 +18,7 @@ A news feed has dozens of visual states: breaking, live, PLUS, ads, offline, dar
 ## 3. Show it working (60 s)
 
 ```bash
-make ios-test && make android-test     # 83 screenshots per platform + logic, contract, contrast and UI interaction tests
+make ios-test && make android-test     # 89 screenshots per platform + logic, contract, contrast and UI interaction tests
 make ios-run TAB=games                 # the real app, starting on any state
 ```
 
@@ -41,6 +41,13 @@ The two platforms fail on **exactly the same screenshots**, and every unaffected
 - **Approved goldens still hid contrast bugs.** One was purple-on-red buttons in Android dark mode. WCAG contrast tests on the colour tokens now run on both platforms.
 - **Pinning the environment proves stability, not correctness.** The "11:05 PM Uhr" bug only showed on a real device with US settings. That's why Layer 2 exists.
 - **Five role-based reviews** (PM, developer, QA, accessibility, hiring panel) found the paywall gap, data-decoding differences between the platforms, and lost-state bugs. All of them are fixed and covered by tests now.
+
+## 5b. Content that changes every minute (45 s): STRATEGY.md §2
+
+- **Goldens are tied to fixtures, not to live news**, so they never go stale. Timestamps are relative to a pinned clock.
+- **What actually changes, the shape of the data, is tested without goldens:** a shared hostile-content fixture (`&amp;`, line breaks, emoji, a 1:02:03 video), a seeded fuzz test (one corrupted item must never hide the others), and date boundaries (DST, New Year, clock skew).
+- **Offline is a state too:** `make ios-run DROP_CONNECTION=1`, then pull down. The last feed stays, with "Stand 15:02 Uhr".
+- **Accessibility audits on every screen** found that hidden tabs were still reachable by VoiceOver: invisible in every screenshot.
 
 ## 6. How I'd roll it out at BILD/WELT (30 s): STRATEGY.md §7–§9
 

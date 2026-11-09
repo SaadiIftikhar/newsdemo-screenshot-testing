@@ -120,7 +120,7 @@ struct LoginForm: View {
                         .accessibilityIdentifier("email")
                 }
                 field(title: "Passwort", error: model.fieldErrors.password) {
-                    SecureField("Passwort", text: $model.password, prompt: Text(verbatim: "Mindestens 8 Zeichen"))
+                    SecureField("Passwort", text: $model.password, prompt: Text(verbatim: "Min. 8 Zeichen")) // the longer text clipped at the largest text size (a11y audit)
                         .textContentType(.password)
                         .accessibilityIdentifier("password")
                 }
@@ -181,6 +181,7 @@ struct ProfileView: View {
                 VStack(spacing: 4) {
                     Text(profile.name).font(.title2.weight(.bold)).foregroundStyle(NewsTheme.textPrimary)
                     Text(profile.email).font(.subheadline).foregroundStyle(NewsTheme.textSecondary)
+                        .accessibilityLabel("E-Mail-Adresse: \(profile.email)") // a bare address is not a readable label
                 }
                 if profile.isPremium {
                     Label("PLUS-Abo aktiv", systemImage: "star.fill")
@@ -203,6 +204,10 @@ struct ProfileView: View {
                 .background(NewsTheme.card, in: RoundedRectangle(cornerRadius: NewsTheme.cornerRadius))
                 Button("Abmelden", role: .destructive, action: onSignOut)
                     .buttonStyle(.bordered)
+                    // Neutral grey button + accentText label: the system red on its own red tint failed the
+                    // accessibility audit's contrast check.
+                    .tint(.gray)
+                    .foregroundStyle(NewsTheme.accentText)
                     .accessibilityIdentifier("sign-out")
             }
             .padding(NewsTheme.spacing)

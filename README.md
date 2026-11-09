@@ -7,6 +7,8 @@ A small news app, built natively on **iOS (SwiftUI)** and **Android (Compose)** 
   - **PLUS** (paywalled) teasers
   - video teaser, ad slot (and an ad that returned nothing, which collapses)
   - skeleton loading, empty, offline and error states
+  - **offline with cached content:** the last feed stays, with "Stand 15:02 Uhr" and pull-to-refresh
+  - **messy CMS text** cleaned identically on both platforms: `&amp;`, stray line breaks, emoji, soft hyphens
   - headlines are **real public WELT/BILD articles**; tapping one opens the publisher's page in-app
   - **PLUS articles open only for subscribers**; everyone else sees a paywall
 - **Spiele** (games): Tic-Tac-Toe against the computer, a pairs card game, a 4×4 Mini-Sudoku.
@@ -18,10 +20,11 @@ Every screen is covered by screenshot tests driven by **one shared set of JSON f
 | | iOS | Android |
 |---|---|---|
 | Screenshot tool | swift-snapshot-testing 1.19.7 | Roborazzi 1.77.0 on Robolectric 4.17 |
-| Golden images | 83 | 83 (identical names, enforced by `make lint-goldens`) |
-| Logic / contract / contrast tests | 24 | 24 (same cases) |
+| Golden images | 89 | 89 (identical names, enforced by `make lint-goldens`) |
+| Logic / contract / contrast / edge-case tests | 35 | 36 (same cases + an Arabic-locale digit test) |
 | UI interaction tests | 8 (XCUITest, real app on the simulator) | 9 (Robolectric) |
-| Test time after build | about 30 s (+ about 2 min UI tests) | about 12 s |
+| Accessibility audits (every screen) | 6 (`performAccessibilityAudit`) | 6 (Google ATF via Roborazzi) |
+| `make` time (measured, after the first build) | about 30 s (+ about 2 min UI tests and audits) | about 20 s |
 
 - **Strategy:** [STRATEGY.md](STRATEGY.md) (PDF: [STRATEGY.pdf](STRATEGY.pdf))
 - **Walkthrough notes:** [WALKTHROUGH.md](WALKTHROUGH.md)
@@ -44,7 +47,7 @@ scripts/             pinned simulator, run helpers, diff report, golden lint, PD
 Run these from the repository root. You need JDK 21 and the Android SDK platform 37 (`sdkmanager "platforms;android-37.0"`).
 
 ```bash
-make android-test                                           # 83 screenshots + logic + interaction tests: green
+make android-test                                           # 89 screenshots + logic + interaction + accessibility: green
 git checkout demo/regression && make android-test           # fails on 24 screenshots (PLUS badge dropped, banner −2pt)
 open artifacts/android/diffs/index.html                     # golden | this change | changed pixels
 git checkout main
@@ -62,10 +65,11 @@ Run everything from the repository root. `make help` lists all commands.
 ## Run the tests
 
 ```bash
-make ios-test          # iOS screenshots (83) + logic/contract/contrast tests
-make ios-ui-test       # iOS UI interaction tests on the real app (XCUITest)
-make android-test      # Android screenshots (83) + logic/contract/contrast + interaction tests
+make ios-test          # iOS screenshots (89) + logic/contract/contrast/edge-case tests
+make ios-ui-test       # iOS UI interaction tests + accessibility audit on the real app (XCUITest)
+make android-test      # Android screenshots (89) + logic/contract/edge-case + interaction + accessibility (ATF)
 make lint-goldens      # no blank golden, and iOS/Android golden names must match
+make gallery           # iOS vs Android side by side: open artifacts/side-by-side/index.html
 ```
 
 ## Regenerate goldens (only after an intended UI change)
@@ -85,6 +89,7 @@ In a team setup only CI records goldens: add the `record-snapshots` label to a P
 git checkout demo/regression
 make ios-test                          # fails: 24 screenshots
 open artifacts/ios/diffs/index.html    # golden | this change | changed pixels (magenta = clear, orange = subtle)
+cat artifacts/ios/diffs/summary.md     # each change classified: layout / visible / subtle (what CI posts on the PR)
 make android-test                      # fails on the same 24
 open artifacts/android/diffs/index.html
 git checkout main                      # always switch back
@@ -96,8 +101,9 @@ Pre-captured output: [docs/regression/](docs/regression/).
 
 ```bash
 make ios-run                                  # (re)builds, boots the pinned simulator, opens it, launches (first time ~75 s)
-make ios-run FIXTURE=feed_long_headlines      # feed_default | feed_long_headlines | feed_edge_cases | feed_empty
+make ios-run FIXTURE=feed_long_headlines      # feed_default | feed_long_headlines | feed_edge_cases | feed_hostile_content | feed_empty
 make ios-run OFFLINE=1                        # offline state
+make ios-run DROP_CONNECTION=1                # loads, then goes offline: pull down to see the cached-content notice
 make ios-run TAB=games                        # start on Spiele (or TAB=account)
 make ios-run TAB=account SIGNED_IN=1          # logged in as the PLUS subscriber
 make android-run                              # same options; uses a plugged-in phone, a running emulator, or boots NewsDemo_API34

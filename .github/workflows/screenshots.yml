@@ -7,6 +7,15 @@
 #    from someone's laptop. The golden diff is then reviewed in the PR (CODEOWNERS: design/QA).
 #  - lint: every run fails if a golden is blank or iOS/Android golden names diverge.
 #
+# When it runs:
+#  - every PR (opened / new commits / label added): the gate. Verifies the MERGE result.
+#  - merge queue (merge_group): re-verifies against the latest main right before merging, so two PRs that are
+#    green on their own cannot turn main red together.
+#  - push to main: post-merge confirmation; keeps main's badge honest.
+#  - nightly 03:00 UTC: the same suite on a fresh runner image (catches drift: runner, runtime, dependencies), plus
+#    the iOS-vs-Android side-by-side gallery for design review.
+#  - manually (workflow_dispatch), optionally in record mode.
+#
 # Push token: a push made with the default GITHUB_TOKEN does NOT start a new workflow run, so the re-recorded
 # commit would never be verified and a required check would hang. Set the secret SNAPSHOT_BOT_TOKEN (a GitHub
 # App / fine-grained token with contents:write) so the bot commit re-triggers this workflow.
@@ -18,6 +27,11 @@ name: screenshots
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
+  merge_group:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       record:
@@ -44,6 +58,15 @@ jobs:
         with:
           lfs: true
       - run: make lint-goldens
+      - name: iOS vs Android gallery (cross-platform design review)
+        run: make gallery
+      - uses: actions/upload-artifact@v7
+        with:
+          name: side-by-side-gallery
+          path: |
+            artifacts/side-by-side
+            ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
+            android/app/src/test/screenshots
 
   ios:
     # Xcode 27 is only offered on the `xcode-27` preview image (macos-26 ships Xcode 26.x).
@@ -51,6 +74,8 @@ jobs:
     timeout-minutes: 40
     permissions:
       contents: write            # record mode pushes the re-recorded goldens back to the PR branch
+    outputs:
+      diff_summary: ${{ steps.diffsum.outputs.md }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -73,7 +98,7 @@ jobs:
       - name: Verify snapshots + logic tests
         if: env.RECORD != 'true'
         run: make ios-test
-      - name: UI interaction tests (XCUITest)
+      - name: UI interaction tests + accessibility audit (XCUITest)
         if: env.RECORD != 'true'
         run: make ios-ui-test
       - name: Re-record, then prove the new goldens
@@ -82,6 +107,14 @@ jobs:
           make ios-record || true      # record mode always reports "failed"
           make lint-goldens            # no blank goldens, names still match Android
           make ios-test                # the freshly recorded goldens must verify, or nothing is pushed
+      - name: "Diff summary (what KIND of change: layout, visible or subtle)"
+        id: diffsum
+        if: failure()
+        run: |
+          f=artifacts/ios/diffs/summary.md
+          [ -f "$f" ] || exit 0
+          cat "$f" >> "$GITHUB_STEP_SUMMARY"
+          { echo 'md<<EOF_SUMMARY'; cat "$f"; echo 'EOF_SUMMARY'; } >> "$GITHUB_OUTPUT"
       - name: Upload diff report
         if: failure()
         uses: actions/upload-artifact@v7
@@ -100,6 +133,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: write
+    outputs:
+      diff_summary: ${{ steps.diffsum.outputs.md }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -113,7 +148,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Install SDK 37 platform
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" > /dev/null
-      - name: Verify snapshots + logic + interaction tests
+      - name: Verify snapshots + logic + interaction + accessibility (ATF) tests
         if: env.RECORD != 'true'
         run: make android-test
       - name: Re-record, then prove the new goldens
@@ -121,6 +156,14 @@ jobs:
         run: |
           make android-record
           make android-test
+      - name: "Diff summary (what KIND of change: layout, visible or subtle)"
+        id: diffsum
+        if: failure()
+        run: |
+          f=artifacts/android/diffs/summary.md
+          [ -f "$f" ] || exit 0
+          cat "$f" >> "$GITHUB_STEP_SUMMARY"
+          { echo 'md<<EOF_SUMMARY'; cat "$f"; echo 'EOF_SUMMARY'; } >> "$GITHUB_OUTPUT"
       - name: Upload diffs (gallery + _compare.png)
         if: failure()
         uses: actions/upload-artifact@v7
@@ -159,6 +202,10 @@ jobs:
                   marker,
                   `### 📸 Screenshot tests found visual changes in: ${failed.join(', ')}`,
                   `Diff gallery (golden / this PR / changed pixels) is attached to [this run](${run}).`,
+                  '',
+                  // What kind of change, before anyone opens an image. "subtle" = colour/anti-aliasing only.
+                  ...['ios', 'android'].filter(p => results[p]?.outputs?.diff_summary)
+                    .map(p => `<details><summary><b>${p}</b> changed snapshots</summary>\n\n${results[p].outputs.diff_summary}\n</details>\n`),
                   '',
                   '- **Unintended?** Fix the code and push.',
                   '- **Intended?** Add the `record-snapshots` label. CI re-records, verifies and pushes the goldens;',

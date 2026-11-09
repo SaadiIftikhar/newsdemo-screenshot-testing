@@ -2,6 +2,7 @@
 # Launch the iOS demo app on the pinned simulator in a chosen state.
 #   scripts/ios-run.sh [fixture]        e.g. feed_default | feed_long_headlines | feed_empty
 #   OFFLINE=1 scripts/ios-run.sh        offline state
+#   DROP_CONNECTION=1                   first load works, then offline: pull down to see the cached-content notice
 #   TAB=games|account, SIGNED_IN=1      start on another tab / logged in as the demo user
 # Xcode 27+ ships the simulator UI inside DeviceHub.app; older Xcode uses Simulator.app.
 set -euo pipefail
@@ -27,5 +28,6 @@ args=()
 if [[ -n "${OFFLINE:-}" ]]; then args+=(-offline); else args+=(-fixture "$FIXTURE"); fi
 [[ -n "${TAB:-}" ]] && args+=(-tab "$TAB")
 [[ -n "${SIGNED_IN:-}" ]] && args+=(-signedIn)
+[[ -n "${DROP_CONNECTION:-}" ]] && args+=(-dropConnection)
 xcrun simctl launch "$UDID" "$BUNDLE_ID" "${args[@]}" >/dev/null
 echo "Launched NewsDemo (${args[*]}) on simulator $UDID"

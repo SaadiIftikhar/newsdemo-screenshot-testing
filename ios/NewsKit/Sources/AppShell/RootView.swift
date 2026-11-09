@@ -36,23 +36,29 @@ public struct RootView: View {
     @State private var selection: AppTab
     private let feedViewModel: FeedViewModel
     private let accountModel: AccountViewModel
-    private let gamesPath: [GameKind]
+    /// Game boards live here, not in the views: only the selected tab is in the hierarchy (see body).
+    @State private var games: GamesModel
     @State private var presented: Presented?
 
     public init(feedViewModel: FeedViewModel, accountModel: AccountViewModel,
                 initialTab: AppTab = .feed, gamesPath: [GameKind] = []) {
         self.feedViewModel = feedViewModel
         self.accountModel = accountModel
-        self.gamesPath = gamesPath
+        _games = State(initialValue: GamesModel(path: gamesPath))
         _selection = State(initialValue: initialTab)
     }
 
     public var body: some View {
         ZStack {
-            // All tabs stay alive (like a system tab bar), so each keeps its state when you switch.
-            tab(.feed) { FeedScreen(viewModel: feedViewModel, onOpenArticle: open) }
-            tab(.games) { GamesHome(path: gamesPath) }
-            tab(.account) { AccountScreen(model: accountModel) }
+            // Only the selected tab is in the hierarchy. Hidden-but-alive tabs (opacity 0) stayed reachable for
+            // VoiceOver even with `.accessibilityHidden` (the feed heading and the login fields, found by the
+            // accessibility audit). State survives a switch because it lives in models owned here and above:
+            // feed, account and game boards. Known trade-off: the feed's scroll position resets.
+            switch selection {
+            case .feed: FeedScreen(viewModel: feedViewModel, onOpenArticle: open)
+            case .games: GamesHome(model: games)
+            case .account: AccountScreen(model: accountModel)
+            }
         }
         // Scrollable content can scroll *under* the floating bar but always ends above it.
         .contentMargins(.bottom, FloatingTabBar.reservedHeight, for: .scrollContent)
@@ -82,14 +88,6 @@ public struct RootView: View {
         case .open(let url): presented = .article(url)
         case .paywall(let url): presented = .paywall(url)
         }
-    }
-
-    private func tab<Content: View>(_ tab: AppTab, @ViewBuilder _ content: () -> Content) -> some View {
-        let isSelected = selection == tab
-        return content()
-            .opacity(isSelected ? 1 : 0)
-            .allowsHitTesting(isSelected)
-            .accessibilityHidden(!isSelected)
     }
 }
 
@@ -129,6 +127,12 @@ struct FloatingTabBar: View {
         .accessibilityLabel(tab.title)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
         .accessibilityIdentifier("tab-\(tab.rawValue)")
+        // Labels stop growing at xxLarge (above), so — like the system tab bar — a long press shows the item
+        // enlarged in the Large Content Viewer. Without it, Apple's accessibility audit flags the capped text.
+        .accessibilityShowsLargeContentViewer {
+            Image(systemName: tab.icon)
+            Text(tab.title)
+        }
     }
 }
 

@@ -35,7 +35,15 @@ func image(from buffer: inout [UInt8], width: Int, height: Int) -> CGImage {
               space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!.makeImage()!
 }
 
-struct Row { let name: String; let file: String; let changed: Int; let subtle: Int; let total: Int; let sizeNote: String }
+struct Row {
+    let name: String; let file: String; let changed: Int; let subtle: Int; let total: Int; let sizeNote: String
+    /// Triage hint for the reviewer, NOT an auto-approval: every failed snapshot still needs a human decision.
+    var severity: String {
+        if !sizeNote.isEmpty { return "layout" }           // the screen got taller/shorter: something moved
+        if changed > 0 { return "visible" }                // pixels a person can see changed
+        return "subtle"                                    // colour/anti-aliasing shift only (check design tokens)
+    }
+}
 var rows: [Row] = []
 var missingReferences: [String] = []
 
@@ -104,7 +112,7 @@ rows.sort { $0.name < $1.name }
 let items = rows.map { row in
     let pct = String(format: "%.2f", Double(row.changed) / Double(row.total) * 100)
     return """
-    <section><h2>\(row.name)</h2><p>\(row.changed) px clearly changed (\(pct)%), \(row.subtle) px subtly changed (orange)\(row.sizeNote)</p>
+    <section><h2>\(row.name) <small>[\(row.severity)]</small></h2><p>\(row.changed) px clearly changed (\(pct)%), \(row.subtle) px subtly changed (orange)\(row.sizeNote)</p>
     <p class="legend"><span>reference (golden)</span><span>actual (this PR)</span><span>changed pixels</span></p>
     <img src="\(row.file)" loading="lazy"></section>
     """
@@ -119,4 +127,16 @@ img{max-width:100%;max-height:80vh}h2{font-size:15px;margin:0 0 4px}.legend{disp
 \(items)
 """
 try html.write(to: out.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
+
+// Markdown summary for the CI job summary and the sticky PR comment: a reviewer sees WHAT kind of change it is
+// before opening a single image.
+let counts = Dictionary(grouping: rows, by: \.severity).mapValues(\.count)
+var md = "| Snapshot | Kind | Clearly changed | Subtle |\n|---|---|---|---|\n"
+for row in rows {
+    md += "| `\(row.name)` | \(row.severity) | \(row.changed) px | \(row.subtle) px |\n"
+}
+for name in missingReferences { md += "| `\(name)` | new (no golden) | – | – |\n" }
+let header = "**\(rows.count) changed** (layout: \(counts["layout"] ?? 0), visible: \(counts["visible"] ?? 0), "
+    + "subtle: \(counts["subtle"] ?? 0)), **\(missingReferences.count) new**\n\n"
+try (header + md).write(to: out.appendingPathComponent("summary.md"), atomically: true, encoding: .utf8)
 print("diff report: \(rows.count) failure(s), \(missingReferences.count) without golden → \(out.path)/index.html")

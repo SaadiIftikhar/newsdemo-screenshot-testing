@@ -21,7 +21,11 @@
 
 ## 2. Mocked, deterministic data
 
-- **One fixture catalog, decoded by each platform's production decoder.** It covers typical, long-German-headline, empty and **edge-case** feeds.
+- **News content changes every minute; goldens must not.** A golden is tied to a *fixture*, never to live content, so it can't go stale: fixture timestamps are relative to a pinned clock ("vor 9 Min." forever). Changing data is covered by three other mechanisms instead:
+  - **contract tests** of the decoders against a schema, and nightly against real (anonymised) responses, which catch format drift
+  - **fixtures refreshed from real responses** in a reviewed PR when the backend changes; that PR re-baselines the affected goldens
+  - **robustness tests** that need no golden: a seeded fuzz test corrupts one feed item 300 ways, and every other item must still show
+- **One fixture catalog, decoded by each platform's production decoder.** It covers typical, long-German-headline, empty, **edge-case** and **hostile-content** feeds. Hostile content means HTML entities, stray line breaks, soft hyphens, emoji, a ticker with no entries yet, a video over an hour long and a timestamp in the future.
 - **The edge-case fixture holds one shared decoding contract**, asserted with the same literal on both platforms. The rules:
   - a malformed item is dropped, never the whole feed
   - a missing flag gets a safe default
@@ -53,7 +57,12 @@
   3. CI **proves the new goldens before pushing them**: golden lint plus a full verify run.
   4. CI pushes them with a bot token, so the gate runs again on the new commit.
   5. Code owners (design/QA) approve the golden diff, and stale approvals are dismissed.
-- **Review:** CI keeps **one sticky PR comment** up to date and attaches an HTML diff gallery (golden, this PR, changed pixels). It also shows subtle colour shifts, so a failing test can never show "0 px changed".
+- **Review:** CI keeps **one sticky PR comment** up to date and attaches an HTML diff gallery (golden, this PR, changed pixels). The comment classifies each change before anyone opens an image:
+  - **layout:** the size changed, so something moved
+  - **visible:** pixels a person can see changed
+  - **subtle:** a colour or anti-aliasing shift only, still shown so a failure never reads "0 px changed"
+
+  This is triage, not approval: every class needs a human decision. A cross-platform gallery (`make gallery`) puts iOS and Android side by side for design review, because each gate only compares a platform with itself.
 - **Guards against a green test that protects nothing:**
   - **Golden lint** (CI job): fails on blank or uniform goldens, and on iOS/Android name divergence.
   - **Capture guard:** refuses to record or compare an undrawn frame.
@@ -68,11 +77,11 @@
   - error, selected and interactive states: + dark
   - feed: + smallest phone, tablet, and **full length** (not just the first screen)
   - paywall and PLUS badge: always
-- **Demo coverage:** 83 goldens per platform, plus logic, contract and contrast tests, plus UI interaction tests on both platforms.
+- **Demo coverage:** 89 goldens per platform, plus logic, contract, contrast and edge-case tests, UI interaction tests and accessibility audits on both platforms.
 - **Accessibility in the gate:**
   - a WCAG contrast test runs over every text/background token pair, in light and dark
-  - VoiceOver/TalkBack labels, selected states and headings are reviewed in code
-  - next steps: accessibility-tree snapshots (AccessibilitySnapshot / Compose ATF checks), and `performAccessibilityAudit()` nightly
+  - **automated audits on every screen:** XCUITest `performAccessibilityAudit()` on iOS and Google ATF via Roborazzi on Android, covering contrast, touch targets, labels and traits
+  - the few accepted audit exceptions are listed in code with the evidence for each (e.g. a contrast false positive on near-black text)
 - **Layer 2 (nightly) covers what in-process rendering cannot:**
   - system chrome (e.g. iOS 26's Liquid Glass tab bar renders blank in-process)
   - real fonts and devices
@@ -80,7 +89,11 @@
 
 ## 5. CI/CD and the Scrum process
 
-- **Every PR:** golden lint, iOS (`xcode-27` runner), Android (Linux), all in parallel. The gate verifies the **merge result**, not just the branch.
+- **When it runs:**
+  - **every PR**, on its merge result: golden lint, iOS (`xcode-27` runner) and Android (Linux) in parallel
+  - the **merge queue**, so two PRs that are green on their own can't break main together
+  - **after merge** on main
+  - **nightly** on a fresh runner image (catches toolchain drift), plus the cross-platform gallery
 - **Measured locally:** about 30 s (iOS) and 12 s (Android) of test time after the build. Target: under 10 minutes of wall time per PR, running only affected modules at scale.
 - **Rollout of the gate:** report-only at first, then a required check.
 - **Definition of Done:** a new UI state ships with a fixture and a snapshot. Story refinement asks "which states does this add?".
@@ -93,7 +106,8 @@
 3. **Tolerance:**
    - iOS: every pixel is compared, with `perceptualPrecision 0.98`. That absorbs GPU anti-aliasing noise but fails on a 2pt shift (proven in the regression demo). Its blind spot is a colour change under ΔE≈2, which the token contrast tests and design review cover.
    - Android: zero tolerance.
-   - Tolerance is never loosened globally.
+   - Tolerance is never loosened globally. A per-test exception is allowed only with a comment saying why (for example, a component with a blur), and is reviewed like code.
+   - No "small diff = auto-pass" rule. A 2pt shift and a dropped PLUS badge are both small; whether a change is intended is a product decision, not a pixel count.
 4. **Android local runs vs Linux CI:** CI is the source of truth. Developers reproduce CI failures in the same pinned Docker image (planned `make android-test-docker`); plain local Mac runs are advisory.
 5. **No automatic retries.** A flaky snapshot is quarantined within 24 hours with an owner. Target flake rate: under 1%. **Measured:** 10 consecutive full runs per platform, all green (iOS 71 tests, Android 116 tests, no retries). The first Android loop "failed" 3 of 10 only because the Mac went to sleep mid-run (wall-clock timeouts in the power log), so long local runs use `caffeinate`; a CI runner never sleeps.
 
@@ -141,6 +155,15 @@
 - a 60-letter compound word breaks mid-word on both platforms. This is a **content** finding: the fix is soft hyphens from the CMS
 - an e-mail placeholder rendered as a Markdown link
 - "11:05 PM Uhr" on an en_US device (found by Layer 2)
+
+**Found by the edge-case and accessibility round:**
+- a video over one hour showed "62:03"
+- Android used the device locale for durations, so an Arabic phone would show non-Latin digits
+- a live ticker without entries was dropped from the feed
+- raw `&amp;` and line breaks from the CMS would reach the screen
+- a fixture image without `.png` loaded on iOS but not on Android (the image contract now checks exact file names)
+- **hidden tabs were still reachable by VoiceOver** (found by the iOS audit); the sign-out button failed contrast
+- Google's official Compose accessibility hook silently checks nothing under Robolectric: a deliberately broken button passed. A guard that can't fail protects nothing, so every new check was first shown to fail.
 
 **Tooling incidents, each now guarded against:**
 - 44 of 62 Android goldens blank but green (capture guard and golden lint)

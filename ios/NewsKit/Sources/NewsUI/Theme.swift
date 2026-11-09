@@ -71,7 +71,22 @@ public enum NewsDateFormatter {
         }
     }
 
+    /// "4:05", and "1:02:03" from one hour on (it used to show "62:03").
     public static func duration(_ seconds: Int) -> String {
-        String(format: "%d:%02d", seconds / 60, seconds % 60)
+        let s = max(0, seconds)
+        return s >= 3600
+            ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60)
+            : String(format: "%d:%02d", s / 60, s % 60)
+    }
+
+    /// When cached content was loaded: "15:02 Uhr" today, "04.11.2026, 15:02 Uhr" on another day.
+    public static func asOf(_ date: Date, now: Date, timeZone: TimeZone) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "de_DE")
+        formatter.timeZone = timeZone
+        formatter.dateFormat = calendar.isDate(date, inSameDayAs: now) ? "HH:mm 'Uhr'" : "dd.MM.yyyy, HH:mm 'Uhr'"
+        return formatter.string(from: date)
     }
 }

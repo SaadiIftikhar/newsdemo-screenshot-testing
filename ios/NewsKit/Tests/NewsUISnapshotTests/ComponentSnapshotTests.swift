@@ -72,6 +72,15 @@ final class ComponentSnapshotTests: XCTestCase {
 
     // MARK: Edge states (feed_edge_cases.json)
 
+    /// A ticker opened before its first entry (e.g. before kick-off), with no kicker from the CMS.
+    func test_liveTicker_noUpdatesYet() throws {
+        let hostile = try Snap.store.feed("feed_hostile_content")
+        guard case .liveTicker(let ticker) = try XCTUnwrap(hostile.items.first(where: { $0.id == "live-301" })) else {
+            return XCTFail("fixture changed")
+        }
+        assertComponent(LiveTickerCard(ticker: ticker), variants: [.light])
+    }
+
     func test_liveTicker_ended() throws {
         guard case .liveTicker(let ticker) = try XCTUnwrap(edge.items.first(where: { $0.id == "live-201" })) else {
             return XCTFail("fixture changed")

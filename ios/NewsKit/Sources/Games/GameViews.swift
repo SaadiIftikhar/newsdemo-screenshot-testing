@@ -1,28 +1,63 @@
+import Observation
 import NewsUI
 import SwiftUI
 
 // MARK: - Games tab
 
+/// Everything the Games tab must remember while another tab is shown (mirror of Android's hoisted `GamesState`).
+/// Owned by the app shell, so the tab's view can leave the hierarchy without the board being reset.
+@MainActor
+@Observable
+public final class GamesModel {
+    public var path: [GameKind]
+    public var ticTacToe = TicTacToe()
+    public var pairs: PairsGame?
+    public var sudoku = MiniSudoku()
+
+    public init(path: [GameKind] = []) { self.path = path }
+}
+
 /// The Games tab: a list of playable games, each pushing its own screen.
 public struct GamesHome: View {
-    @State private var path: [GameKind]
+    @Bindable private var model: GamesModel
     /// Fixture mode / Layer 2 pins the pairs deal via `-pairsSeed`; real users get a random deal.
     @Environment(\.pairsSeed) private var pairsSeed
 
-    public init(path: [GameKind] = []) { _path = State(initialValue: path) }
+    public init(model: GamesModel) { self.model = model }
+    /// Previews and snapshot tests: a fresh model.
+    public init(path: [GameKind] = []) { self.model = GamesModel(path: path) }
 
     public var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $model.path) {
             GamesList()
                 .navigationTitle("Spiele")
                 .navigationDestination(for: GameKind.self) { kind in
                     switch kind {
-                    case .ticTacToe: TicTacToeView()
-                    case .pairs: PairsView(game: PairsGame(seed: pairsSeed ?? UInt64.random(in: 1...UInt64.max)))
-                    case .sudoku: MiniSudokuView()
+                    case .ticTacToe: TicTacToeView(game: $model.ticTacToe)
+                    case .pairs: PairsView(game: Binding(get: { model.pairs ?? deal() }, set: { model.pairs = $0 }))
+                    case .sudoku: MiniSudokuView(game: $model.sudoku)
                     }
                 }
         }
+        // Deal once, before any pairs screen can show (a random seed must not reshuffle on every render).
+        .onAppear { if model.pairs == nil { model.pairs = deal() } }
+    }
+
+    private func deal() -> PairsGame { PairsGame(seed: pairsSeed ?? UInt64.random(in: 1...UInt64.max)) }
+}
+
+/// A game view's state: the app shell's (via binding) or its own (snapshot tests pass a plain value).
+@propertyWrapper
+struct GameState<Value>: DynamicProperty {
+    @State private var local: Value
+    private let external: Binding<Value>?
+
+    init(_ value: Value) { _local = State(initialValue: value); external = nil }
+    init(_ binding: Binding<Value>) { _local = State(initialValue: binding.wrappedValue); external = binding }
+
+    var wrappedValue: Value {
+        get { external?.wrappedValue ?? local }
+        nonmutating set { if let external { external.wrappedValue = newValue } else { local = newValue } }
     }
 }
 
@@ -93,9 +128,10 @@ extension GameKind {
 // MARK: - Tic-Tac-Toe
 
 public struct TicTacToeView: View {
-    @State private var game: TicTacToe
+    @GameState private var game: TicTacToe
 
-    public init(game: TicTacToe = TicTacToe()) { _game = State(initialValue: game) }
+    public init(game: TicTacToe = TicTacToe()) { _game = GameState(game) }
+    public init(game: Binding<TicTacToe>) { _game = GameState(game) }
 
     private var status: String {
         if let winner = game.winner { return winner == .x ? "Du hast gewonnen!" : "Der Computer hat gewonnen." }
@@ -144,9 +180,10 @@ public struct TicTacToeView: View {
 // MARK: - Pairs
 
 public struct PairsView: View {
-    @State private var game: PairsGame
+    @GameState private var game: PairsGame
 
-    public init(game: PairsGame) { _game = State(initialValue: game) }
+    public init(game: PairsGame) { _game = GameState(game) }
+    public init(game: Binding<PairsGame>) { _game = GameState(game) }
 
     public var body: some View {
         VStack(spacing: 16) {
@@ -204,9 +241,10 @@ public struct PairsView: View {
 // MARK: - Mini-Sudoku
 
 public struct MiniSudokuView: View {
-    @State private var game: MiniSudoku
+    @GameState private var game: MiniSudoku
 
-    public init(game: MiniSudoku = MiniSudoku()) { _game = State(initialValue: game) }
+    public init(game: MiniSudoku = MiniSudoku()) { _game = GameState(game) }
+    public init(game: Binding<MiniSudoku>) { _game = GameState(game) }
 
     public var body: some View {
         VStack(spacing: 20) {

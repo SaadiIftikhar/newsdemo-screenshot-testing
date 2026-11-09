@@ -21,15 +21,23 @@ final class FixtureContractTests: XCTestCase {
         XCTAssertEqual(feed.items.count, 6)
     }
 
-    func test_everyReferencedImageExists() throws {
-        let feed = try store.feed("feed_default")
-        let names: [String] = feed.items.compactMap {
-            switch $0 {
-            case .teaser(let t): t.image
-            case .video(let v): v.image
-            default: nil
+    /// Every image any fixture references exists under EXACTLY that file name. iOS's UIImage(contentsOfFile:)
+    /// silently found "politics" for "politics.png" while Android showed the placeholder: compare names, not loads.
+    /// `missing-image.png` is the one deliberate exception (the broken-image state in feed_edge_cases).
+    func test_everyReferencedImageExists_withItsExactFileName() throws {
+        let files = try FileManager.default.contentsOfDirectory(atPath: store.root.appendingPathComponent("images").path)
+        let fixtures = try FileManager.default.contentsOfDirectory(atPath: store.root.appendingPathComponent("feed").path)
+        for fixture in fixtures where fixture.hasSuffix(".json") {
+            let feed = try store.feed(String(fixture.dropLast(5)))
+            for item in feed.items {
+                let name: String? = switch item {
+                case .teaser(let t): t.image
+                case .video(let v): v.image
+                default: nil
+                }
+                guard let name, name != "missing-image.png" else { continue }
+                XCTAssertTrue(files.contains(name), "\(fixture): image \"\(name)\" is not a file in fixtures/images")
             }
         }
-        for name in names { XCTAssertNotNil(store.image(name), "missing fixture image \(name)") }
     }
 }

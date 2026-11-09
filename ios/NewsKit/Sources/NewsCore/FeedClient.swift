@@ -48,3 +48,20 @@ extension FeedClient {
         FeedClient { throw error }
     }
 }
+
+extension FeedClient {
+    /// The first fetch goes through, every later one fails as offline: the "train enters a tunnel" scenario
+    /// (cached content + pull-to-refresh). Used by tests and by the demo app's `-dropConnection` flag.
+    public static func droppingConnection(after base: FeedClient) -> FeedClient {
+        let calls = CallCounter()
+        return FeedClient {
+            if await calls.next() > 1 { throw FeedError.offline }
+            return try await base.fetchFeed()
+        }
+    }
+}
+
+private actor CallCounter {
+    private var count = 0
+    func next() -> Int { count += 1; return count }
+}
