@@ -9,11 +9,13 @@ Branch **`demo/regression`** contains a plausible "refactor" commit on each plat
 
 | | iOS (swift-snapshot-testing) | Android (Roborazzi) |
 |---|---|---|
-| Failing snapshots | 24 (of 83) | 24 (of 83) |
-| Failing tests | 12 test methods | 12 test methods |
+| Failing snapshots | 29 (of 89) | 29 (of 89) |
+| Failing tests | 15 test methods | 15 test methods |
 | Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states, all Games, Account and Paywall screens | same |
 
-The two platforms fail on **exactly the same 24 snapshots** (lists in `ios/failing-tests.txt` and `android/failing-snapshots.txt`), because they share fixtures, test names and the variant matrix. The failures include the app shell's feed tab, and a real WELTplus teaser losing its PLUS badge.
+The two platforms fail on **exactly the same 29 snapshots** (lists in `ios/failing-tests.txt` and `android/failing-snapshots.txt`), because they share fixtures, test names and the variant matrix. The failures include the app shell's feed tab, the offline (cached content) and hostile-content feeds, and a real WELTplus teaser losing its PLUS badge.
+
+**Triage before opening an image** (`ios/summary.md`, `android/summary.md`; this is what CI posts on the PR): 10 snapshots are **layout** changes (the banner got 4pt shorter, so the image size changed) and 19 are **visible** changes. None is "subtle", which is what you would expect from a dropped badge and a padding change.
 
 ## Review artifacts
 

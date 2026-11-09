@@ -163,6 +163,7 @@
 - raw `&amp;` and line breaks from the CMS would reach the screen
 - a fixture image without `.png` loaded on iOS but not on Android (the image contract now checks exact file names)
 - **hidden tabs were still reachable by VoiceOver** (found by the iOS audit); the sign-out button failed contrast
+- after a failed refresh, Android inserted the offline notice just above the visible list, so readers never saw it (found by the pull-to-refresh interaction test)
 - Google's official Compose accessibility hook silently checks nothing under Robolectric: a deliberately broken button passed. A guard that can't fail protects nothing, so every new check was first shown to fail.
 
 **Tooling incidents, each now guarded against:**
@@ -183,7 +184,7 @@
 - low-contrast secondary text
 - CI record-mode gaps
 
-All are fixed and covered by tests. **Deliberate regression** (PLUS badge dropped, banner −2pt): the **same 24 of 83** snapshots fail on both platforms, including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green.
+All are fixed and covered by tests. **Deliberate regression** (PLUS badge dropped, banner −2pt): the **same 29 of 89** snapshots fail on both platforms, including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green.
 
 ## Appendix B: devil's advocate
 

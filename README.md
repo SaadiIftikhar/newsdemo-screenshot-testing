@@ -22,7 +22,7 @@ Every screen is covered by screenshot tests driven by **one shared set of JSON f
 | Screenshot tool | swift-snapshot-testing 1.19.7 | Roborazzi 1.77.0 on Robolectric 4.17 |
 | Golden images | 89 | 89 (identical names, enforced by `make lint-goldens`) |
 | Logic / contract / contrast / edge-case tests | 35 | 36 (same cases + an Arabic-locale digit test) |
-| UI interaction tests | 8 (XCUITest, real app on the simulator) | 9 (Robolectric) |
+| UI interaction tests | 9 (XCUITest, real app on the simulator) | 10 (Robolectric) |
 | Accessibility audits (every screen) | 6 (`performAccessibilityAudit`) | 6 (Google ATF via Roborazzi) |
 | `make` time (measured, after the first build) | about 30 s (+ about 2 min UI tests and audits) | about 20 s |
 
@@ -48,7 +48,7 @@ Run these from the repository root. You need JDK 21 and the Android SDK platform
 
 ```bash
 make android-test                                           # 89 screenshots + logic + interaction + accessibility: green
-git checkout demo/regression && make android-test           # fails on 24 screenshots (PLUS badge dropped, banner −2pt)
+git checkout demo/regression && make android-test           # fails on 29 screenshots (PLUS badge dropped, banner −2pt)
 open artifacts/android/diffs/index.html                     # golden | this change | changed pixels
 git checkout main
 ```
@@ -87,10 +87,10 @@ In a team setup only CI records goldens: add the `record-snapshots` label to a P
 
 ```bash
 git checkout demo/regression
-make ios-test                          # fails: 24 screenshots
+make ios-test                          # fails: 29 screenshots
 open artifacts/ios/diffs/index.html    # golden | this change | changed pixels (magenta = clear, orange = subtle)
 cat artifacts/ios/diffs/summary.md     # each change classified: layout / visible / subtle (what CI posts on the PR)
-make android-test                      # fails on the same 24
+make android-test                      # fails on the same 29
 open artifacts/android/diffs/index.html
 git checkout main                      # always switch back
 ```

@@ -15,8 +15,13 @@ test_feed_default_fullHeight.light
 test_feed_default_smallDevice.light
 test_feed_default_tablet.light
 test_feed_edgeCases.light
+test_feed_hostileContent.light
+test_feed_hostileContent.light_xxxl
 test_feed_longHeadlines.light
 test_feed_longHeadlines.light_xxxl
+test_feed_offlineCached.dark
+test_feed_offlineCached.light
+test_feed_refreshFailed.light
 test_teaserCard_premium.dark
 test_teaserCard_premium.light
 test_teaserCard_premium.light_xxxl

@@ -80,4 +80,15 @@ final class InteractionTests: XCTestCase {
         app.buttons["article-tsr-002"].tap()
         XCTAssertFalse(app.staticTexts["Weiterlesen mit PLUS"].waitForExistence(timeout: 3))
     }
+
+    /// The connection drops after the first load; pull to refresh must keep the news and say since when.
+    func test_pullToRefresh_whileOffline_keepsTheFeed_andShowsWhenItWasLoaded() {
+        launch(["-dropConnection"])
+        let article = app.buttons["article-tsr-001"]
+        XCTAssertTrue(article.waitForExistence(timeout: 10))
+        let start = app.staticTexts["NewsDemo"].coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 4))
+        start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: 450)))
+        XCTAssertTrue(app.staticTexts["Offline – gespeicherte Artikel"].waitForExistence(timeout: 10))
+        XCTAssertTrue(article.exists, "the cached articles stay on screen")
+    }
 }
