@@ -5,7 +5,9 @@ Branch **`demo/regression`** contains a plausible "refactor" commit on each plat
 1. **The PLUS (paywall) badge is silently dropped** from the teaser card. This is the brief's own example: *"a paywall badge that disappears after a refactor"*.
 2. **The breaking-news banner's vertical padding shrinks by 2pt/dp.** This is a subtle change that a human reviewer would miss in a screenshot. It proves the tolerance setting doesn't hide real layout shifts.
 
-## Result
+## Result (GitHub Actions, PR #2, run 42691506706)
+
+Captured on CI, not on a laptop: PR #2 on the private repo is blocked by both the iOS and the Android job, and the bot comment shows the table below for each platform.
 
 | | iOS (swift-snapshot-testing) | Android (Roborazzi) |
 |---|---|---|

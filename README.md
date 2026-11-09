@@ -27,6 +27,8 @@ Every screen is covered by screenshot tests driven by **one shared set of JSON f
 | `make` time (measured, after the first build) | about 30 s (+ about 2 min UI tests and audits) | about 20 s |
 
 - **Strategy:** [STRATEGY.md](STRATEGY.md) (PDF: [STRATEGY.pdf](STRATEGY.pdf))
+- **Evidence** (what building and running it found, devil's advocate): [docs/EVIDENCE.md](docs/EVIDENCE.md)
+- **CI on GitHub:** private repo `SaadiIftikhar/newsdemo-screenshot-testing`; PR #1 (re-pin + CI re-record, green), PR #2 (deliberate regression, blocked)
 - **Walkthrough notes:** [WALKTHROUGH.md](WALKTHROUGH.md)
 - **Prompts used:** [PROMPTS.md](PROMPTS.md)
 - **Deliberate regression:** branch `demo/regression`, captured diffs in [docs/regression/](docs/regression/)
@@ -129,9 +131,9 @@ make android-run                              # same options; uses a plugged-in 
 
 - **Goldens are recorded by CI** (the first ones came from the `record-snapshots` run in PR #1). This Mac verifies them on both platforms, so local and CI agree. Android renders on macOS and Linux within 2/255 on about 0.005% of pixels, inside Roborazzi's per-pixel tolerance.
 - **CI runs on GitHub** (private repo). Without a `SNAPSHOT_BOT_TOKEN` secret the bot's golden commit does not start a new run; push any commit (or re-run) to verify it.
-- **Android tests run on Robolectric's SDK 36 runtime**, while the app compiles against and targets SDK 37. On the SDK 37 runtime most captures came out blank (STRATEGY, Appendix A).
+- **Android tests run on Robolectric's SDK 36 runtime**, while the app compiles against and targets SDK 37. On the SDK 37 runtime most captures came out blank ([docs/EVIDENCE.md](docs/EVIDENCE.md)).
 - **Keep the Mac awake for long runs.** A laptop that sleeps mid-run turns green tests into timeouts. The `make` test targets wrap the runs in `caffeinate -i`.
-- **Verified on this machine** (see STRATEGY §6 and Appendix A):
+- **Verified on this machine** (see STRATEGY §6 and [docs/EVIDENCE.md](docs/EVIDENCE.md)):
   - 10 consecutive full runs per platform, all green
   - both suites pass on `main` and fail on the same snapshots on `demo/regression`
   - every `make` command was run
