@@ -57,7 +57,7 @@ git checkout main
 
 | Platform | Needs |
 |---|---|
-| iOS | macOS with **Xcode 27** (currently a beta/preview release) and the iOS 26.5 simulator runtime. `make` creates the pinned "NewsDemo Snapshots" iPhone 17 simulator. `xcodegen` is needed for the app and UI tests |
+| iOS | macOS with **Xcode 27** (currently a beta/preview release) and the iOS 27.0 simulator runtime (`xcodebuild -downloadPlatform iOS -buildVersion 27.0`; the same runtime the CI image has). `make` creates the pinned "NewsDemo Snapshots" iPhone 17 simulator. `xcodegen` is needed for the app and UI tests |
 | Android | JDK 21, Android SDK platform 37, `ANDROID_HOME` or `android/local.properties`. No emulator needed for tests |
 
 Run everything from the repository root. `make help` lists all commands.

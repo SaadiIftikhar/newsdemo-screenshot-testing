@@ -47,7 +47,9 @@ env:
   RECORD: ${{ github.event.label.name == 'record-snapshots' || inputs.record == true }}
   # The pins goldens depend on. Bump them together with a re-baseline, in ONE reviewed PR.
   XCODE_MAJOR: "27"
-  IOS_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-26-5
+  # iOS 27.0 + iPhone 17: on the xcode-27 runner image (27.0/27.1/27.2) AND on the dev Macs (26.5 was not on the
+  # image; the local 27.1 runtime only supports one device). Bump together with a re-baseline, in one PR.
+  IOS_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-27-0
 
 jobs:
   lint-goldens:
@@ -89,7 +91,12 @@ jobs:
           sudo xcode-select -s "$XCODE"
           xcodebuild -version
       - name: Ensure pinned simulator runtime
-        run: xcrun simctl list runtimes | grep -q "$IOS_RUNTIME" || xcodebuild -downloadPlatform iOS
+        # Fail loudly or fetch EXACTLY the pinned version: a bare `-downloadPlatform iOS` silently installed the
+        # image default instead (first CI run).
+        run: |
+          xcrun simctl list runtimes | grep -q "$IOS_RUNTIME" && exit 0
+          xcodebuild -downloadPlatform iOS -buildVersion 27.0
+          xcrun simctl list runtimes | grep -q "$IOS_RUNTIME"
       - name: Cache SwiftPM
         uses: actions/cache@v6
         with:
