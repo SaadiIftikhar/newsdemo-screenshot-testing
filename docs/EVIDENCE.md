@@ -34,6 +34,7 @@ Supporting material for [STRATEGY.md](../STRATEGY.md): what building and running
 - `xcodegen` is not on the GitHub macOS image, so the UI tests could not even start on CI (now installed, pinned to the version the dev Macs use)
 - the diff report needs CoreGraphics, which Linux does not have, so Android failures on CI had no gallery or summary (now built by a short macOS job from the Android job's images)
 - the bot's golden commit, pushed with the default CI token, does not start a new run by design (a repo-scoped `SNAPSHOT_BOT_TOKEN` fixes it)
+- **the first CI flake:** a paywall UI test passed on PR #1 and failed on PR #3 with no iOS change. It tapped and asserted without waiting, which a laptop tolerates and a slower runner does not. Fixed at the root (explicit waits, a polling wait for the selected tab), not retried; failing UI runs now upload their result bundle
 
 **Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found:
 - the missing paywall/entitlement states

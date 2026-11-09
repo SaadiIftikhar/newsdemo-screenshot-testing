@@ -116,6 +116,12 @@ jobs:
         run: |
           xcodegen --version
           make ios-ui-test
+      - name: Upload UI test results (screenshots + logs of every failing step)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-ui-test-results
+          path: ios/DerivedData/Logs/Test/*.xcresult
       - name: Re-record, then prove the new goldens
         if: env.RECORD == 'true'
         run: |
