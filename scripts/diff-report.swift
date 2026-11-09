@@ -46,7 +46,9 @@ func reference(for relative: String) -> URL? {
     if fm.fileExists(atPath: direct.path) { return direct }
     let name = (relative as NSString).lastPathComponent.replacingOccurrences(of: "_actual.png", with: ".png")
     let all = fm.enumerator(at: goldens, includingPropertiesForKeys: nil)
-    while let candidate = all?.nextObject() as? URL where candidate.lastPathComponent == name { return candidate }
+    while let candidate = all?.nextObject() as? URL {
+        if candidate.lastPathComponent == name { return candidate }
+    }
     return nil
 }
 
