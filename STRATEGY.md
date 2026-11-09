@@ -2,45 +2,28 @@
 
 **Goal:** catch unintended visual changes on every pull request, on iOS and Android, by rendering real production UI with mocked data that is identical on every run.
 
-**In one line:** native in-process snapshot tools on each platform, fed by **one shared set of JSON fixtures**, gated in CI on every PR. A small nightly pass on real simulators and emulators covers what in-process rendering cannot see.
+**In one line:** native in-process snapshot tools on each platform, fed by **one shared set of JSON fixtures**, gated in CI on every PR. A nightly pass on real simulators and emulators covers what in-process rendering cannot see. Evidence from building and running the demo: [docs/EVIDENCE.md](docs/EVIDENCE.md).
 
 ## 1. Tooling
 
 | | iOS | Android |
 |---|---|---|
 | **PR gate (Layer 1)** | [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) 1.19.7 (pinned) | [Roborazzi](https://github.com/takahirom/roborazzi) 1.77 on Robolectric 4.17 (pinned) |
-| Why | In-process, fast. Same authors as TCA, so mocking reuses `withDependencies` | JVM, no emulator. Works with Hilt. The same run also drives UI interaction tests |
-| Behaviour tests | Logic and contract tests, plus XCUITest interaction tests on the pinned simulator | Logic and contract tests, plus Robolectric interaction tests (tap, type, switch tabs) |
+| Why | In-process and fast. Same authors as TCA, so mocking reuses `withDependencies` | JVM, no emulator, works with Hilt. The same run drives interaction tests |
+| Also in the gate | Logic/contract tests; XCUITest interaction tests and `performAccessibilityAudit()` | Logic/contract tests; Robolectric interaction tests and Google ATF checks |
 | **Nightly (Layer 2)** | Maestro/XCUITest on a simulator, app started with `-fixture <name>` | Maestro on an emulator, `--es fixture <name>` |
 
-**Rejected for the gate:**
-- **Paparazzi:** 2.0 alpha, no Hilt and no interactions. It's the fallback, because our test code is a thin layer over portable fixtures.
-- **Google's Compose Preview Screenshot Testing:** alpha.
-- **Appium/Maestro + a paid visual service:** minutes per screen instead of milliseconds, flakier, and edge states are hard to reach. It belongs to Layer 2.
-- **Hosted review (Sentry Snapshots):** worth a phase-4 trial.
+**Rejected for the gate:** Paparazzi (2.0 alpha, no Hilt or interactions; it is the fallback, because the test code is a thin layer over portable fixtures), Compose Preview Screenshot Testing (alpha), and Appium/Maestro with a paid visual service (minutes per screen, flakier, edge states hard to reach: that is Layer 2). Hosted review (e.g. Sentry Snapshots) is worth a later trial.
 
 ## 2. Mocked, deterministic data
 
-- **News content changes every minute; goldens must not.** A golden is tied to a *fixture*, never to live content, so it can't go stale: fixture timestamps are relative to a pinned clock ("vor 9 Min." forever). Changing data is covered by three other mechanisms instead:
-  - **contract tests** of the decoders against a schema, and nightly against real (anonymised) responses, which catch format drift
-  - **fixtures refreshed from real responses** in a reviewed PR when the backend changes; that PR re-baselines the affected goldens
-  - **robustness tests** that need no golden: a seeded fuzz test corrupts one feed item 300 ways, and every other item must still show
-- **One fixture catalog, decoded by each platform's production decoder.** It covers typical, long-German-headline, empty, **edge-case** and **hostile-content** feeds. Hostile content means HTML entities, stray line breaks, soft hyphens, emoji, a ticker with no entries yet, a video over an hour long and a timestamp in the future.
-- **The edge-case fixture holds one shared decoding contract**, asserted with the same literal on both platforms. The rules:
-  - a malformed item is dropped, never the whole feed
-  - a missing flag gets a safe default
-  - duplicate ids keep the first entry
-  - fractional-second dates parse
-
-  The two decoders had silently diverged here: one missing field blanked the iOS feed, but made a PLUS article free on Android.
-- **Every source of variation is pinned:**
-  - clock, `de_DE` locale, `Europe/Berlin` time zone
-  - seeded randomness, with the same RNG on both platforms
-  - animations off
-  - local images
-  - fixed device geometry, theme and text size per variant
-  - ads and WebViews replaced by fixed placeholders
-- **Seams.** UI and view models depend on small client values, never on the HTTP stack: `FeedClient` and `AuthClient`, plus an image provider. In the existing apps (stack *assumed from public job ads*: TCA on iOS, Hilt on Android):
+- **News changes every minute; goldens must not.** A golden belongs to a *fixture*, never to live content, so it cannot go stale: fixture times are relative to a pinned clock ("vor 9 Min." forever). Changing data is tested by other means:
+  - **contract tests** of the decoders, nightly against anonymised real responses, catch format drift
+  - **fixture refreshes** from real responses happen in their own reviewed PR, which shows exactly which goldens it re-baselines
+  - **robustness tests without goldens:** a seeded fuzz test corrupts one feed item 300 ways, and every other item must still show
+- **One fixture catalog, decoded by each platform's production decoder:** typical, long German headlines, empty, edge cases and hostile content (HTML entities, stray line breaks, soft hyphens, emoji, a ticker with no entries, a 1:02:03 video, a timestamp in the future). The edge-case and hostile-content fixtures are **shared contracts**, asserted with the same literal on both platforms: a malformed item is dropped, never the whole feed; missing flags get safe defaults; duplicate ids keep the first entry. The two decoders had silently diverged here: one missing field blanked the iOS feed but made a PLUS article free on Android.
+- **Every source of variation is pinned:** clock, `de_DE` locale, `Europe/Berlin` time zone, seeded randomness (same RNG on both platforms), animations off, local images, fixed geometry, theme and text size per variant, and placeholders for ads and WebViews.
+- **Seams.** UI and view models depend on small client values (`FeedClient`, `AuthClient`, an image provider), never on the HTTP stack. In the existing apps (stack *assumed from public job ads*):
 
 | Seam | iOS | Android |
 |---|---|---|
@@ -50,90 +33,45 @@
 
 ## 3. Golden images: storage, review, guards
 
-- **Storage:** goldens live next to the tests, with Git LFS beyond about 100 MB. Names are identical on both platforms, which gives designers a side-by-side gallery.
-- **Only CI records goldens:**
-  1. A developer adds the `record-snapshots` label.
-  2. CI re-records on the pinned image.
-  3. CI **proves the new goldens before pushing them**: golden lint plus a full verify run.
-  4. CI pushes them with a bot token, so the gate runs again on the new commit.
-  5. Code owners (design/QA) approve the golden diff, and stale approvals are dismissed.
-- **Review:** CI keeps **one sticky PR comment** up to date and attaches an HTML diff gallery (golden, this PR, changed pixels). The comment classifies each change before anyone opens an image:
-  - **layout:** the size changed, so something moved
-  - **visible:** pixels a person can see changed
-  - **subtle:** a colour or anti-aliasing shift only, still shown so a failure never reads "0 px changed"
-
-  This is triage, not approval: every class needs a human decision. A cross-platform gallery (`make gallery`) puts iOS and Android side by side for design review, because each gate only compares a platform with itself.
-- **Guards against a green test that protects nothing:**
-  - **Golden lint** (CI job): fails on blank or uniform goldens, and on iOS/Android name divergence.
-  - **Capture guard:** refuses to record or compare an undrawn frame.
-  - **Fixture precondition tests:** "the premium teaser is premium". A fixture edit can't silently change what a golden means.
-  - **Recording starts from an empty folder**, so orphaned goldens show up as deletions.
+- **Storage:** goldens live next to the tests (Git LFS beyond about 100 MB), with identical names on both platforms.
+- **Only CI records goldens.** A developer adds the `record-snapshots` label; CI re-records on the pinned image, **proves the new goldens** (lint plus a full verify) and pushes them as a bot commit; design/QA code owners approve the golden diff, and stale approvals are dismissed. This ran for real when the iOS runtime was re-pinned (PR #1).
+- **Review:** one sticky PR comment, updated in place, with an HTML diff gallery (golden, this PR, changed pixels). The comment classifies each change before anyone opens an image: **layout** (size changed, something moved), **visible**, or **subtle** (colour or anti-aliasing only). This is triage, never approval. `make gallery` shows iOS and Android side by side, because each gate only compares a platform with itself.
+- **Guards against a green test that protects nothing:** golden lint (blank goldens, iOS/Android name divergence), a capture guard against undrawn frames, fixture-precondition tests ("the premium teaser is premium"), and recording from an empty folder so orphaned goldens show up as deletions. Every new guard is first shown to fail on a broken input.
 
 ## 4. What is covered, and by which layer
 
-- **Matrix (curated, not every combination):**
-  - every component: light + dark
-  - text-heavy and interactive screens: + largest supported text (iOS AX3, Android font scale 2.0 with real non-linear scaling)
-  - error, selected and interactive states: + dark
-  - feed: + smallest phone, tablet, and **full length** (not just the first screen)
-  - paywall and PLUS badge: always
-- **Demo coverage:** 89 goldens per platform, plus logic, contract, contrast and edge-case tests, UI interaction tests and accessibility audits on both platforms.
-- **Accessibility in the gate:**
-  - a WCAG contrast test runs over every text/background token pair, in light and dark
-  - **automated audits on every screen:** XCUITest `performAccessibilityAudit()` on iOS and Google ATF via Roborazzi on Android, covering contrast, touch targets, labels and traits
-  - the few accepted audit exceptions are listed in code with the evidence for each (e.g. a contrast false positive on near-black text)
-- **Layer 2 (nightly) covers what in-process rendering cannot:**
-  - system chrome (e.g. iOS 26's Liquid Glass tab bar renders blank in-process)
-  - real fonts and devices
-  - **hostile device settings:** en_US 12-hour time, bold text, increased contrast. It found a "11:05 PM Uhr" bug the snapshots couldn't see.
+- **Matrix (curated, not every combination):** every component in light + dark; text-heavy and interactive screens also at the largest supported text (iOS AX3, Android font scale 2.0 with non-linear scaling); error, selected and interactive states also in dark; the feed also on the smallest phone, a tablet and at **full length**; paywall and PLUS badge always. Demo: 89 goldens per platform.
+- **Accessibility in the gate:** a WCAG contrast test over every colour-token pair, plus automated audits on every screen (contrast, touch targets, labels, traits). The audit found that hidden tabs were still reachable by VoiceOver, invisible in every screenshot. Accepted audit exceptions are listed in code with the evidence for each.
+- **Layer 2 (nightly):** what in-process rendering cannot see: system chrome (iOS 26's Liquid Glass tab bar renders blank in-process), real fonts and devices, and hostile settings (en_US 12-hour time, bold text, increased contrast). It found an "11:05 PM Uhr" bug no snapshot could.
 
 ## 5. CI/CD and the Scrum process
 
-- **When it runs:**
-  - **every PR**, on its merge result: golden lint, iOS (`xcode-27` runner) and Android (Linux) in parallel
-  - the **merge queue**, so two PRs that are green on their own can't break main together
-  - **after merge** on main
-  - **nightly** on a fresh runner image (catches toolchain drift), plus the cross-platform gallery
-- **Measured locally:** about 30 s (iOS) and 12 s (Android) of test time after the build. Target: under 10 minutes of wall time per PR, running only affected modules at scale.
-- **Rollout of the gate:** report-only at first, then a required check.
-- **Definition of Done:** a new UI state ships with a fixture and a snapshot. Story refinement asks "which states does this add?".
+- **When it runs:** every PR on its merge result (golden lint, iOS on the `xcode-27` runner, Android on Linux, in parallel); the merge queue, so two green PRs cannot break main together; main after merge; nightly on a fresh runner image to catch toolchain drift.
+- **Measured on GitHub Actions:** Android 1–6 min, iOS 12–19 min (snapshots, UI tests and audits). Cost control: run iOS only when iOS or shared files change, build once for snapshots and UI tests, move the slowest audits to nightly. Target: under 10 minutes per PR.
+- **Rollout of the gate:** report-only first, then a required check. **Definition of Done:** a new UI state ships with a fixture and a snapshot; refinement asks "which states does this add?".
 - **Platform upgrades** (Xcode, simulator runtime, SDK, Robolectric, the snapshot library): one PR bumps the version *and* re-baselines, reviewed as such.
 
 ## 6. Stability
 
-1. **Pin the environment:** Xcode, simulator device and runtime, runner image, and all library *and test* dependencies. A transitive Espresso 3.5.1 crashed on SDK 37 until it was pinned to 3.7.0.
+1. **Pin the environment:** Xcode, simulator device *and runtime*, runner image, and all library and test dependencies. The first CI run failed because the pinned runtime was not on the CI image; the pin is now a runtime that exists on both, fetched exactly or failing loudly.
 2. **Pin the inputs** (§2). A `Date()`, network image, animation or unseeded random value in a view is a test-design bug.
-3. **Tolerance:**
-   - iOS: every pixel is compared, with `perceptualPrecision 0.98`. That absorbs GPU anti-aliasing noise but fails on a 2pt shift (proven in the regression demo). Its blind spot is a colour change under ΔE≈2, which the token contrast tests and design review cover.
-   - Android: no pixel may change (`changeThreshold = 0`) beyond Roborazzi's built-in per-pixel colour tolerance. Measured on the first CI run: Mac- and Linux-rendered goldens differ on about 0.005% of pixels by at most 2/255, which that tolerance absorbs. A real change (a 2pt shift, a missing badge) changes thousands of pixels.
-   - Tolerance is never loosened globally. A per-test exception is allowed only with a comment saying why (for example, a component with a blur), and is reviewed like code.
-   - No "small diff = auto-pass" rule. A 2pt shift and a dropped PLUS badge are both small; whether a change is intended is a product decision, not a pixel count.
-4. **Local runs vs CI** (measured on the first CI runs): CI is the source of truth and records the goldens. A Mac verifies the CI-recorded goldens on both platforms, so a CI failure reproduces locally. One condition: the same pinned simulator runtime. The CI image did not have the first pin (iOS 26.5), so it was re-pinned to 27.0 in one reviewed PR that also re-baselined (§5).
-5. **No automatic retries.** A flaky snapshot is quarantined within 24 hours with an owner. Target flake rate: under 1%. **Measured:** 10 consecutive full runs per platform, all green (iOS 71 tests, Android 116 tests, no retries). The first Android loop "failed" 3 of 10 only because the Mac went to sleep mid-run (wall-clock timeouts in the power log), so long local runs use `caffeinate`; a CI runner never sleeps.
+3. **Tolerance:** iOS uses `perceptualPrecision 0.98`, which absorbs GPU anti-aliasing but fails on a 2pt shift. Android allows no changed pixel beyond Roborazzi's per-pixel colour tolerance; Mac and Linux renders differ on 0.005% of pixels by at most 2/255, inside it. Tolerance is never loosened globally; a per-test exception needs a comment and review. **No "small diff = auto-pass":** a 2pt shift and a dropped PLUS badge are both small; intent is a product decision, not a pixel count.
+4. **Local equals CI.** CI is the source of truth and records goldens; a Mac verifies the CI-recorded goldens on both platforms, so every CI failure reproduces locally.
+5. **No automatic retries.** A flaky snapshot is quarantined within 24 hours with an owner; target flake rate under 1%. Measured: 10 consecutive full runs per platform, all green.
 
 ## 7. Integration into the existing apps
 
-- **Fixtures** live in one shared `news-fixtures` package (SPM resources plus a Gradle artifact), versioned with the API contract, validated against the OpenAPI schema, and seeded from anonymised real responses.
-- **First two weeks, without blocking feature work:**
-  1. Snapshot design-system components that take plain models: no network seam needed.
-  2. A `URLProtocol`/`MockWebServer` stub as a stopgap.
-  3. Add a client seam at one feature boundary.
-  4. Run the CI job report-only.
-- **Never change product UI for a test tool.** In this demo the tab bar is custom, so every pixel is testable. In production, keep the system tab bar, snapshot the tab *content*, and cover the system chrome in Layer 2.
-- **Test-support module per platform:** the deterministic wrapper, variants, the capture guard and the diff report. A new snapshot test is about 5 lines.
+- **Fixtures** live in one shared `news-fixtures` package (SPM resources plus a Gradle artifact), versioned with the API contract and seeded from anonymised real responses.
+- **First two weeks, without blocking feature work:** snapshot design-system components that take plain models (no seam needed); add a `URLProtocol`/`MockWebServer` stub as a stopgap; add a client seam at one feature boundary; run the CI job report-only.
+- **Never change product UI for a test tool.** The demo's tab bar is custom so every pixel is testable; in production, keep the system tab bar, snapshot the tab *content*, and cover the chrome in Layer 2.
+- **A test-support module per platform** (deterministic wrapper, variants, capture guard, diff report) makes a new snapshot test about 5 lines.
 
 ## 8. Scaling, ownership, enablement
 
-- **Four apps share one design system.** Component goldens are shared; app modules (WELT PLUS, Sport BILD tickers) own their own screens and fixtures.
-- **Cost control:** affected modules only, sharding, Git LFS, and a quarterly matrix review that drops variants that never fail.
-- **Ownership:** developers write and maintain the tests. QA owns the strategy, the fixture catalog and the matrix rules. Design approves goldens.
-- **Enablement:** an "add a snapshot in 5 lines" guide, pairing with each squad, a diff-review session for designers, office hours in month one, and fixture review in refinement.
-- **Metrics:**
-  - escaped visual bugs per release
-  - PR gate time
-  - flake rate
-  - share of UI states with fixtures
-  - contrast-test pass rate
+- **Four apps, one design system:** component goldens are shared; app modules (WELT PLUS, Sport BILD tickers) own their screens and fixtures.
+- **Ownership:** developers write and maintain the tests. QA owns the strategy, the fixture catalog and the matrix rules. Design approves goldens. AI may triage diffs; a human approves.
+- **Enablement:** an "add a snapshot in 5 lines" guide, pairing with each squad, a diff-review session for designers, office hours in month one.
+- **Metrics:** escaped visual bugs per release, PR gate time, flake rate, share of UI states with fixtures, accessibility findings per release.
 
 ## 9. Rollout (about 4 sprints)
 
@@ -143,58 +81,3 @@
 | 2 | Shared fixtures, feed and paywall states, diff gallery and sticky comment, CODEOWNERS; pairing with each squad | Every squad merged at least one snapshot test |
 | 3 | Gate **required** and in the Definition of Done; CI-only recording; Layer 2 nightly | Under 10 min, flake rate under 1% |
 | 4+ | Other three apps; accessibility snapshots; trial a hosted review tool | Visual bugs caught by the gate, not in release testing |
-
----
-
-## Appendix A: evidence from building the demo
-
-**Product bugs caught before any deliberate regression:**
-- the banner timestamp was grey on red
-- the kicker was truncated, and "EILMEL-DUNG" hyphenated, at large text sizes
-- Android didn't hyphenate German headlines while iOS did (found by comparing the same fixture across platforms)
-- a 60-letter compound word breaks mid-word on both platforms. This is a **content** finding: the fix is soft hyphens from the CMS
-- an e-mail placeholder rendered as a Markdown link
-- "11:05 PM Uhr" on an en_US device (found by Layer 2)
-
-**Found by the edge-case and accessibility round:**
-- a video over one hour showed "62:03"
-- Android used the device locale for durations, so an Arabic phone would show non-Latin digits
-- a live ticker without entries was dropped from the feed
-- raw `&amp;` and line breaks from the CMS would reach the screen
-- a fixture image without `.png` loaded on iOS but not on Android (the image contract now checks exact file names)
-- **hidden tabs were still reachable by VoiceOver** (found by the iOS audit); the sign-out button failed contrast
-- after a failed refresh, Android inserted the offline notice just above the visible list, so readers never saw it (found by the pull-to-refresh interaction test)
-- Google's official Compose accessibility hook silently checks nothing under Robolectric: a deliberately broken button passed. A guard that can't fail protects nothing, so every new check was first shown to fail.
-
-**Tooling incidents, each now guarded against:**
-- 44 of 62 Android goldens blank but green (capture guard and golden lint)
-- a transitive Espresso crash on SDK 37 (pinned test dependencies)
-- the Liquid Glass tab bar can't be captured in-process (custom bar in the demo; Layer 2 in production)
-- tall components clipped by the harness
-- stale diff files shown to reviewers (cleared before every run)
-- a stale app build launched by the run script (project-local build, always rebuilt)
-- the pinned simulator runtime vanished mid-session (re-pin plus re-baseline in one commit)
-- the first CI run failed before any test: the pinned iOS runtime was not on the CI image, and the fallback silently installed a different one (now: pin a runtime that exists on both, fetch exactly that version or fail)
-
-**Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found:
-- the missing paywall/entitlement states
-- decoding differences between the platforms
-- Android losing state on tab switches and rotation
-- Android dark-mode buttons that were purple on red (about 2.3:1) in *approved* goldens
-- undersized iOS game boards
-- low-contrast secondary text
-- CI record-mode gaps
-
-All are fixed and covered by tests. **Deliberate regression** (PLUS badge dropped, banner −2pt): the **same 29 of 89** snapshots fail on both platforms, including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green.
-
-## Appendix B: devil's advocate
-
-| Objection | Answer |
-|---|---|
-| "Reviewers will approve diffs without looking." | Small focused snapshots, code-owner approval, stale approvals dismissed, and the diff is in the PR |
-| "In-process rendering isn't the real app." | True. That's Layer 2's job (system chrome, devices, hostile settings) |
-| "Every OS or Xcode upgrade changes every golden." | Yes, as a planned re-baseline PR per upgrade |
-| "Too many combinations." | Curated matrix rules, affected-modules-only runs, quarterly pruning |
-| "Roborazzi is largely one maintainer." | Exact pinning, and thin test code over portable fixtures: switching to Paparazzi is cheap |
-| "QA should own the tests." | Developers own them. QA owns the system around them |
-| "Can AI approve diffs?" | AI triages (summarises diffs, generates edge-case fixtures). A human approves goldens |

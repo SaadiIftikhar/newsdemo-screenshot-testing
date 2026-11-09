@@ -61,23 +61,36 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["sign-in"].waitForExistence(timeout: 5))
     }
 
+    // Never tap or assert before the element is there: the first CI runs showed these tests racing the sheet
+    // animation on a slower runner (they always passed on a laptop). Wait explicitly, never retry.
+    private func tapWhenReady(_ element: XCUIElement, timeout: TimeInterval = 15,
+                              file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(element.waitForExistence(timeout: timeout), "\(element) never appeared", file: file, line: line)
+        element.tap()
+    }
+
+    private func waitUntilSelected(_ element: XCUIElement, timeout: TimeInterval = 10) -> Bool {
+        let selected = XCTNSPredicateExpectation(predicate: NSPredicate(format: "isSelected == true"), object: element)
+        return XCTWaiter.wait(for: [selected], timeout: timeout) == .completed
+    }
+
     func test_tappingAPlusTeaser_whenLoggedOut_showsThePaywall_notTheArticle() {
         launch()
-        app.buttons["article-tsr-002"].tap() // XCUITest scrolls it into view
-        XCTAssertTrue(app.staticTexts["Weiterlesen mit PLUS"].waitForExistence(timeout: 5))
+        tapWhenReady(app.buttons["article-tsr-002"]) // XCUITest scrolls it into view
+        XCTAssertTrue(app.staticTexts["Weiterlesen mit PLUS"].waitForExistence(timeout: 10))
     }
 
     func test_paywallSignIn_switchesToTheAccountTab() {
         launch()
-        app.buttons["article-tsr-002"].tap()
-        app.buttons["Bereits Abonnent? Anmelden"].tap()
-        XCTAssertTrue(app.buttons["sign-in"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["tab-account"].isSelected)
+        tapWhenReady(app.buttons["article-tsr-002"])
+        tapWhenReady(app.buttons["Bereits Abonnent? Anmelden"])
+        XCTAssertTrue(app.buttons["sign-in"].waitForExistence(timeout: 10))
+        XCTAssertTrue(waitUntilSelected(app.buttons["tab-account"]), "the Konto tab is selected after the sheet closes")
     }
 
     func test_tappingAPlusTeaser_asSubscriber_doesNotShowThePaywall() {
         launch(["-signedIn"])
-        app.buttons["article-tsr-002"].tap()
+        tapWhenReady(app.buttons["article-tsr-002"])
         XCTAssertFalse(app.staticTexts["Weiterlesen mit PLUS"].waitForExistence(timeout: 3))
     }
 
