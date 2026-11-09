@@ -1,0 +1,70 @@
+{
+  "breaking": null,
+  "items": [
+    {
+      "type": "liveTicker",
+      "id": "live-201",
+      "kicker": "LIVE",
+      "headline": "Testfall: Ticker ist beendet",
+      "latestUpdate": "Abpfiff – der Ticker wird nicht mehr aktualisiert.",
+      "updatedAt": "2026-11-03T20:30:00Z",
+      "isLive": false
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-201",
+      "kicker": "TESTFALL",
+      "headline": "Teaser ohne premium-Feld gilt als frei, nicht als Fehler",
+      "summary": "Außerdem lädt das Bild nicht: es erscheint der Platzhalter.",
+      "image": "missing-image.png",
+      "publishedAt": "2026-11-05T14:13:00Z"
+    },
+    {
+      "type": "video",
+      "id": "vid-201",
+      "kicker": "KAPUTT",
+      "headline": "Video ohne Bild ist ungültig und wird verworfen",
+      "image": null,
+      "durationSeconds": 30,
+      "publishedAt": "2026-11-05T12:00:00Z"
+    },
+    {
+      "id": "x-201",
+      "headline": "Eintrag ohne type wird verworfen"
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-201",
+      "kicker": "DUPLIKAT",
+      "headline": "Doppelte id: nur der erste Eintrag zählt",
+      "publishedAt": "2026-11-05T14:00:00Z"
+    },
+    {
+      "type": "ad",
+      "id": "ad-201",
+      "slot": "feed_mid",
+      "height": 250.5,
+      "filled": false
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-202",
+      "kicker": "ARCHIV",
+      "headline": "Älter als 24 Stunden: absolutes Datum statt »vor …«",
+      "summary": null,
+      "image": null,
+      "publishedAt": "2026-11-02T09:00:00Z",
+      "premium": true
+    },
+    {
+      "type": "teaser",
+      "id": "tsr-203",
+      "kicker": "TESTFALL",
+      "headline": "Datum mit Sekundenbruchteilen wird korrekt gelesen",
+      "summary": null,
+      "image": null,
+      "publishedAt": "2026-11-05T13:14:20.500Z",
+      "premium": false
+    }
+  ]
+}

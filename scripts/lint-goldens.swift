@@ -32,6 +32,17 @@ for root in CommandLine.arguments.dropFirst() {
         if colours.count < 3 { problems.append("blank (\(colours.count) colour/s): \(url.path)") }
     }
 }
-print("lint-goldens: checked \(checked) image(s)")
+// Cross-platform parity: iOS and Android must have exactly the same golden names (same tests, same variants).
+// A test added, renamed or removed on one platform only fails here instead of drifting silently.
+let roots = Array(CommandLine.arguments.dropFirst())
+if roots.count == 2 {
+    func names(_ root: String) -> Set<String> {
+        Set((FileManager.default.enumerator(atPath: root)?.allObjects as? [String] ?? []).filter { $0.hasSuffix(".png") })
+    }
+    let (ios, android) = (names(roots[0]), names(roots[1]))
+    ios.subtracting(android).sorted().forEach { problems.append("only on iOS: \($0)") }
+    android.subtracting(ios).sorted().forEach { problems.append("only on Android: \($0)") }
+}
+print("lint-goldens: checked \(checked) image(s)\(roots.count == 2 ? ", parity iOS ↔ Android" : "")")
 problems.forEach { print("  ✗ \($0)") }
 exit(problems.isEmpty ? 0 : 1)

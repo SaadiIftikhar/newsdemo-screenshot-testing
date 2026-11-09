@@ -17,4 +17,6 @@ extension EnvironmentValues {
     @Entry public var imageProvider: ImageProvider = .remote(baseURL: URL(string: "https://cdn.example.com/img/")!)
     /// Live tickers pulse. Tests switch this off so the frame captured is always the same.
     @Entry public var animationsEnabled: Bool = true
+    /// Pins the pairs deal (tests / fixture mode). Nil = random.
+    @Entry public var pairsSeed: UInt64? = nil
 }

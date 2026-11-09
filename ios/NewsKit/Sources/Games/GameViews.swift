@@ -6,6 +6,8 @@ import SwiftUI
 /// The Games tab: a list of playable games, each pushing its own screen.
 public struct GamesHome: View {
     @State private var path: [GameKind]
+    /// Fixture mode / Layer 2 pins the pairs deal via `-pairsSeed`; real users get a random deal.
+    @Environment(\.pairsSeed) private var pairsSeed
 
     public init(path: [GameKind] = []) { _path = State(initialValue: path) }
 
@@ -16,7 +18,7 @@ public struct GamesHome: View {
                 .navigationDestination(for: GameKind.self) { kind in
                     switch kind {
                     case .ticTacToe: TicTacToeView()
-                    case .pairs: PairsView(game: PairsGame(seed: UInt64.random(in: 1...UInt64.max)))
+                    case .pairs: PairsView(game: PairsGame(seed: pairsSeed ?? UInt64.random(in: 1...UInt64.max)))
                     case .sudoku: MiniSudokuView()
                     }
                 }
@@ -37,6 +39,7 @@ public struct GamesList: View {
                 ForEach(GameKind.allCases) { kind in
                     NavigationLink(value: kind) { GameCard(kind: kind) }
                         .buttonStyle(.plain)
+                        .accessibilityIdentifier("game-\(kind.rawValue)")
                 }
             }
             .padding(NewsTheme.spacing)
@@ -110,7 +113,8 @@ public struct TicTacToeView: View {
                     }
                 }
             }
-            .frame(maxWidth: 320)
+            // Explicit width: a Grid with only maxWidth collapsed to its content (≈173pt vs 293dp on Android).
+            .containerRelativeFrame(.horizontal) { width, _ in min(width - 2 * NewsTheme.spacing, 320) }
             Button("Neues Spiel") { game = TicTacToe() }
                 .buttonStyle(.borderedProminent)
                 .tint(NewsTheme.breakingRed)
@@ -126,14 +130,14 @@ public struct TicTacToeView: View {
         return Button { game.playAgainstComputer(index) } label: {
             Text(game.board[index]?.rawValue ?? " ")
                 .font(.system(size: 44, weight: .heavy, design: .rounded))
-                .foregroundStyle(game.board[index] == .x ? NewsTheme.breakingRed : NewsTheme.textPrimary)
+                .foregroundStyle(game.board[index] == .x ? NewsTheme.accentText : NewsTheme.textPrimary)
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1, contentMode: .fit)
                 .background(isWinning ? NewsTheme.premiumGold.opacity(0.35) : NewsTheme.card,
                             in: RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Feld \(index + 1): \(game.board[index]?.rawValue ?? "leer")")
+        .accessibilityLabel("Feld \(index + 1): \(game.board[index]?.rawValue ?? "leer")\(isWinning ? ", Gewinnreihe" : "")")
     }
 }
 
@@ -170,7 +174,7 @@ public struct PairsView: View {
                 if visible {
                     Image(systemName: Self.icon(card.symbol))
                         .font(.system(size: 30, weight: .bold))
-                        .foregroundStyle(card.isMatched ? NewsTheme.textSecondary : NewsTheme.breakingRed)
+                        .foregroundStyle(card.isMatched ? NewsTheme.textSecondary : NewsTheme.accentText)
                 } else {
                     Image(systemName: "questionmark").font(.title2.weight(.bold)).foregroundStyle(.white.opacity(0.8))
                 }
@@ -178,7 +182,11 @@ public struct PairsView: View {
             .aspectRatio(0.8, contentMode: .fit)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(visible ? card.symbol : "Verdeckte Karte")
+        .accessibilityLabel(visible ? Self.spokenName(card.symbol) + (card.isMatched ? ", gefunden" : "") : "Verdeckte Karte")
+    }
+
+    static func spokenName(_ symbol: String) -> String {
+        ["star": "Stern", "heart": "Herz", "diamond": "Karo", "club": "Kreuz", "spade": "Pik"][symbol] ?? "Kreis"
     }
 
     static func icon(_ symbol: String) -> String {
@@ -204,7 +212,7 @@ public struct MiniSudokuView: View {
         VStack(spacing: 20) {
             Text(game.isSolved ? "Gelöst!" : (game.conflicts.isEmpty ? "Feld wählen, dann Zahl tippen." : "Da passt etwas nicht."))
                 .font(.title3.weight(.bold))
-                .foregroundStyle(game.conflicts.isEmpty ? NewsTheme.textPrimary : NewsTheme.breakingRed)
+                .foregroundStyle(game.conflicts.isEmpty ? NewsTheme.textPrimary : NewsTheme.accentText)
             Grid(horizontalSpacing: 4, verticalSpacing: 4) {
                 ForEach(0..<4, id: \.self) { row in
                     GridRow {
@@ -212,12 +220,20 @@ public struct MiniSudokuView: View {
                     }
                 }
             }
-            .frame(maxWidth: 300)
+            .containerRelativeFrame(.horizontal) { width, _ in min(width - 2 * NewsTheme.spacing, 300) }
             HStack(spacing: 10) {
                 ForEach(1...4, id: \.self) { value in
-                    Button("\(value)") { game.enter(value) }.buttonStyle(.bordered).font(.title3.weight(.bold))
+                    // ≥ 44pt touch targets (they were ≈38pt).
+                    Button { game.enter(value) } label: {
+                        Text("\(value)").font(.title3.weight(.bold)).frame(minWidth: 44, minHeight: 44)
+                    }
+                    .buttonStyle(.bordered)
                 }
-                Button { game.enter(0) } label: { Image(systemName: "delete.left") }.buttonStyle(.bordered)
+                Button { game.enter(0) } label: {
+                    Image(systemName: "delete.left").frame(minWidth: 44, minHeight: 44)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityLabel("Löschen")
             }
             .tint(NewsTheme.textPrimary)
         }
@@ -235,7 +251,7 @@ public struct MiniSudokuView: View {
         return Button { game.select(index) } label: {
             Text(value == 0 ? " " : "\(value)")
                 .font(.system(size: 30, weight: game.given[index] ? .heavy : .regular, design: .rounded))
-                .foregroundStyle(isConflict ? NewsTheme.breakingRed : NewsTheme.textPrimary)
+                .foregroundStyle(isConflict ? NewsTheme.accentText : NewsTheme.textPrimary)
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1, contentMode: .fit)
                 .background(shaded ? NewsTheme.card : NewsTheme.adBackground, in: RoundedRectangle(cornerRadius: 6))
@@ -246,6 +262,9 @@ public struct MiniSudokuView: View {
                 }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Zeile \(row + 1), Spalte \(column + 1): \(value == 0 ? "leer" : "\(value)")")
+        // State in words, not only colour/weight (WCAG 1.4.1): given, conflict and selection are spoken.
+        .accessibilityLabel("Zeile \(row + 1), Spalte \(column + 1): \(value == 0 ? "leer" : "\(value)")"
+            + (game.given[index] ? ", vorgegeben" : "") + (isConflict ? ", Konflikt" : ""))
+        .accessibilityAddTraits(game.selected == index ? .isSelected : [])
     }
 }

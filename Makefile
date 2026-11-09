@@ -5,7 +5,7 @@ IOS_PKG := ios/NewsKit
 IOS_ARTIFACTS := $(ROOT)/artifacts/ios
 ANDROID_DIR := android
 
-.PHONY: help ios-test ios-record ios-record-missing ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
+.PHONY: help ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
 
 help:
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
@@ -26,8 +26,18 @@ endef
 ios-test: ## Verify iOS snapshots against committed goldens (what CI runs)
 	$(call ios_xcodebuild,never)
 
+IOS_GOLDENS := ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
+ANDROID_GOLDENS := $(ANDROID_DIR)/app/src/test/screenshots
+
 ios-record: ## Re-record ALL iOS goldens (review the git diff before committing!)
+	@# Start from an empty folder: goldens of deleted/renamed tests show up as deletions instead of lingering.
+	@find $(IOS_GOLDENS) -name '*.png' -delete
 	$(call ios_xcodebuild,all)
+
+ios-ui-test: ## Run iOS UI interaction tests (XCUITest) against the real app on the simulator
+	cd ios && xcodegen generate --quiet
+	@UDID=$$(scripts/ios-sim.sh) && xcodebuild test -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
+	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet
 
 ios-record-missing: ## Record only goldens that don't exist yet (new tests)
 	$(call ios_xcodebuild,missing)
@@ -46,10 +56,14 @@ ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=...] [OFF
 # --- Android -----------------------------------------------------------------
 
 android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
-	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi   # stale _compare.png files would mislead reviewers
-	cd $(ANDROID_DIR) && ./gradlew verifyRoborazziDebug --stacktrace
+	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android   # stale diffs would mislead reviewers
+	@cd $(ANDROID_DIR) && ./gradlew verifyRoborazziDebug --stacktrace; status=$$?; cd $(ROOT); \
+	if ls $(ANDROID_DIR)/app/build/outputs/roborazzi/*_actual.png >/dev/null 2>&1; then \
+	  swift scripts/diff-report.swift $(ANDROID_GOLDENS) $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android/diffs; \
+	fi; exit $$status
 
 android-record: ## Re-record ALL Android goldens
+	@find $(ANDROID_GOLDENS) -name '*.png' -delete   # orphans of deleted/renamed tests show up as deletions
 	cd $(ANDROID_DIR) && ./gradlew recordRoborazziDebug
 
 android-compare: ## Produce _compare.png diff images without failing the build

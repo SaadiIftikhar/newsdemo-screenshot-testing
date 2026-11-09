@@ -26,18 +26,40 @@ public final class AccountViewModel {
         self.state = state
     }
 
+    /// Paywall decisions are based on this (see `ArticleAccess`).
+    public var entitlement: Entitlement {
+        if case .signedIn(let profile) = state { return profile.isPremium ? .subscriber : .registered }
+        return .anonymous
+    }
+
     public func signIn() async {
         fieldErrors = LoginValidator.validate(email: email, password: password)
-        guard fieldErrors.isEmpty else { return }
+        guard fieldErrors.isEmpty else {
+            announce(fieldErrors.email ?? fieldErrors.password ?? "")
+            return
+        }
         state = .submitting
         do {
             state = .signedIn(try await client.signIn(email, password))
             password = ""
+        } catch AuthError.invalidCredentials {
+            state = .failed(Self.wrongCredentials)
         } catch AuthError.offline {
-            state = .failed("Keine Internetverbindung. Bitte später erneut versuchen.")
+            state = .failed(Self.offline)
         } catch {
-            state = .failed("E-Mail-Adresse oder Passwort ist falsch.")
+            state = .failed(Self.generic) // same three messages as Android
         }
+        if case .failed(let message) = state { announce(message) }
+    }
+
+    static let wrongCredentials = "E-Mail-Adresse oder Passwort ist falsch."
+    static let offline = "Keine Internetverbindung. Bitte später erneut versuchen."
+    static let generic = "Anmeldung fehlgeschlagen. Bitte später erneut versuchen."
+
+    /// VoiceOver users hear errors immediately instead of having to find them.
+    private func announce(_ message: String) {
+        guard !message.isEmpty else { return }
+        AccessibilityNotification.Announcement(message).post()
     }
 
     public func signOut() {
@@ -50,9 +72,9 @@ public final class AccountViewModel {
 
 /// The Account tab.
 public struct AccountScreen: View {
-    @State private var model: AccountViewModel
+    private let model: AccountViewModel // owned by the app shell (it also drives the paywall)
 
-    public init(model: AccountViewModel) { _model = State(initialValue: model) }
+    public init(model: AccountViewModel) { self.model = model }
 
     public var body: some View {
         NavigationStack {
@@ -95,24 +117,26 @@ struct LoginForm: View {
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .accessibilityIdentifier("email")
                 }
                 field(title: "Passwort", error: model.fieldErrors.password) {
                     SecureField("Passwort", text: $model.password, prompt: Text(verbatim: "Mindestens 8 Zeichen"))
                         .textContentType(.password)
+                        .accessibilityIdentifier("password")
                 }
 
                 Button {
                     Task { await model.signIn() }
                 } label: {
-                    Group {
-                        if model.state == .submitting { ProgressView().tint(.white) } else { Text("Anmelden").bold() }
-                    }
+                    // Static text instead of a spinner: deterministic in snapshots, clearer for VoiceOver.
+                    Text(model.state == .submitting ? "Wird angemeldet …" : "Anmelden").bold()
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(NewsTheme.breakingRed)
                 .disabled(model.state == .submitting)
+                .accessibilityIdentifier("sign-in")
 
                 Text(verbatim: "Demo-Zugang: \(AuthClient.demoEmail) / \(AuthClient.demoPassword)")
                     .font(.footnote)
@@ -131,7 +155,7 @@ struct LoginForm: View {
                 .background(NewsTheme.card, in: RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(error == nil ? .clear : NewsTheme.breakingRed, lineWidth: 1.5))
             if let error {
-                Text(error).font(.footnote).foregroundStyle(NewsTheme.breakingRed)
+                Text(error).font(.footnote).foregroundStyle(NewsTheme.accentText)
             }
         }
     }
@@ -153,6 +177,7 @@ struct ProfileView: View {
                     .foregroundStyle(.white)
                     .frame(width: 80, height: 80)
                     .background(NewsTheme.breakingRed, in: Circle())
+                    .accessibilityHidden(true) // initials avatar is decorative; the name follows
                 VStack(spacing: 4) {
                     Text(profile.name).font(.title2.weight(.bold)).foregroundStyle(NewsTheme.textPrimary)
                     Text(profile.email).font(.subheadline).foregroundStyle(NewsTheme.textSecondary)
@@ -166,10 +191,10 @@ struct ProfileView: View {
                 }
                 VStack(spacing: 0) {
                     ForEach(["Benachrichtigungen", "Newsletter", "Datenschutz"], id: \.self) { title in
+                        // No chevron: these rows are not interactive in the demo, and a chevron promised a tap.
                         HStack {
                             Text(title).foregroundStyle(NewsTheme.textPrimary)
                             Spacer()
-                            Image(systemName: "chevron.right").foregroundStyle(NewsTheme.textSecondary)
                         }
                         .padding(NewsTheme.spacing)
                         if title != "Datenschutz" { Divider().padding(.leading, NewsTheme.spacing) }
@@ -178,6 +203,7 @@ struct ProfileView: View {
                 .background(NewsTheme.card, in: RoundedRectangle(cornerRadius: NewsTheme.cornerRadius))
                 Button("Abmelden", role: .destructive, action: onSignOut)
                     .buttonStyle(.bordered)
+                    .accessibilityIdentifier("sign-out")
             }
             .padding(NewsTheme.spacing)
             .frame(maxWidth: .infinity)

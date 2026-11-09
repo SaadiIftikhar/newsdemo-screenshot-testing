@@ -12,13 +12,16 @@ import SwiftUI
 ///   -offline                       -> simulate no connectivity
 ///   -baseURL http://localhost:8080 -> live HTTP client, e.g. against a WireMock serving /fixtures
 ///   -tab games | account           -> start on another tab
-///   -signedIn                      -> start logged in as the demo user
+///   -signedIn                      -> start logged in as the demo PLUS subscriber
+///   -pairsSeed 42                  -> pin the pairs deal (fixture mode defaults to 42)
 @main
 struct NewsDemoApp: App {
     private let feedViewModel: FeedViewModel
     private let accountModel: AccountViewModel
     private let imageProvider: ImageProvider
     private let initialTab: AppTab
+    private let usesFixtures: Bool
+    private let pairsSeed: UInt64?
     /// Fixture mode pins the clock + zone too, so Layer 2 screenshots are deterministic.
     private let now: Date?
     private let timeZone: TimeZone
@@ -28,6 +31,9 @@ struct NewsDemoApp: App {
         let arguments = ProcessInfo.processInfo.arguments
         let fixtures = FixtureStore.bundled()
         let usesFixtures = defaults.string(forKey: "baseURL") == nil
+        self.usesFixtures = usesFixtures
+        // Fixture mode is fully deterministic for Layer 2 screenshots: fixed clock, fixed deal, no animations.
+        pairsSeed = defaults.string(forKey: "pairsSeed").flatMap(UInt64.init) ?? (usesFixtures ? 42 : nil)
         now = usesFixtures ? FixtureEnvironment.now : nil
         timeZone = usesFixtures ? FixtureEnvironment.timeZone : .current
         initialTab = defaults.string(forKey: "tab").flatMap(AppTab.init(rawValue:)) ?? .feed
@@ -62,6 +68,8 @@ struct NewsDemoApp: App {
                 .environment(\.locale, Locale(identifier: "de_DE"))
                 .environment(\.timeZone, timeZone)
                 .environment(\.now, now ?? Date())
+                .environment(\.pairsSeed, pairsSeed)
+                .environment(\.animationsEnabled, !usesFixtures)
         }
     }
 }

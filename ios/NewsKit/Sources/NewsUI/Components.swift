@@ -13,11 +13,10 @@ struct Timestamp: View {
     /// Shows ↗ so readers know the item opens the publisher's page.
     var isLink: Bool = false
     @Environment(\.now) private var now
-    @Environment(\.locale) private var locale
     @Environment(\.timeZone) private var timeZone
 
     var body: some View {
-        let relative = NewsDateFormatter.relative(date, now: now, locale: locale, timeZone: timeZone)
+        let relative = NewsDateFormatter.relative(date, now: now, timeZone: timeZone)
         HStack(spacing: 3) {
             Text(source.map { "\($0) · \(relative)" } ?? relative)
             if isLink { Image(systemName: "arrow.up.right").imageScale(.small).accessibilityHidden(true) }
@@ -37,18 +36,28 @@ public struct RemoteImage: View {
     public var body: some View {
         switch provider {
         case .remote(let baseURL):
-            AsyncImage(url: baseURL.appendingPathComponent(name)) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                NewsTheme.card
+            AsyncImage(url: baseURL.appendingPathComponent(name)) { phase in
+                if let image = phase.image { image.resizable().scaledToFill() } else { ImagePlaceholder() }
             }
         case .local(let load):
             if let image = load(name) {
                 Image(uiImage: image).resizable().scaledToFill()
             } else {
-                NewsTheme.card
+                ImagePlaceholder()
             }
         }
+    }
+}
+
+/// Shown while an image loads or when it fails: a neutral photo glyph, so a failed image does not look broken
+/// (a bare grey box under a play button looked like a bug). Decorative, hidden from VoiceOver.
+struct ImagePlaceholder: View {
+    var body: some View {
+        ZStack {
+            NewsTheme.card
+            Image(systemName: "photo").font(.system(size: 34)).foregroundStyle(NewsTheme.textSecondary)
+        }
+        .accessibilityHidden(true)
     }
 }
 
@@ -98,7 +107,8 @@ public struct BreakingNewsBanner: View {
                     .lineLimit(1)
                     .fixedSize()
                 if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 0) }
-                Timestamp(date: news.publishedAt, color: .white.opacity(0.85), source: news.source, isLink: news.url != nil)
+                // Full white: 85% white on the red was only ≈4.3:1 (accessibility review).
+                Timestamp(date: news.publishedAt, color: .white, source: news.source, isLink: news.url != nil)
             }
             Text(news.headline)
                 .font(.headline)
@@ -125,10 +135,14 @@ public struct LiveTickerCard: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(NewsTheme.liveRed)
+                    .fill(ticker.isLive ? NewsTheme.liveRed : NewsTheme.textSecondary)
                     .frame(width: 8, height: 8)
                     .opacity(pulse ? 0.3 : 1)
-                Text(ticker.kicker).font(.caption.weight(.black)).foregroundStyle(NewsTheme.liveRed)
+                    .accessibilityHidden(true)
+                // Text uses accentText: liveRed as small text is only ≈4.3:1 on the light card.
+                Text(ticker.isLive ? ticker.kicker : "BEENDET")
+                    .font(.caption.weight(.black))
+                    .foregroundStyle(ticker.isLive ? NewsTheme.accentText : NewsTheme.textSecondary)
                 Spacer(minLength: 0)
                 Timestamp(date: ticker.updatedAt, source: ticker.source, isLink: ticker.url != nil)
             }
@@ -139,9 +153,11 @@ public struct LiveTickerCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(NewsTheme.card, in: RoundedRectangle(cornerRadius: NewsTheme.cornerRadius))
         .onAppear {
-            guard animationsEnabled else { return }
+            guard animationsEnabled, ticker.isLive else { return }
             withAnimation(.easeInOut(duration: 0.8).repeatForever()) { pulse = true }
         }
+        // Reset when the cell scrolls away, so the pulse restarts when it comes back (lazy stacks reuse state).
+        .onDisappear { pulse = false }
     }
 }
 
@@ -241,7 +257,13 @@ public struct AdSlotView: View {
     public init(slot: AdSlot) { self.slot = slot }
 
     public var body: some View {
+        // No fill → collapse completely instead of reserving an empty grey box.
+        if slot.filled { filledBody }
+    }
+
+    private var filledBody: some View {
         VStack(spacing: 4) {
+            // "Anzeige" is legally required next to every ad (separation of ads and editorial content).
             Text("Anzeige").font(.caption2).foregroundStyle(NewsTheme.textSecondary)
             RoundedRectangle(cornerRadius: 6)
                 .fill(NewsTheme.adBackground)

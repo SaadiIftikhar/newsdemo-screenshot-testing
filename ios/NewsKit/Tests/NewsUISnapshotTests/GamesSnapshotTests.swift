@@ -31,6 +31,16 @@ final class GamesSnapshotTests: XCTestCase {
                      variants: [.light, .dark])
     }
 
+    func test_ticTacToe_computerWon() {
+        assertScreen(onScreen(TicTacToeView(game: TicTacToe(board: [.x, .x, nil, .o, .o, .o, .x, nil, nil]))),
+                     variants: [.light])
+    }
+
+    func test_ticTacToe_draw() {
+        assertScreen(onScreen(TicTacToeView(game: TicTacToe(board: [.x, .o, .x, .x, .o, .o, .o, .x, .x]))),
+                     variants: [.light])
+    }
+
     func test_pairs_new() {
         assertScreen(onScreen(PairsView(game: PairsGame(seed: 42))), variants: [.light, .dark])
     }
@@ -61,7 +71,7 @@ final class GamesSnapshotTests: XCTestCase {
     func test_sudoku_conflict() {
         var game = MiniSudoku()
         game.select(1); game.enter(4)
-        assertScreen(onScreen(MiniSudokuView(game: game)), variants: [.light])
+        assertScreen(onScreen(MiniSudokuView(game: game)), variants: [.light, .dark])
     }
 
     func test_sudoku_solved() {

@@ -22,10 +22,16 @@ struct Variant: Sendable {
     var traits: UITraitCollection {
         UITraitCollection { traits in
             traits.userInterfaceStyle = colorScheme == .dark ? .dark : .light
-            traits.preferredContentSizeCategory = dynamicType == .accessibility3 ? .accessibilityExtraLarge : .large
+            traits.preferredContentSizeCategory = UIContentSizeCategory(dynamicType) // exact mapping for any variant
             traits.layoutDirection = .leftToRight
         }
     }
+}
+
+extension ViewImageConfig {
+    /// iPhone 13 width, tall enough to show a whole feed (screen goldens otherwise stop after the first screen).
+    static let iPhone13FullHeight = ViewImageConfig(safeArea: .zero, size: CGSize(width: 390, height: 2700),
+                                                    traits: ViewImageConfig.iPhone13.traits)
 }
 
 enum Snap {

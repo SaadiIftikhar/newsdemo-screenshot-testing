@@ -10,10 +10,12 @@ import XCTest
 final class ComponentSnapshotTests: XCTestCase {
     private var feed: Feed!
     private var longFeed: Feed!
+    private var edge: Feed!
 
     override func setUp() async throws {
         feed = try Snap.store.feed("feed_default")
         longFeed = try Snap.store.feed("feed_long_headlines")
+        edge = try Snap.store.feed("feed_edge_cases")
     }
 
     // MARK: Breaking news banner
@@ -68,10 +70,25 @@ final class ComponentSnapshotTests: XCTestCase {
         assertComponent(AdSlotView(slot: slot), variants: [.light, .dark])
     }
 
+    // MARK: Edge states (feed_edge_cases.json)
+
+    func test_liveTicker_ended() throws {
+        guard case .liveTicker(let ticker) = try XCTUnwrap(edge.items.first(where: { $0.id == "live-201" })) else {
+            return XCTFail("fixture changed")
+        }
+        assertComponent(LiveTickerCard(ticker: ticker), variants: [.light, .dark])
+    }
+
+    /// The image fails to load: the placeholder must look intentional, not broken.
+    func test_teaserCard_imageMissing() throws {
+        assertComponent(TeaserCard(teaser: try teaser("tsr-201", in: edge)), variants: [.light])
+    }
+
     // MARK: Helpers
 
+    /// FAILS (never skips) when the fixture lost an id: a skipped premium test would leave the PLUS badge unguarded.
     private func teaser(_ id: String, in feed: Feed) throws -> Teaser {
         for case .teaser(let teaser) in feed.items where teaser.id == id { return teaser }
-        throw XCTSkip("teaser \(id) missing from fixture")
+        return try XCTUnwrap(nil as Teaser?, "teaser \(id) missing from fixture")
     }
 }

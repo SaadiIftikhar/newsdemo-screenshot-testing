@@ -24,7 +24,8 @@ extension FeedClient {
             let response: URLResponse
             do {
                 (data, response) = try await session.data(from: url)
-            } catch let error as URLError where [.notConnectedToInternet, .networkConnectionLost, .dataNotAllowed].contains(error.code) {
+            } catch let error as URLError where FeedClient.offlineCodes.contains(error.code) {
+                // Same mapping as Android (every connectivity IOException → offline).
                 throw FeedError.offline
             }
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
@@ -37,6 +38,11 @@ extension FeedClient {
             }
         }
     }
+
+    static let offlineCodes: Set<URLError.Code> = [
+        .notConnectedToInternet, .networkConnectionLost, .dataNotAllowed, .timedOut,
+        .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed, .internationalRoamingOff,
+    ]
 
     public static func failing(_ error: FeedError) -> FeedClient {
         FeedClient { throw error }

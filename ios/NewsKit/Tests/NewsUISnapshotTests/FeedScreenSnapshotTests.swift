@@ -13,6 +13,28 @@ final class FeedScreenSnapshotTests: XCTestCase {
         assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_default"))))
     }
 
+    /// The whole feed, not just the first screen: card spacing, ad placement and the last item are protected too.
+    func test_feed_default_fullHeight() throws {
+        assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_default"))),
+                     device: .iPhone13FullHeight, variants: [.light, .dark])
+    }
+
+    /// WELT Edition is read on tablets: the feed column is capped instead of stretching edge to edge.
+    func test_feed_default_tablet() throws {
+        assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_default"))),
+                     device: .iPadPro11(.portrait), variants: [.light])
+    }
+
+    /// Malformed items dropped, ad without fill collapsed, ended ticker, broken image, >24 h and "gerade eben".
+    func test_feed_edgeCases() throws {
+        assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_edge_cases"))),
+                     device: .iPhone13FullHeight, variants: [.light])
+    }
+
+    func test_feed_loading() {
+        assertScreen(FeedView(state: .loading), variants: [.light, .dark])
+    }
+
     /// Smallest supported phone: catches layouts that only break on narrow screens.
     func test_feed_default_smallDevice() throws {
         assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_default"))),

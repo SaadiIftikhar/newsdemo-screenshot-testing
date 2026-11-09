@@ -35,24 +35,45 @@ func image(from buffer: inout [UInt8], width: Int, height: Int) -> CGImage {
               space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!.makeImage()!
 }
 
-struct Row { let name: String; let file: String; let changed: Int; let total: Int; let sizeNote: String }
+struct Row { let name: String; let file: String; let changed: Int; let subtle: Int; let total: Int; let sizeNote: String }
 var rows: [Row] = []
+var missingReferences: [String] = []
+
+/// Golden for a failure image. iOS mirrors the golden folder structure; Android (Roborazzi) writes flat
+/// `<test>.<variant>_actual.png` files, so we look the golden up by file name.
+func reference(for relative: String) -> URL? {
+    let direct = goldens.appendingPathComponent(relative)
+    if fm.fileExists(atPath: direct.path) { return direct }
+    let name = (relative as NSString).lastPathComponent.replacingOccurrences(of: "_actual.png", with: ".png")
+    let all = fm.enumerator(at: goldens, includingPropertiesForKeys: nil)
+    while let candidate = all?.nextObject() as? URL where candidate.lastPathComponent == name { return candidate }
+    return nil
+}
 
 let enumerator = fm.enumerator(at: failures, includingPropertiesForKeys: nil)
 while let url = enumerator?.nextObject() as? URL {
-    guard url.pathExtension == "png" else { continue }
-    let relative = url.path.replacingOccurrences(of: failures.path + "/", with: "")
-    guard let actual = load(url), let reference = load(goldens.appendingPathComponent(relative)) else { continue }
+    guard url.pathExtension == "png", !url.lastPathComponent.hasSuffix("_compare.png") else { continue }
+    var relative = url.path.replacingOccurrences(of: failures.path + "/", with: "")
+    guard let actual = load(url) else { continue }
+    guard let refURL = reference(for: relative), let reference = load(refURL) else {
+        missingReferences.append(relative) // a NEW screenshot with no golden: must be reviewed, never silently skipped
+        continue
+    }
+    relative = refURL.path.replacingOccurrences(of: goldens.path + "/", with: "")
 
     let w = max(actual.width, reference.width), h = max(actual.height, reference.height)
     let a = rgba(actual, width: w, height: h), r = rgba(reference, width: w, height: h)
     var diff = [UInt8](repeating: 255, count: w * h * 4)
-    var changed = 0
+    var changed = 0, subtle = 0
     for i in stride(from: 0, to: a.count, by: 4) {
         let delta = abs(Int(a[i]) - Int(r[i])) + abs(Int(a[i + 1]) - Int(r[i + 1])) + abs(Int(a[i + 2]) - Int(r[i + 2]))
         if delta > 24 {
             changed += 1
-            diff[i] = 255; diff[i + 1] = 0; diff[i + 2] = 200
+            diff[i] = 255; diff[i + 1] = 0; diff[i + 2] = 200          // clearly visible change: magenta
+        } else if delta > 0 {
+            subtle += 1
+            diff[i] = 255; diff[i + 1] = 150; diff[i + 2] = 0          // subtle change (e.g. a slight colour shift): orange.
+            // Shown on purpose: the test can fail on a shift the eye barely sees; the report must not say "0 px".
         } else {
             let gray = UInt8(200 + Int(r[i]) / 5 > 255 ? 255 : 200 + Int(r[i]) / 5) // faded reference for context
             diff[i] = gray; diff[i + 1] = gray; diff[i + 2] = gray
@@ -74,14 +95,14 @@ while let url = enumerator?.nextObject() as? URL {
     CGImageDestinationFinalize(dest)
     let sizeNote = (actual.width, actual.height) == (reference.width, reference.height)
         ? "" : " · size changed \(reference.width)×\(reference.height) → \(actual.width)×\(actual.height)px"
-    rows.append(Row(name: relative, file: name, changed: changed, total: w * h, sizeNote: sizeNote))
+    rows.append(Row(name: relative, file: name, changed: changed, subtle: subtle, total: w * h, sizeNote: sizeNote))
 }
 
 rows.sort { $0.name < $1.name }
 let items = rows.map { row in
     let pct = String(format: "%.2f", Double(row.changed) / Double(row.total) * 100)
     return """
-    <section><h2>\(row.name)</h2><p>\(row.changed) px changed (\(pct)%)\(row.sizeNote)</p>
+    <section><h2>\(row.name)</h2><p>\(row.changed) px clearly changed (\(pct)%), \(row.subtle) px subtly changed (orange)\(row.sizeNote)</p>
     <p class="legend"><span>reference (golden)</span><span>actual (this PR)</span><span>changed pixels</span></p>
     <img src="\(row.file)" loading="lazy"></section>
     """
@@ -91,8 +112,9 @@ let html = """
 <style>body{font:14px -apple-system,sans-serif;margin:24px;background:#f4f4f5}section{background:#fff;padding:16px;margin:0 0 24px;border-radius:8px}
 img{max-width:100%;max-height:80vh}h2{font-size:15px;margin:0 0 4px}.legend{display:flex;gap:24px;color:#666}.legend span{flex:1}</style>
 <h1>\(rows.count) snapshot(s) changed</h1>
+\(missingReferences.isEmpty ? "" : "<p><b>No golden yet (new tests):</b> " + missingReferences.joined(separator: ", ") + "</p>")
 <p>Unintended → fix the code. Intended → add the <code>record-snapshots</code> label; a design/QA code-owner approves the new goldens.</p>
 \(items)
 """
 try html.write(to: out.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)
-print("diff report: \(rows.count) failure(s) → \(out.path)/index.html")
+print("diff report: \(rows.count) failure(s), \(missingReferences.count) without golden → \(out.path)/index.html")

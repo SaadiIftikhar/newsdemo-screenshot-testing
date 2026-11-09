@@ -27,15 +27,21 @@ public struct AuthClient: Sendable {
 }
 
 extension AuthClient {
+    /// PLUS subscriber.
     public static let demoEmail = "demo@newsdemo.app"
+    /// Registered reader without a subscription (sees the paywall on PLUS articles).
+    public static let basicEmail = "basis@newsdemo.app"
     public static let demoPassword = "demo1234"
 
-    /// Offline demo backend: one known account. No network, no secrets.
+    /// Offline demo backend: two known accounts. No network, no secrets.
     public static let demo = AuthClient { email, password in
-        guard email.trimmingCharacters(in: .whitespaces).lowercased() == demoEmail, password == demoPassword else {
-            throw AuthError.invalidCredentials
+        let normalized = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard password == demoPassword else { throw AuthError.invalidCredentials }
+        switch normalized {
+        case demoEmail: return UserProfile(name: "Demo Leser", email: demoEmail, isPremium: true)
+        case basicEmail: return UserProfile(name: "Basis Leser", email: basicEmail, isPremium: false)
+        default: throw AuthError.invalidCredentials
         }
-        return UserProfile(name: "Demo Leser", email: demoEmail, isPremium: true)
     }
 
     public static func failing(_ error: AuthError) -> AuthClient {
@@ -58,7 +64,8 @@ public enum LoginValidator {
 
     public static func validate(email: String, password: String) -> Errors {
         var errors = Errors()
-        let trimmed = email.trimmingCharacters(in: .whitespaces)
+        // Same rules as Android: trim whitespace AND newlines; length counted in Unicode code points.
+        let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             errors.email = "Bitte E-Mail-Adresse eingeben."
         } else if trimmed.range(of: #"^[^@\s]+@[^@\s]+\.[^@\s]+$"#, options: .regularExpression) == nil {
@@ -66,7 +73,7 @@ public enum LoginValidator {
         }
         if password.isEmpty {
             errors.password = "Bitte Passwort eingeben."
-        } else if password.count < 8 {
+        } else if password.unicodeScalars.count < 8 {
             errors.password = "Das Passwort hat mindestens 8 Zeichen."
         }
         return errors

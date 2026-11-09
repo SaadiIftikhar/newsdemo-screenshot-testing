@@ -27,16 +27,17 @@ public enum AppTab: String, Hashable, Sendable, CaseIterable {
 
 /// App root: three tabs behind our own floating tab bar.
 ///
-/// Why not the system `TabView`? On iOS 26 its floating "Liquid Glass" bar is not captured by in-process
-/// snapshots (the glass renders blank, and lazy tab content isn't laid out before capture), so it could not be
-/// regression-tested. A custom bar is fully snapshot-testable and looks identical on Android. The cost:
-/// accessibility (selected trait, labels, capped text size) is implemented by hand below.
+/// Why not the system `TabView` in this demo? On iOS 26 its floating "Liquid Glass" bar is not captured by
+/// in-process snapshots (the glass renders blank, lazy tab content isn't laid out before capture). For a demo
+/// whose point is screenshot coverage, a custom bar (identical on Android) keeps every pixel testable.
+/// In a production app we would NOT change product UI for a test tool: keep the system bar, snapshot the tab
+/// *content*, and cover the system chrome in Layer 2 (XCUITest/Maestro on a real simulator). See STRATEGY.md.
 public struct RootView: View {
     @State private var selection: AppTab
     private let feedViewModel: FeedViewModel
     private let accountModel: AccountViewModel
     private let gamesPath: [GameKind]
-    @State private var openedArticle: OpenedArticle?
+    @State private var presented: Presented?
 
     public init(feedViewModel: FeedViewModel, accountModel: AccountViewModel,
                 initialTab: AppTab = .feed, gamesPath: [GameKind] = []) {
@@ -49,15 +50,37 @@ public struct RootView: View {
     public var body: some View {
         ZStack {
             // All tabs stay alive (like a system tab bar), so each keeps its state when you switch.
-            tab(.feed) { FeedScreen(viewModel: feedViewModel, onOpenArticle: { openedArticle = OpenedArticle(url: $0) }) }
+            tab(.feed) { FeedScreen(viewModel: feedViewModel, onOpenArticle: open) }
             tab(.games) { GamesHome(path: gamesPath) }
             tab(.account) { AccountScreen(model: accountModel) }
         }
         // Scrollable content can scroll *under* the floating bar but always ends above it.
         .contentMargins(.bottom, FloatingTabBar.reservedHeight, for: .scrollContent)
         .overlay(alignment: .bottom) { FloatingTabBar(selection: $selection) }
-        .sheet(item: $openedArticle) { article in
-            SafariView(url: article.url).ignoresSafeArea()
+        .sheet(item: $presented) { item in
+            switch item {
+            case .article(let url):
+                SafariView(url: url).ignoresSafeArea()
+            case .paywall:
+                PaywallView(entitlement: accountModel.entitlement,
+                            onSubscribe: { presented = nil },
+                            onSignIn: { presented = nil; selection = .account },
+                            onClose: { presented = nil })
+            }
+        }
+        // A keyboard left up in the (still alive, hidden) Konto tab must not cover the next tab.
+        .onChange(of: selection) {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
+
+    /// Free articles open in the in-app browser; PLUS articles only for subscribers, otherwise the paywall.
+    private func open(_ request: ArticleRequest) {
+        // SFSafariViewController throws on non-web schemes: only http(s) is ever opened.
+        guard let scheme = request.url.scheme?.lowercased(), ["http", "https"].contains(scheme) else { return }
+        switch ArticleAccess.decide(url: request.url, isPremium: request.isPremium, entitlement: accountModel.entitlement) {
+        case .open(let url): presented = .article(url)
+        case .paywall(let url): presented = .paywall(url)
         }
     }
 
@@ -105,12 +128,20 @@ struct FloatingTabBar: View {
         .buttonStyle(.plain)
         .accessibilityLabel(tab.title)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityIdentifier("tab-\(tab.rawValue)")
     }
 }
 
-struct OpenedArticle: Identifiable {
-    let url: URL
-    var id: String { url.absoluteString }
+enum Presented: Identifiable {
+    case article(URL)
+    case paywall(URL)
+
+    var id: String {
+        switch self {
+        case .article(let url): "article-\(url.absoluteString)"
+        case .paywall(let url): "paywall-\(url.absoluteString)"
+        }
+    }
 }
 
 /// The publisher's article in an in-app browser (SFSafariViewController): we link out, we never copy content.

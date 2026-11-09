@@ -32,7 +32,7 @@ let package = Package(
         .target(name: "AppShell", dependencies: ["NewsCore", "NewsUI", "Games", "Account"]),
         .testTarget(
             name: "NewsCoreTests",
-            dependencies: ["NewsCore", "NewsFixtures", "Games", "Account"]
+            dependencies: ["NewsCore", "NewsFixtures", "NewsUI", "Games", "Account"]
         ),
         .testTarget(
             name: "NewsUISnapshotTests",
