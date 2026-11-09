@@ -35,7 +35,7 @@ The two platforms fail on **exactly the same screenshots**, and every unaffected
 - **Unintended:** fix the code.
 - **Intended:** add the `record-snapshots` label. CI re-records, proves the new goldens, and pushes them. A design/QA code owner approves the golden diff.
 
-## 5. What I learned from building it (60 s): STRATEGY.md Appendix A
+## 5. What I learned from building it (60 s): docs/EVIDENCE.md
 
 - **A green test can protect nothing.** After an SDK upgrade, 44 of 62 Android goldens were blank, and verify still passed (blank equals blank). There is now a capture guard plus a golden lint in CI.
 - **Approved goldens still hid contrast bugs.** One was purple-on-red buttons in Android dark mode. WCAG contrast tests on the colour tokens now run on both platforms.

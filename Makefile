@@ -61,7 +61,9 @@ android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
 	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android   # stale diffs would mislead reviewers
 	@cd $(ANDROID_DIR) && $(AWAKE) ./gradlew verifyRoborazziDebug --stacktrace; status=$$?; cd $(ROOT); \
 	if ls $(ANDROID_DIR)/app/build/outputs/roborazzi/*_actual.png >/dev/null 2>&1; then \
-	  swift scripts/diff-report.swift $(ANDROID_GOLDENS) $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android/diffs; \
+	  if [ "$$(uname)" = Darwin ]; then \
+	    swift scripts/diff-report.swift $(ANDROID_GOLDENS) $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android/diffs; \
+	  else echo "diff gallery needs macOS (CoreGraphics); on CI the android-diffs job builds it"; fi; \
 	fi; exit $$status
 
 android-record: ## Re-record ALL Android goldens

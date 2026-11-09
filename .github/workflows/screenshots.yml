@@ -194,8 +194,37 @@ jobs:
           paths: android/app/src/test/screenshots
           message: "chore(snapshots): re-record Android goldens"
 
+  android-diffs:
+    # The diff report uses CoreGraphics (macOS); Linux Swift has no CoreGraphics. When Android fails, build the same
+    # gallery + summary on a short macOS job from the images the Android job uploaded.
+    needs: android
+    if: always() && needs.android.result == 'failure'
+    runs-on: macos-26
+    timeout-minutes: 10
+    outputs:
+      diff_summary: ${{ steps.diffsum.outputs.md }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: true
+      - uses: actions/download-artifact@v7
+        with:
+          name: android-snapshot-diffs
+          path: ci-android
+      - name: Build the diff gallery and summary
+        id: diffsum
+        run: |
+          swift scripts/diff-report.swift android/app/src/test/screenshots ci-android/android/app/build/outputs/roborazzi artifacts/android/diffs
+          f=artifacts/android/diffs/summary.md
+          cat "$f" >> "$GITHUB_STEP_SUMMARY"
+          { echo 'md<<EOF_SUMMARY'; cat "$f"; echo 'EOF_SUMMARY'; } >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android-diff-gallery
+          path: artifacts/android/diffs
+
   report:
-    needs: [lint-goldens, ios, android]
+    needs: [lint-goldens, ios, android, android-diffs]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     permissions:
@@ -219,8 +248,8 @@ jobs:
                   `Diff gallery (golden / this PR / changed pixels) is attached to [this run](${run}).`,
                   '',
                   // What kind of change, before anyone opens an image. "subtle" = colour/anti-aliasing only.
-                  ...['ios', 'android'].filter(p => results[p]?.outputs?.diff_summary)
-                    .map(p => `<details><summary><b>${p}</b> changed snapshots</summary>\n\n${results[p].outputs.diff_summary}\n</details>\n`),
+                  ...[['ios', 'ios'], ['android', 'android-diffs']].filter(([, job]) => results[job]?.outputs?.diff_summary)
+                    .map(([p, job]) => `<details><summary><b>${p}</b> changed snapshots</summary>\n\n${results[job].outputs.diff_summary}\n</details>\n`),
                   '',
                   '- **Unintended?** Fix the code and push.',
                   '- **Intended?** Add the `record-snapshots` label. CI re-records, verifies and pushes the goldens;',

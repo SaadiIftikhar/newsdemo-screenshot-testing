@@ -11,9 +11,11 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 | Games tab | Built-in classics (Tic-Tac-Toe, pairs, Mini-Sudoku) instead of embedded web games | Offline, deterministic, so every state can be snapshot-tested |
 | Deliverable format | Markdown + PDF in a local git repo with a CI workflow; regression on its own branch | Reviewers can run it and see the failing diff |
 | Attribution | No AI co-author in the git history | The submission is mine |
-| Quality bar | Asked for repeated audits, including **five role-based reviews** (product manager, senior developer, senior QA, accessibility/design, hiring panel), and had their findings implemented | See STRATEGY.md, Appendix A |
+| Hosting and CI | A **private** GitHub repo under my personal account; commit authorship rewritten to my GitHub no-reply address before the first push | No work e-mail published; CI proven on real runners |
+| Merges | I review the golden diffs and merge PRs myself; the agent was not allowed to merge | Mirrors the proposed process: a human code owner approves goldens |
+| Quality bar | Asked for repeated audits, including **five role-based reviews** (product manager, senior developer, senior QA, accessibility/design, hiring panel), and had their findings implemented | See docs/EVIDENCE.md |
 
-**Golden approval.** The agent did a first-pass review of each new golden, which caught the real bugs listed in STRATEGY.md Appendix A. Final approval of what is committed as a golden is mine, as the candidate. That mirrors the proposed process: AI may triage, a human code owner approves.
+**Golden approval.** The agent did a first-pass review of each new golden, which caught the real bugs listed in docs/EVIDENCE.md. Final approval of what is committed as a golden is mine, as the candidate. That mirrors the proposed process: AI may triage, a human code owner approves.
 
 ## 2. Prompts
 
@@ -64,6 +66,22 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 > 3: how do we deal with just a litle diference and that has human confimartion to do ? etc . and what type and scale of differnece do we allow or do we have flags for those too for user confirmation is that the best solution or not etc
 > 4: and now that you hae more knoeldge of the type of app to keep in mind come up with more edge canses so we can implement those and wat is the best solution to deal with apps that have contnuesly changing data ,so do we mock data etc those kind of thinking behind the reserch you do for the latest best solution for our case
 
+> short answer what of the deliverables are left etc
+
+> i want you to upload to https://github.com/SaadiIftikhar and run and test the whole CI/CD pipeline
+
+(Decisions for that round: private repo; authorship rewritten to the GitHub no-reply address.)
+
+> done
+
+> did the IOS finish?
+
+> okay what deliverables are left and what imrpovements we can do to the process  also add caveman skill if not done yet
+
+> jutst the 9nes left
+
+> merge done
+
 ## 3. How the AI was used
 
 - **Research:**
@@ -74,4 +92,4 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 - **Stack assumptions:** the BILD/WELT stack (Swift 6/SwiftUI/TCA, Kotlin/Compose/Hilt) was **inferred from public job postings** and is labelled as an assumption in the strategy.
 - **Reviews:** a devil's-advocate pass, two full audits, and five parallel role-based reviews. Each finding was verified in the code before it was acted on.
 - **Checks that must be able to fail:** every new guard (fuzz test, image contract, accessibility checks) was first shown to fail on a deliberately broken input. One didn't: Google's Compose accessibility hook silently checks nothing under Robolectric, so it was replaced.
-- **Never delegated:** approving golden changes.
+- **Never delegated:** approving golden changes and merging pull requests.
