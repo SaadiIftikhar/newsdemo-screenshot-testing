@@ -118,7 +118,8 @@ public struct BreakingNewsBanner: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundStyle(.white)
-        .padding(NewsTheme.spacing)
+        .padding(.horizontal, NewsTheme.spacing)
+        .padding(.vertical, NewsTheme.spacing - 2) // "tighten the banner a bit"
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(NewsTheme.breakingRed)
         .accessibilityElement(children: .combine)
@@ -194,9 +195,9 @@ public struct TeaserCard: View {
                     .clipped()
             }
             VStack(alignment: .leading, spacing: 6) {
+                // "Refactor": badge moved into Kicker styling... and silently dropped.
                 if teaser.isPremium || !teaser.kicker.isEmpty {
                     badgeLayout {
-                        if teaser.isPremium { PremiumBadge() }
                         Kicker(text: teaser.kicker)
                     }
                 }
