@@ -49,12 +49,14 @@ while i < len(lines):
             item = inline(re.sub(r"^\s*(- |\d+\. )", "", lines[i]))
             if lines[i].startswith("  ") and open_li:
                 # Indented sub-bullets belong inside the previous item, so they don't consume list numbers.
+                # Both "  - x" and "  1. x" sub-items; anything else ends the sub-list (and always advances i).
+                sub_tag = "ol" if re.match(r"^\s+\d+\. ", lines[i]) else "ul"
                 sub = []
-                while i < len(lines) and lines[i].startswith("  ") and re.match(r"^\s+- ", lines[i]):
-                    text = inline(re.sub(r"^\s+- ", "", lines[i]))
+                while i < len(lines) and lines[i].startswith("  ") and re.match(r"^\s+(- |\d+\. )", lines[i]):
+                    text = inline(re.sub(r"^\s+(- |\d+\. )", "", lines[i]))
                     sub.append("<li>" + text + "</li>")
                     i += 1
-                out[-1] = out[-1][: -len("</li>")] + "<ul>" + "".join(sub) + "</ul></li>"
+                out[-1] = out[-1][: -len("</li>")] + f"<{sub_tag}>" + "".join(sub) + f"</{sub_tag}></li>"
                 continue
             out.append(f"<li>{item}</li>")
             open_li = True

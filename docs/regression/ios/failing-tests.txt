@@ -1,19 +1,24 @@
-	AppShellSnapshotTests.test_appShell_feedTab()
-	AppShellSnapshotTests.test_appShell_feedTab()
-	ComponentSnapshotTests.test_breakingBanner_default()
-	ComponentSnapshotTests.test_breakingBanner_default()
-	ComponentSnapshotTests.test_breakingBanner_default()
-	ComponentSnapshotTests.test_breakingBanner_longHeadline()
-	ComponentSnapshotTests.test_breakingBanner_longHeadline()
-	ComponentSnapshotTests.test_teaserCard_premium_longHeadline()
-	ComponentSnapshotTests.test_teaserCard_premium_longHeadline()
-	ComponentSnapshotTests.test_teaserCard_premium()
-	ComponentSnapshotTests.test_teaserCard_premium()
-	ComponentSnapshotTests.test_teaserCard_premium()
-	FeedScreenSnapshotTests.test_feed_default_smallDevice()
-	FeedScreenSnapshotTests.test_feed_default()
-	FeedScreenSnapshotTests.test_feed_default()
-	FeedScreenSnapshotTests.test_feed_default()
-	FeedScreenSnapshotTests.test_feed_longHeadlines()
-	FeedScreenSnapshotTests.test_feed_longHeadlines()
-	FeedScreenSnapshotTests.test_feedScreen_viaViewModel_mockedClient()
+test_appShell_feedTab.dark
+test_appShell_feedTab.light
+test_appShell_feedTab.light_xxxl
+test_breakingBanner_default.dark
+test_breakingBanner_default.light
+test_breakingBanner_default.light_xxxl
+test_breakingBanner_longHeadline.light
+test_breakingBanner_longHeadline.light_xxxl
+test_feedScreen_viaViewModel_mockedClient.light
+test_feed_default.dark
+test_feed_default.light
+test_feed_default.light_xxxl
+test_feed_default_fullHeight.dark
+test_feed_default_fullHeight.light
+test_feed_default_smallDevice.light
+test_feed_default_tablet.light
+test_feed_edgeCases.light
+test_feed_longHeadlines.light
+test_feed_longHeadlines.light_xxxl
+test_teaserCard_premium.dark
+test_teaserCard_premium.light
+test_teaserCard_premium.light_xxxl
+test_teaserCard_premium_longHeadline.light
+test_teaserCard_premium_longHeadline.light_xxxl

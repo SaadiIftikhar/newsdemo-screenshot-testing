@@ -7,6 +7,7 @@ with their production decoders, so one fixture == one UI state on both platforms
 |---|---|
 | `feed/feed_default.json` | Typical feed of **real public headlines** (WELT/BILD RSS, fetched 2026-11-05): breaking banner, live ticker, teaser with/without image, a real WELTplus (premium) teaser, ad slot, video teaser, plus one **unknown item type** (must be ignored). Every item has a `url` (opened in-app) and a `source` credit |
 | `feed/feed_long_headlines.json` | Worst-case German compound words + long kicker, premium badge under pressure |
+| `feed/feed_edge_cases.json` | **Shared decoding contract** (asserted identically on iOS and Android): malformed item, item without `type`, duplicate id → dropped; teaser without `premium` → free; ad without fill → collapsed; ended live ticker; image that fails to load; timestamps "gerade eben", > 24 h and with fractional seconds |
 | `feed/feed_empty.json` | Empty feed state |
 | `images/*.png` | Local stand-ins for CDN images (no network in tests) |
 

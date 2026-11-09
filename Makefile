@@ -4,6 +4,8 @@ ROOT := $(shell pwd)
 IOS_PKG := ios/NewsKit
 IOS_ARTIFACTS := $(ROOT)/artifacts/ios
 ANDROID_DIR := android
+# Keep the Mac awake during long runs: a sleeping laptop turned green runs into wall-clock timeouts (STRATEGY §6).
+AWAKE := $(shell command -v caffeinate >/dev/null 2>&1 && echo "caffeinate -i")
 
 .PHONY: help ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
 
@@ -17,7 +19,7 @@ define ios_xcodebuild
 	cd $(IOS_PKG) && \
 	TEST_RUNNER_SNAPSHOT_TESTING_RECORD=$(1) \
 	TEST_RUNNER_SNAPSHOT_ARTIFACTS=$(IOS_ARTIFACTS)/failures \
-	xcodebuild test -scheme NewsKit-Package -destination "platform=iOS Simulator,id=$$UDID" \
+	$(AWAKE) xcodebuild test -scheme NewsKit-Package -destination "platform=iOS Simulator,id=$$UDID" \
 	  -resultBundlePath $(IOS_ARTIFACTS)/NewsKit.xcresult -quiet \
 	  -skipPackagePluginValidation ; status=$$?; \
 	cd $(ROOT) && scripts/ios-export-diffs.sh $(IOS_ARTIFACTS) ; exit $$status
@@ -36,7 +38,7 @@ ios-record: ## Re-record ALL iOS goldens (review the git diff before committing!
 
 ios-ui-test: ## Run iOS UI interaction tests (XCUITest) against the real app on the simulator
 	cd ios && xcodegen generate --quiet
-	@UDID=$$(scripts/ios-sim.sh) && xcodebuild test -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
+	@UDID=$$(scripts/ios-sim.sh) && $(AWAKE) xcodebuild test -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
 	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet
 
 ios-record-missing: ## Record only goldens that don't exist yet (new tests)
@@ -57,7 +59,7 @@ ios-run: ## Launch the iOS app on the simulator: make ios-run [FIXTURE=...] [OFF
 
 android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
 	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android   # stale diffs would mislead reviewers
-	@cd $(ANDROID_DIR) && ./gradlew verifyRoborazziDebug --stacktrace; status=$$?; cd $(ROOT); \
+	@cd $(ANDROID_DIR) && $(AWAKE) ./gradlew verifyRoborazziDebug --stacktrace; status=$$?; cd $(ROOT); \
 	if ls $(ANDROID_DIR)/app/build/outputs/roborazzi/*_actual.png >/dev/null 2>&1; then \
 	  swift scripts/diff-report.swift $(ANDROID_GOLDENS) $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android/diffs; \
 	fi; exit $$status
