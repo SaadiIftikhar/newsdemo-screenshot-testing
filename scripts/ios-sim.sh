@@ -5,10 +5,10 @@ set -euo pipefail
 
 SIM_NAME="${IOS_SIM_NAME:-NewsDemo Snapshots}"
 DEVICE_TYPE="${IOS_DEVICE_TYPE:-com.apple.CoreSimulator.SimDeviceType.iPhone-17}"
-RUNTIME="${IOS_RUNTIME:-com.apple.CoreSimulator.SimRuntime.iOS-26-5}"
+RUNTIME="${IOS_RUNTIME:-com.apple.CoreSimulator.SimRuntime.iOS-27-0}"
 
 if ! xcrun simctl list runtimes | grep -q "$RUNTIME"; then
-  echo "error: simulator runtime $RUNTIME is not installed (xcodebuild -downloadPlatform iOS)" >&2
+  echo "error: simulator runtime $RUNTIME is not installed (xcodebuild -downloadPlatform iOS -buildVersion 27.0)" >&2
   exit 1
 fi
 
