@@ -18,11 +18,19 @@ public final class AccountViewModel {
     public private(set) var fieldErrors = LoginValidator.Errors()
     public private(set) var state: State
     private let client: AuthClient
+    /// What the form holds when signed out: empty, or the demo account in the demo app (see `prefillDemoAccount`).
+    private let signedOutEmail: String
+    private let signedOutPassword: String
 
-    public init(client: AuthClient = .demo, email: String = "", password: String = "", state: State = .signedOut) {
+    /// `prefillDemoAccount`: the demo app fills the form with the demo account (also again after sign-out), so a
+    /// presenter signs in with one tap. Tests pass explicit values instead, so their goldens don't depend on it.
+    public init(client: AuthClient = .demo, email: String = "", password: String = "", state: State = .signedOut,
+                prefillDemoAccount: Bool = false) {
         self.client = client
-        self.email = email
-        self.password = password
+        signedOutEmail = prefillDemoAccount ? AuthClient.demoEmail : ""
+        signedOutPassword = prefillDemoAccount ? AuthClient.demoPassword : ""
+        self.email = email.isEmpty ? signedOutEmail : email
+        self.password = password.isEmpty ? signedOutPassword : password
         self.state = state
     }
 
@@ -64,8 +72,8 @@ public final class AccountViewModel {
 
     public func signOut() {
         state = .signedOut
-        email = ""
-        password = ""
+        email = signedOutEmail
+        password = signedOutPassword
         fieldErrors = .init()
     }
 }

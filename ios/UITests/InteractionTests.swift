@@ -43,7 +43,7 @@ final class InteractionTests: XCTestCase {
     }
 
     func test_account_invalidInput_showsFieldErrors() {
-        launch(["-tab", "account"])
+        launch(["-tab", "account", "-emptyLogin"])
         app.buttons["sign-in"].tap()
         XCTAssertTrue(app.staticTexts["Bitte E-Mail-Adresse eingeben."].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Bitte Passwort eingeben."].exists)
@@ -51,14 +51,13 @@ final class InteractionTests: XCTestCase {
 
     func test_account_signInWithDemoUser_showsProfile_thenSignOut() {
         launch(["-tab", "account"])
-        let email = app.textFields["email"]
-        email.tap(); email.typeText("demo@newsdemo.app")
-        let password = app.secureTextFields["password"]
-        password.tap(); password.typeText("demo1234")
+        // The demo app pre-fills the demo account: one tap signs in.
+        XCTAssertEqual(app.textFields["email"].value as? String, "demo@newsdemo.app")
         app.buttons["sign-in"].tap()
         XCTAssertTrue(app.staticTexts["Demo Leser"].waitForExistence(timeout: 5))
         app.buttons["sign-out"].tap()
         XCTAssertTrue(app.buttons["sign-in"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.textFields["email"].value as? String, "demo@newsdemo.app") // ready for the next sign-in
     }
 
     // Never tap or assert before the element is there: the first CI runs showed these tests racing the sheet

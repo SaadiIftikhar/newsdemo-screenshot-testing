@@ -46,21 +46,16 @@ step "5/6 The app in the simulator (first time ~1.5 min)"
 make ios-run > "$LOG/ios-run.log" 2>&1 && ok "NewsDemo is running in the simulator" || die "the app did not launch: see $LOG/ios-run.log"
 
 step "6/6 Opening the windows, in the order the demo uses them"
-xed ios/NewsKit >/dev/null 2>&1; sleep 4
-xed "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" >/dev/null 2>&1; sleep 2
-xed "ios/UITests/AccessibilityAuditTests.swift" >/dev/null 2>&1; sleep 2
-ok "Xcode: NewsKit package + FeedScreenSnapshotTests.swift, AccessibilityAuditTests.swift"
-"$VSCODE" --new-window . >/dev/null 2>&1; sleep 3
-"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift" ".github/CODEOWNERS" "ios/NewsKit/Tests/NewsUISnapshotTests/SnapshotSupport.swift" "fixtures/feed/feed_hostile_content.json" ".github/workflows/screenshots.yml" >/dev/null 2>&1
-ok "VS Code tabs: 1 feed_default.json, 2 FixtureStore.swift, 3 CODEOWNERS, 4 SnapshotSupport.swift, 5 feed_hostile_content.json, 6 screenshots.yml"
-open "ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests" && ok "Finder: the goldens folder FeedScreenSnapshotTests"
+"$VSCODE" . >/dev/null 2>&1; sleep 3   # reuses the project window if it is already open (no duplicates on re-runs)
+"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" "fixtures/feed/feed_hostile_content.json" >/dev/null 2>&1
+ok "VS Code tabs: 1 feed_default.json, 2 FeedScreenSnapshotTests.swift, 3 feed_hostile_content.json"
 open "artifacts/gallery/index.html"; sleep 1
 open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/1"; sleep 1
 open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/2/commits"; sleep 1
-open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/actions"; sleep 1
-ok "Browser tabs: 1 gallery, 2 PR #1, 3 PR #2 commits, 4 Actions"
+ok "Browser tabs: 1 gallery, 2 PR #1, 3 PR #2 commits"
 open STRATEGY.pdf && ok "Preview: STRATEGY.pdf"
 open presentation/Demo-script.html && ok "This script: presentation/Demo-script.html (move it to your second device)"
 
 printf '\n%s%sREADY.%s Branch: %s. Logs: %s/\n' "$B" "$G" "$N" "$(git branch --show-current)" "$LOG"
+printf 'Tip: if VS Code already had other tabs open, close them (Cmd+K W) and re-run, so the tab numbers match the script.\n'
 printf 'Now: bring Terminal to the front, enlarge the font (Cmd +), turn on Do Not Disturb, and start with the Opening.\n'
