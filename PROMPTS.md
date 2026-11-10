@@ -138,6 +138,12 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 > I have dleted the repo so once you have done the task i have given you you can upload as public with android removed and other things done
 
+> in demo without code also give me a script with the commands so i know they way we take the presentation
+
+> ok for the script with out code, make the setup script more robust so all the things i am doing to point to in the code less presentation vs code tabs in order , simulater aopp etc and then remove the commands from the script for those only the ones for the files as they will be open just give me commands that are needed to run for presentation and in text oyu can say in the vs code the tab this anme shows xcode for test etc and lets focus on the mian script and the coe less script and remove th presentation and also check in the maint ask document if power point presentation is needed if not then remove the rpesentation and the script connected t it just leave the code less script file nothing lese and the imicial script command, also before you give me these run the commands the steup script and the commands in the presentation so everyone of them are well.
+
+(Decision for that round: the brief asks only for an optional recording or notes, not slides, so the PowerPoint and its scripts were removed. presentation/ now holds one talk track and one setup script, both generated from scripts/presentation/generate.js.)
+
 ## 3. How the AI was used
 
 - **Research:**
