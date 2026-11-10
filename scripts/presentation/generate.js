@@ -111,7 +111,7 @@ This is supposed to fail. [While it runs, ~1 min:] Every screen with a PLUS teas
 
 29 of 89 screenshots fail, and the other 60 stay green: games, account, the paywall. Here is the diff: the approved picture, the new one, and in magenta the pixels that changed. The badge is simply gone. And the summary already says what kind of change each one is: 10 layout changes, because the banner got shorter, and 19 visible ones. That table is what CI posts on the pull request.`,
     steps: [
-      { where: "Terminal", what: "Show how small the change is.", cmd: "git diff main demo/regression --stat", see: "1 file changed." },
+      { where: "Terminal", what: "Show how small the change is.", cmd: "git diff main...demo/regression --stat", see: "1 file changed." },
       { where: "Terminal", what: "Switch to the branch with the bug.", cmd: "git checkout demo/regression", see: "Switched to branch 'demo/regression'." },
       { where: "Terminal", what: "Run the tests: they must fail.", cmd: "make ios-test", see: "~1 min, fails: \"diff report: 29 failure(s)\"." },
       { where: "Browser", what: "Open the diff page (it only exists after this failing run).", cmd: "open artifacts/ios/diffs/index.html", see: "Scroll to ComponentSnapshotTests/test_teaserCard_premium.dark: golden with PLUS | new without | magenta." },
