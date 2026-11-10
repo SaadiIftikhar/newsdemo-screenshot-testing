@@ -366,7 +366,7 @@ step "5/6 The app in the simulator (first time ~1.5 min)"
 make ios-run > "$LOG/ios-run.log" 2>&1 && ok "NewsDemo is running in the simulator" || die "the app did not launch: see $LOG/ios-run.log"
 
 step "6/6 Opening the windows, in the order the demo uses them"
-"$VSCODE" --new-window . >/dev/null 2>&1; sleep 3
+"$VSCODE" . >/dev/null 2>&1; sleep 3   # reuses the project window if it is already open (no duplicates on re-runs)
 "$VSCODE" --reuse-window ${vscodeTabs.map(([f]) => q(f)).join(" ")} >/dev/null 2>&1
 ok "VS Code tabs: ${vscodeTabs.map(([f], i) => `${i + 1} ${path.basename(f)}`).join(", ")}"
 open ${q(`${SNAP}/__Snapshots__/FeedScreenSnapshotTests`)} && ok "Finder: the goldens folder FeedScreenSnapshotTests"
@@ -376,6 +376,7 @@ open STRATEGY.pdf && ok "Preview: STRATEGY.pdf"
 open presentation/Demo-script.html && ok "This script: presentation/Demo-script.html (move it to your second device)"
 
 printf '\\n%s%sREADY.%s Branch: %s. Logs: %s/\\n' "$B" "$G" "$N" "$(git branch --show-current)" "$LOG"
+printf 'Tip: if VS Code already had other tabs open, close them (Cmd+K W) and re-run, so the tab numbers match the script.\\n'
 printf 'Now: bring Terminal to the front, enlarge the font (Cmd +), turn on Do Not Disturb, and start with the Opening.\\n'
 `;
 fs.writeFileSync(path.join(OUT, "setup.sh"), sh, { mode: 0o755 });
