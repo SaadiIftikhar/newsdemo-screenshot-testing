@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Before the presentation</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f3b;--ink2:#4a5270;--muted:#6b7389;--line:#e3e6ee;--teal:#0e8c99;--magenta:#c2185b;--green:#2e9e5b;
+--code-bg:#1b1f3b;--code-ink:#e8ecf5;--chip:#eef1f6;--shadow:0 1px 2px rgba(27,31,59,.06),0 4px 16px rgba(27,31,59,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2c3150;
+--teal:#3cc2cf;--magenta:#ff6fa3;--green:#5fd18f;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--chip:#262b4a;--shadow:none}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2c3150;--teal:#3cc2cf;--magenta:#ff6fa3;
+--green:#5fd18f;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--chip:#262b4a;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:0 16px 80px}
+header.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;gap:12px;align-items:center;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+header.top .brand{font-weight:700;margin-right:auto}
+h1{font-size:30px;line-height:1.2;margin:32px 0 8px}h2{font-size:22px;margin:40px 0 12px}h3{font-size:18px;margin:0}
+p.lead{color:var(--ink2);margin:0 0 20px;max-width:70ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 12px;color:var(--muted);font-size:14px}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;letter-spacing:.02em}
+.badge.live{background:var(--magenta);color:#fff}.badge.time{background:var(--chip);color:var(--ink2)}
+.goal{color:var(--ink2);margin:0 0 12px}.goal b{color:var(--ink)}
+blockquote{margin:0 0 16px;padding:12px 16px;border-left:3px solid var(--teal);background:var(--chip);border-radius:0 8px 8px 0;color:var(--ink)}
+blockquote p{margin:0 0 8px}blockquote p:last-child{margin:0}
+.label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 8px}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps>li{counter-increment:s;position:relative;padding:0 0 14px 40px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;
+font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.where{display:inline-block;font-size:12px;font-weight:700;color:var(--teal);background:var(--chip);border-radius:6px;padding:1px 8px;margin-right:6px}
+.see{color:var(--muted);font-size:14px;margin-top:6px}.see b{color:var(--ink2);font-weight:600}
+.cmd{display:flex;align-items:stretch;margin-top:8px;border-radius:8px;overflow:hidden;background:var(--code-bg)}
+.cmd code{flex:1;min-width:0;padding:10px 12px;color:var(--code-ink);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+.cmd code::before{content:"$ ";color:#7f88a8}
+.cmd button{flex:none;border:0;border-left:1px solid #2f3557;background:#262b4a;color:#e8ecf5;font:600 13px -apple-system,sans-serif;padding:0 14px;cursor:pointer;min-width:72px}
+.cmd button:hover{background:#323866}.cmd button.ok{background:var(--green);color:#0b0d1d}
+.cmd button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.fallback{margin-top:8px;font-size:14px;color:var(--ink2);background:color-mix(in srgb,var(--magenta) 8%,var(--card));border:1px solid color-mix(in srgb,var(--magenta) 25%,var(--line));border-radius:8px;padding:8px 12px}
+.bridge{margin-top:12px;font-size:14px;color:var(--ink2)}.bridge i{color:var(--ink)}
+nav.slides{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 20px}
+nav.slides a{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:13px}
+nav.slides a.live{border-color:var(--magenta)}
+.emergency{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.emergency .cmd{margin:0}.emergency .cmd code{padding:6px 10px;font-size:13px}.emergency .cmd button{min-width:60px}
+ul.tips{margin:0;padding-left:20px}ul.tips li{margin:0 0 6px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:6px 0}.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--teal)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+a{color:var(--teal)}
+.qa dt{font-weight:700;margin-top:12px}.qa dd{margin:4px 0 0;color:var(--ink2)}
+@media (max-width:600px){h1{font-size:24px}ol.steps>li{padding-left:34px}.cmd{flex-direction:column}.cmd button{min-height:36px;border-left:0;border-top:1px solid #2f3557}}
+</style></head><body>
+<header class="top"><div class="wrap"><span class="brand">1 · Before the presentation</span></div></header>
+<main class="wrap"><h1>Before the presentation</h1>
+<p class="lead">Run this 15–30 minutes before you present. It warms the build, warms the regression demo, builds the gallery, opens the simulator, VS Code, the GitHub tabs and the slides. Every command runs in <b>Terminal</b>, from the project folder.</p>
+<div class="card"><h3>The quick way: one command</h3><p class="goal">Runs every step below in order, explains each one as it runs, and ends on <code>main</code>. About 5–8 minutes.</p>
+<div class="cmd"><code>cd ~/Desktop/Task &amp;&amp; scripts/presentation/prepare.sh</code><button type="button" aria-label="Copy command">Copy</button></div>
+<div class="see"><b>You'll see at the end:</b> "All steps passed. You're ready." (The regression step prints a failure on purpose: that's the bug the demo catches.)</div></div>
+<h2>Or step by step</h2><div class="card"><h3>1. Go to the project, on the correct code</h3><p class="goal" style="margin:14px 0 0">Moves into the project folder. Every other command runs from here.</p><div class="cmd"><code>cd ~/Desktop/Task</code><button type="button" aria-label="Copy command">Copy</button></div><p class="goal" style="margin:14px 0 0">Switches to the correct code and fetches the latest version from GitHub.</p><div class="cmd"><code>git checkout main &amp;&amp; git pull</code><button type="button" aria-label="Copy command">Copy</button></div><p class="goal" style="margin:14px 0 0">Should say &quot;nothing to commit, working tree clean&quot;.</p><div class="cmd"><code>git status</code><button type="button" aria-label="Copy command">Copy</button></div></div><div class="card"><h3>2. Warm up the build and confirm everything is green</h3><p class="goal" style="margin:14px 0 0">Builds the project and runs all screenshot and logic tests (1–2 min the first time). Must end with &quot;no snapshot failures&quot;. After this, the live run on slide 4 takes ~40 s.</p><div class="cmd"><code>make ios-test</code><button type="button" aria-label="Copy command">Copy</button></div></div><div class="card"><h3>3. Warm up the regression demo (it fails on purpose)</h3><p class="goal" style="margin:14px 0 0">Builds the bug branch once, so the live demo on slide 6 is quick. It fails on purpose (29 failures); the last part switches back to main.</p><div class="cmd"><code>git checkout demo/regression &amp;&amp; make ios-test ; git checkout main</code><button type="button" aria-label="Copy command">Copy</button></div></div><div class="card"><h3>4. Build the page you'll open on slide 5</h3><p class="goal" style="margin:14px 0 0">Creates artifacts/gallery/index.html: every golden on one page.</p><div class="cmd"><code>make gallery</code><button type="button" aria-label="Copy command">Copy</button></div></div><div class="card"><h3>5. Start the simulator with the app</h3><p class="goal" style="margin:14px 0 0">Builds the app, boots the pinned simulator and opens it (first time ~1.5 min). After this, ios-run on slide 9 takes ~15 s.</p><div class="cmd"><code>make ios-run</code><button type="button" aria-label="Copy command">Copy</button></div></div><div class="card"><h3>6. Open the windows you'll switch between</h3><p class="goal" style="margin:14px 0 0">Opens the project in VS Code, so files open instantly during the talk.</p><div class="cmd"><code>open -a &quot;Visual Studio Code&quot; .</code><button type="button" aria-label="Copy command">Copy</button></div><p class="goal" style="margin:14px 0 0">Opens the browser tabs for slides 7 and 11.</p><div class="cmd"><code>open https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/1 https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/2 https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/actions</code><button type="button" aria-label="Copy command">Copy</button></div><p class="goal" style="margin:14px 0 0">Opens the deck in PowerPoint.</p><div class="cmd"><code>open presentation/Presentation.pptx</code><button type="button" aria-label="Copy command">Copy</button></div></div><h2>Checklist</h2><div class="card"><label class="check"><input type="checkbox" id="c0"><span>Terminal open in ~/Desktop/Task, font enlarged (Cmd +), on branch main</span></label><label class="check"><input type="checkbox" id="c1"><span>The simulator is open with the NewsDemo app</span></label><label class="check"><input type="checkbox" id="c2"><span>VS Code is open on the project</span></label><label class="check"><input type="checkbox" id="c3"><span>Browser: the regression PR, the redesign PR and the Actions tab, loaded</span></label><label class="check"><input type="checkbox" id="c4"><span>PowerPoint open (Presenter View if you have two screens)</span></label><label class="check"><input type="checkbox" id="c5"><span>This page and &quot;2 · Presenting with slides&quot; open in the browser, for copying commands</span></label><label class="check"><input type="checkbox" id="c6"><span>Do Not Disturb on; Slack and mail closed</span></label></div>
+<h2>Rules for the live parts</h2><div class="card"><ul class="tips">
+<li>Say what you're about to show <i>before</i> you run the command.</li>
+<li>The red test on slide 6 is the point: say "this is supposed to fail" before you run it.</li>
+<li>Never run <code>make ios-record</code> live: it rewrites the goldens.</li>
+<li>Always end the demo with <code>git checkout main</code>.</li>
+<li>If something breaks, don't debug it in front of them: use the fallback written under that slide.</li></ul></div></main><script>
+function copyText(t){if(navigator.clipboard&&window.isSecureContext){return navigator.clipboard.writeText(t)}
+return new Promise(function(res,rej){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();
+try{document.execCommand('copy')?res():rej()}catch(e){rej(e)}finally{document.body.removeChild(a)}})}
+document.addEventListener('click',function(e){var b=e.target.closest('.cmd button');if(!b)return;var t=b.parentElement.querySelector('code').textContent;
+copyText(t).then(function(){b.textContent='Copied';b.classList.add('ok');setTimeout(function(){b.textContent='Copy';b.classList.remove('ok')},1400)},
+function(){b.textContent='Select';})});
+document.querySelectorAll('.check input').forEach(function(c){var k='chk:'+location.pathname+':'+c.id;try{c.checked=localStorage.getItem(k)==='1'}catch(e){}
+c.addEventListener('change',function(){try{localStorage.setItem(k,c.checked?'1':'0')}catch(e){}})});
+</script></body></html>

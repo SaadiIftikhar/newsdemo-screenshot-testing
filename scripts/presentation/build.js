@@ -1,6 +1,6 @@
 // Builds presentation/Screenshot-Testing-Presentation.pptx.
 // Slide text lives here; speaker notes and LIVE tags come from content.js (also the source of SCRIPT.md / COMMANDS.md).
-// Run: presentation/src/build.sh
+// Run: scripts/presentation/build.sh
 const path = require("path");
 const pptxgen = require("pptxgenjs");
 const { applyTheme } = require(process.env.APPLY_THEME);
@@ -96,12 +96,12 @@ pres.addSection({ title: S.intro });
 let s = addSlide({ masterName: "Title dark", sectionTitle: S.intro });
 s.addText("Catching visual bugs before readers do", { placeholder: "title" });
 s.addText([
-  { text: "Screenshot testing with mocked data for the BILD and WELT apps, on iOS and Android", options: { breakLine: true } },
+  { text: "Screenshot testing with mocked data for the BILD and WELT apps. Built for iOS, the same approach for Android.", options: { breakLine: true } },
   { text: " ", options: { breakLine: true, fontSize: 8 } },
   { text: "Saad Iftikhar · QA Engineer", options: { color: C.background1, bold: true } },
 ], { placeholder: "body" });
-phone(s, "ios_feed.png", 5.9, 0.75, 3.9, "iOS", C.accent6);
-phone(s, "and_feed.png", 7.9, 0.75, 3.9, "Android", C.accent6);
+phone(s, "ios_feed.png", 5.9, 0.75, 3.9, "Light", C.accent6);
+phone(s, "ios_feed_dark.png", 7.9, 0.75, 3.9, "Dark", C.accent6);
 
 // 2. Problem
 s = addSlide({ masterName: "Content", sectionTitle: S.intro });
@@ -135,17 +135,17 @@ s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 8.5, y: 2.35, w: 1.0, h: 0.7, rec
 s.addText("Different: fail + diff", { x: 8.5, y: 2.35, w: 1.0, h: 0.7, fontSize: 11, bold: true, color: C.background1, align: "center", valign: "middle", margin: 0, isTextBox: true });
 s.addText(bullets([
   "Inputs are frozen, so a difference always means the code changed how a screen looks",
-  "Same fixtures and the same test names on iOS and Android: one regression fails on both, in the same places",
+  "The fixtures are plain JSON: Android can use the very same files and test names",
   "A human reviews every difference: machines compare, people decide",
 ]), { x: 0.5, y: 3.4, w: 9, h: 1.6, color: C.text2, margin: 0, valign: "top", isTextBox: true });
 
 // 4. Tooling
 s = addSlide({ masterName: "Content", sectionTitle: S.how });
 s.addText("Tooling: native, in-process, fast", { placeholder: "title" });
-card(s, 0.5, 1.3, 4.35, 2.45, "iOS: swift-snapshot-testing",
+card(s, 0.5, 1.3, 4.35, 2.45, "iOS (this demo): swift-snapshot-testing",
   "Point-Free's library, pinned. Renders SwiftUI in-process on a pinned simulator. Fits a TCA codebase: mocking reuses withDependencies.\n\nAbout 40 s for 89 screenshots and 35 logic tests.");
 card(s, 5.15, 1.3, 4.35, 2.45, "Android: Roborazzi on Robolectric",
-  "Runs on the JVM, no emulator. Works with Hilt. The same run also drives tap-and-type interaction tests and accessibility checks.\n\nAbout 20 s for 89 screenshots and 52 other tests.");
+  "The same approach for Compose: renders on the JVM, no emulator, works with Hilt, and the same run drives interaction and accessibility checks.\n\nBuilt in an earlier version of this demo: 89 screenshots in ~20 s.");
 s.addText([
   { text: "Rejected for the PR gate: ", options: { bold: true, color: C.text1 } },
   { text: "Paparazzi (2.0 alpha, no Hilt), Compose Preview Screenshot Testing (alpha), Appium or Maestro with a paid visual service (minutes per screen, flakier). Device-level tools stay, as a nightly Layer 2 for what in-process rendering can't see: system chrome, real devices, hostile settings.", options: { color: C.text2 } },
@@ -161,8 +161,8 @@ s.addText(bullets([
   "Real data changes are tested without screenshots: decoder contract tests, a fuzz test, hostile-content fixtures",
   "When the API changes, the fixture is refreshed in its own PR, which shows exactly which goldens change",
 ]), { x: 0.5, y: 1.3, w: 5.2, h: 3.7, color: C.text2, margin: 0, valign: "top", isTextBox: true });
-phone(s, "ios_feed.png", 6.15, 1.2, 3.55, "iOS");
-phone(s, "and_feed.png", 8.0, 1.2, 3.55, "Android");
+phone(s, "ios_feed.png", 6.15, 1.2, 3.55, "Feed, light");
+phone(s, "ios_feed_xxxl.png", 8.0, 1.2, 3.55, "Largest text");
 
 // 6. Regression demo
 pres.addSection({ title: S.proof });
@@ -174,7 +174,7 @@ s.addText("Demo: a refactor drops the PLUS badge", { placeholder: "title" });
 s.addImage({ path: A("reg_teaser.png"), x: 1.25, y: 1.5, w: 7.5, h: 7.5 * 598 / 1800,
   altText: "Diff of the premium teaser: golden with PLUS badge, this PR without it, changed pixels in magenta", objectName: "regression diff" });
 stat(s, 1.25, 4.1, 2.5, "29 of 89", "screenshots fail", C.accent2, 24);
-stat(s, 3.75, 4.1, 2.5, "Same 29", "on iOS and on Android", undefined, 24);
+stat(s, 3.75, 4.1, 2.5, "60 green", "unaffected screens stay green", C.accent4, 24);
 stat(s, 6.25, 4.1, 2.5, "10 + 19", "layout + visible, 0 subtle", C.text1, 24);
 
 // 7. Review workflow
@@ -194,7 +194,7 @@ s.addText("Goldens never come from a laptop. Approval is never automatic.", { x:
 // 8. Tolerance
 s = addSlide({ masterName: "Content", sectionTitle: S.proof });
 s.addText("How much difference is allowed?", { placeholder: "title" });
-card(s, 0.5, 1.3, 2.85, 2.6, "Rendering noise: ignored", "iOS: perceptual precision 0.98 absorbs GPU anti-aliasing.\nAndroid: measured Mac vs Linux, at most 2/255 on 0.005% of pixels: inside the tolerance.", { titleColor: C.accent4 });
+card(s, 0.5, 1.3, 2.85, 2.6, "Rendering noise: ignored", "Perceptual precision 0.98 absorbs GPU anti-aliasing: differences no person can see. A 2pt shift still fails.", { titleColor: C.accent4 });
 card(s, 3.575, 1.3, 2.85, 2.6, "Any real change: fails", "A 2pt shift and a missing badge are both \"small\". Both are bugs. A pixel count can't tell intent.", { titleColor: C.accent2 });
 card(s, 6.65, 1.3, 2.85, 2.6, "Triage, not approval", "Each change is labelled layout, visible or subtle, so the reviewer knows what to look for. A person still decides.", { titleColor: C.accent1 });
 s.addText("No \"small diff = auto-pass\". Tolerance is never loosened globally; a per-test exception needs a comment and a review.",
@@ -222,9 +222,9 @@ s.addText("Plus a seeded fuzz test: one feed item corrupted 300 ways, and every 
 // 10. Beyond pixels
 s = addSlide({ masterName: "Content", sectionTitle: S.edge });
 s.addText("Beyond pixels: checks that can actually fail", { placeholder: "title" });
-[["Accessibility audits on every screen", "Apple's audit on iOS, Google's ATF on Android. They found hidden tabs still reachable by VoiceOver: invisible in every screenshot."],
- ["Guards against green-but-empty tests", "Golden lint (blank images, iOS/Android name parity), a capture guard, fixture preconditions such as \"the premium teaser is premium\"."],
- ["Every guard is shown to fail first", "Google's Compose accessibility hook checked nothing under Robolectric: a broken button passed. It was replaced."]].forEach(([t, b], i) => {
+[["Accessibility audits on every screen", "Apple's audit runs on the real app. It found hidden tabs still reachable by VoiceOver: invisible in every screenshot."],
+ ["Guards against green-but-empty tests", "Golden lint (blank images), recording from an empty folder, fixture preconditions such as \"the premium teaser is premium\"."],
+ ["Every guard is shown to fail first", "A check that can't fail protects nothing. On the Android version, an official accessibility hook silently checked nothing: a broken button passed."]].forEach(([t, b], i) => {
   const y = 1.3 + i * 1.2;
   dot(s, i + 1, 0.5, y + 0.05, i === 2 ? C.accent2 : C.accent1);
   s.addText(t, { x: 1.1, y, w: 4.7, h: 0.38, fontSize: 15, bold: true, color: C.text1, margin: 0, isTextBox: true });
@@ -238,12 +238,11 @@ s = addSlide({ masterName: "Content", sectionTitle: S.rollout });
 s.addText("CI/CD: proven on GitHub Actions", { placeholder: "title" });
 s.addText([
   { text: "When it runs", options: { bold: true, fontSize: 15, color: C.text1, breakLine: true } },
-  ...bullets(["Every PR, on its merge result", "The merge queue", "Main, after merge", "Nightly, to catch toolchain drift"], 13),
+  ...bullets(["Every PR, on its merge result", "The merge queue", "Main, after merge", "Nightly in production (off in the demo)"], 13),
 ], { x: 0.5, y: 1.3, w: 2.9, h: 2.4, color: C.text2, margin: 0, valign: "top", isTextBox: true });
-stat(s, 0.5, 3.7, 1.4, "1–6 min", "Android", undefined, 22);
-stat(s, 1.95, 3.7, 1.6, "12–19 min", "iOS, incl. UI tests", C.text1, 22);
+stat(s, 0.5, 3.7, 3.0, "12–19 min", "full iOS run, incl. UI tests and the accessibility audit", C.text1, 24);
 card(s, 3.75, 1.3, 5.75, 3.7, "What real CI taught us",
-  "• The pinned iOS 26.5 simulator wasn't on GitHub's Xcode 27 machines: re-pinned to 27.0 and re-recorded on CI, in one reviewed PR\n• A tool (xcodegen) wasn't on the runner: now installed, pinned\n• The first flaky UI test: fixed at the cause, with explicit waits; never retried\n• A Mac verifies the CI-recorded goldens: local equals CI\n• macOS minutes cost 10× on a private repo: run iOS only when iOS files change",
+  "• The pinned iOS 26.5 simulator wasn't on GitHub's Xcode 27 machines: re-pinned to 27.0 and re-recorded on CI, in one reviewed PR\n• A tool (xcodegen) wasn't on the runner: now installed, pinned\n• The first flaky UI test: fixed at the cause, with explicit waits; never retried\n• A Mac verifies the CI-recorded goldens: local equals CI\n• macOS minutes are expensive (10× on private repos): at scale, run iOS only when iOS files change",
   { bodySize: 12 });
 
 // 12. Rollout
@@ -263,13 +262,31 @@ s.addText([
   { text: "developers write and keep the tests; QA owns the strategy, the fixtures and the matrix rules; design approves goldens. AI may triage diffs, a human approves.", options: { color: C.text2 } },
 ], { x: 0.5, y: 4.3, w: 9, h: 0.75, fontSize: 13, margin: 0, valign: "top", isTextBox: true });
 
-// 13. Close
+// 13. Android
+s = addSlide({ masterName: "Content", sectionTitle: S.rollout });
+s.addText("Android: the same approach", { placeholder: "title" });
+const ahdr = (t) => ({ text: t, options: { bold: true, color: C.background1, fill: { color: C.text1 }, fontSize: 12 } });
+const acell = (t, b) => ({ text: t, options: { color: C.text2, fontSize: 12, bold: !!b } });
+s.addTable([
+  [ahdr(""), ahdr("iOS (this demo)"), ahdr("Android (same design)")],
+  [acell("Fake data", true), acell("fixtures/*.json"), acell("the same files")],
+  [acell("Screenshot tool", true), acell("swift-snapshot-testing"), acell("Roborazzi on Robolectric (JVM, no emulator)")],
+  [acell("Seam for mocks", true), acell("TCA withDependencies"), acell("Hilt @TestInstallIn, Coil fake engine")],
+  [acell("Test + golden names", true), acell("test_feed_default.light.png"), acell("the same names → the same failures")],
+  [acell("CI", true), acell("macOS runner (xcode-27)"), acell("Linux runner, in parallel")],
+], { x: 0.5, y: 1.25, w: 9, colW: [2.0, 3.2, 3.8], border: { type: "solid", pt: 0.5, color: "D5DAE3" }, fill: { color: C.background1 }, rowH: 0.42, margin: 0.08 });
+s.addText([
+  { text: "Built and then cut from this demo: ", options: { bold: true, color: C.text1 } },
+  { text: "the Android version ran the same 89 screenshots in ~20 s, failed on the same 29 in the regression, and found a decoder difference that made a PLUS article free.", options: { color: C.text2 } },
+], { x: 0.5, y: 4.0, w: 9, h: 0.9, fontSize: 13, margin: 0, valign: "top", isTextBox: true });
+
+// 14. Close
 s = addSlide({ masterName: "Title dark", sectionTitle: S.rollout });
 s.addText("Takeaways", { placeholder: "title" });
 s.addText([
   { text: "Frozen data makes every difference meaningful", options: { bullet: true, breakLine: true } },
-  { text: "Same fixtures and names: one regression, the same failures on iOS and Android", options: { bullet: true, breakLine: true } },
   { text: "Machines compare; a person decides what's intended", options: { bullet: true, breakLine: true } },
+  { text: "The same fixtures carry the approach to Android", options: { bullet: true, breakLine: true } },
   { text: "Questions?", options: { bold: true, color: C.background1, fontSize: 20 } },
 ], { placeholder: "body" });
 phone(s, "ios_feed_xxxl.png", 5.9, 0.75, 3.9, "Largest text", C.accent6);
