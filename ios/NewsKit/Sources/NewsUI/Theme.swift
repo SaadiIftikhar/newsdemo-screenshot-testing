@@ -48,7 +48,7 @@ public enum NewsTheme {
     public static let tabBarBorder = Color(uiColor: NewsPalette.tabBarBorder)
 
     public static let spacing: CGFloat = 12
-    public static let cornerRadius: CGFloat = 10
+    public static let cornerRadius: CGFloat = 14
 }
 
 /// Relative German timestamps, driven by injected `now` and time zone.
