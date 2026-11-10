@@ -31,38 +31,41 @@ const vs = (file) => `VS Code tab ${tab(vscodeTabs, file)} "${path.basename(file
 const br = (url) => `browser tab ${tab(browserTabs, url)}`;
 
 // ---------- the talk track ----------
-// step: { where, what, cmd?, see? }  — cmd only for things you RUN live; everything else is already open.
+// Each section is a list of beats. A beat = what to show (window/tab, or a command you run live) + what to say while it's on screen.
+// show: { where, what, cmd?, see? } — cmd only for things you RUN live; everything else is already open.
 const demo = [
   {
     title: "Opening", min: 1,
     goal: "Say who you are, what they'll see, and that everything is real.",
-    say: `Hi, I'm Saad. Instead of slides, I'll show you the project itself: a small news app in SwiftUI, the screenshot tests around it, and the CI pipeline on GitHub.
+    beats: [
+      { show: [{ where: "Terminal", what: "Start here. setup.sh left you in the project folder, on main." }],
+        say: `Hi, I'm Saad. Instead of slides, I'll show you the project itself: a small news app in SwiftUI, the screenshot tests around it, and the CI pipeline on GitHub.
 
-The question it answers: how do we catch visual bugs in the BILD and WELT apps, like a PLUS badge that silently disappears, before a reader sees them, even though the news content changes every minute? I'll show how it works, break it on purpose, and show what happens next. At the end, how the same approach works on Android.`,
-    steps: [{ where: "Terminal", what: "Start here. setup.sh left you in the project folder, on main." }],
+The question it answers: how do we catch visual bugs in the BILD and WELT apps, like a PLUS badge that silently disappears, before a reader sees them, even though the news content changes every minute? I'll show how it works, break it on purpose, and show what happens next. At the end, how the same approach works on Android.` },
+    ],
     next: "Let me start with what's in the repo.",
   },
   {
     title: "1. What's in the repo", min: 1.5,
     goal: "Give them a map before you go into details.",
-    say: `It's one repository. fixtures holds the fake data every test uses. ios holds the app and its tests. scripts holds small helpers like the diff report, and docs holds the strategy evidence and the captured regression.
-
-Everything you can do is one make command, so nobody has to remember long Xcode commands. Here they all are.`,
-    steps: [
-      { where: "VS Code", what: "The Explorer on the left shows the folders: fixtures, ios, scripts, docs, presentation, plus Makefile and README.md." },
-      { where: "Terminal", what: "List every command.", cmd: "make help", see: "ios-test, ios-ui-test, lint-goldens, gallery, ios-record, ios-run… each with a one-line description." },
+    beats: [
+      { show: [{ where: "VS Code", what: "The Explorer on the left: fixtures, ios, scripts, docs, presentation, plus Makefile and README.md." }],
+        say: `It's one repository. fixtures holds the fake data every test uses. ios holds the app and its tests. scripts holds small helpers like the diff report, and docs holds the strategy evidence and the captured regression.` },
+      { show: [{ where: "Terminal", what: "List every command.", cmd: "make help", see: "ios-test, ios-ui-test, lint-goldens, gallery, ios-record, ios-run… each with a one-line description." }],
+        say: `Everything you can do is one make command, so nobody has to remember long Xcode commands. Here they all are.` },
     ],
     next: "First, the app itself, so you know what we're testing.",
   },
   {
     title: "2. The app", min: 2,
     goal: "They see the real product the tests protect, including the PLUS paywall.",
-    say: `This is the app, running on fake data. A news feed with a breaking banner, a live ticker, teasers, video and ads; a games tab; and an account tab.
-
-The important one for today is this PLUS article. If I'm not a subscriber and I tap it, I get the paywall. If I log in as the demo subscriber, it opens. That PLUS badge is exactly the thing a refactor could break without anyone noticing.`,
-    steps: [
-      { where: "Simulator", what: "The NewsDemo app is already open on the feed. Scroll to the Tesla article with the PLUS badge and tap it: the paywall appears. Close it." },
-      { where: "Simulator", what: "Konto tab → log in with demo@newsdemo.app / demo1234 → back to Nachrichten → tap the Tesla article again: it opens." },
+    beats: [
+      { show: [{ where: "Simulator", what: "The NewsDemo app, open on the feed. Scroll slowly." }],
+        say: `This is the app, running on fake data. A news feed with a breaking banner, a live ticker, teasers, video and ads; a games tab; and an account tab.` },
+      { show: [{ where: "Simulator", what: "Scroll to the Tesla article with the PLUS badge and tap it: the paywall appears. Close it." }],
+        say: `The important one for today is this PLUS article. If I'm not a subscriber and I tap it, I get the paywall.` },
+      { show: [{ where: "Simulator", what: "Konto tab → log in with demo@newsdemo.app / demo1234 → back to Nachrichten → tap the Tesla article again: it opens." }],
+        say: `If I log in as the demo subscriber, it opens. That PLUS badge is exactly the thing a refactor could break without anyone noticing.` },
     ],
     fallback: "If the simulator is closed or slow, run make ios-run (~15 s), or describe the screens; you'll see them as goldens in section 3.",
     next: "So how do we test all these states without clicking through them?",
@@ -70,51 +73,60 @@ The important one for today is this PLUS article. If I'm not a subscriber and I 
   {
     title: "3. How one screenshot test works", min: 3,
     goal: "They understand fixture → render → golden, with real files.",
-    say: `Three pieces. One: the fixture, frozen fake API data. This file is the feed the tests read; this item has premium: true, that's the PLUS article.
-
-Two: the test. One line renders the real production feed screen with that data, in memory, and compares it with an approved picture.
-
-Three: that approved picture, the golden, stored in git. One PNG per screen and variant: light, dark, the largest text size. If the new picture matches, the test passes. If not, it fails and shows me the difference. And here are all 89 approved states on one page.`,
-    steps: [
-      { where: "VS Code", what: `${vs("fixtures/feed/feed_default.json")}.`, see: "Point at \"premium\": true on the item tsr-002." },
-      { where: "VS Code", what: `${vs(`${SNAP}/FeedScreenSnapshotTests.swift`)}.`, see: "func test_feed_default: one line renders the real feed with the fixture and compares it." },
-      { where: "Finder", what: "The window \"FeedScreenSnapshotTests\" (the goldens folder).", see: "test_feed_default.light.png, .dark.png, .light_xxxl.png… Press Space on one to preview it." },
-      { where: "Browser", what: `${br("artifacts/gallery/index.html")}: the gallery.`, see: "All 89 approved screenshots, grouped by test; light, dark and largest text side by side." },
+    beats: [
+      { show: [{ where: "VS Code", what: `${vs("fixtures/feed/feed_default.json")}.`, see: "Point at \"premium\": true on the item tsr-002." }],
+        say: `Three pieces. One: the fixture, frozen fake API data. This file is the feed the tests read; this item has premium: true, that's the PLUS article.` },
+      { show: [{ where: "VS Code", what: `${vs(`${SNAP}/FeedScreenSnapshotTests.swift`)}.`, see: "func test_feed_default: one line renders the real feed with the fixture and compares it." }],
+        say: `Two: the test. One line renders the real production feed screen with that data, in memory, and compares it with an approved picture.` },
+      { show: [{ where: "Finder", what: "The window \"FeedScreenSnapshotTests\" (the goldens folder).", see: "test_feed_default.light.png, .dark.png, .light_xxxl.png… Press Space on one to preview it." }],
+        say: `Three: that approved picture, the golden, stored in git. One PNG per screen and variant: light, dark, the largest text size. If the new picture matches, the test passes. If not, it fails and shows me the difference.` },
+      { show: [{ where: "Browser", what: `${br("artifacts/gallery/index.html")}: the gallery.`, see: "All 89 approved screenshots, grouped by test; light, dark and largest text side by side." }],
+        say: `And here are all 89 approved states on one page.` },
     ],
     next: "But a news app changes every minute. Won't these pictures be outdated tomorrow?",
   },
   {
     title: "4. Content changes, goldens don't", min: 1.5,
     goal: "Answer the obvious question before they ask it.",
-    say: `No, because a golden belongs to a fixture, not to live news. The fixture is frozen, and so is everything else that varies: the clock, the German locale, the Berlin time zone, random numbers, animations and images. "vor 9 Min." stays "vor 9 Min." forever, so a difference can only mean the code changed.
+    beats: [
+      { show: [{ where: "VS Code", what: `${vs("ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift")}.`, see: "FixtureEnvironment: now = 2026-11-05 14:13:20Z, locale de_DE, time zone Europe/Berlin." }],
+        say: `No, because a golden belongs to a fixture, not to live news. The fixture is frozen, and so is everything else that varies: the clock, the German locale, the Berlin time zone, random numbers, animations and images. "vor 9 Min." stays "vor 9 Min." forever, so a difference can only mean the code changed.
 
-What does change in reality is the shape of the data, and that's tested without screenshots: contract tests, a fuzz test, and messy-content fixtures. I'll show those later.`,
-    steps: [{ where: "VS Code", what: `${vs("ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift")}.`, see: "FixtureEnvironment: now = 2026-11-05 14:13:20Z, locale de_DE, time zone Europe/Berlin." }],
+What does change in reality is the shape of the data, and that's tested without screenshots: contract tests, a fuzz test, and messy-content fixtures. I'll show those later.` },
+    ],
     next: "Let me show you everything is green right now.",
   },
   {
     title: "5. Everything is green", min: 1.5,
     goal: "A real, passing run on the correct code.",
-    say: `This runs every screenshot and every logic test: 89 screenshots and 35 logic tests. It takes under a minute, because the screens are drawn in memory: no app launch, no tapping, no network. [While it runs:] The same command runs in CI on every pull request.`,
-    steps: [{ where: "Terminal", what: "Run all tests.", cmd: "make ios-test", see: "~40–60 s, ends with \"no snapshot failures\"." }],
+    beats: [
+      { show: [{ where: "Terminal", what: "Run all tests.", cmd: "make ios-test", see: "~40–60 s, ends with \"no snapshot failures\"." }],
+        say: `This runs every screenshot and every logic test: 89 screenshots and 35 logic tests. It takes under a minute, because the screens are drawn in memory: no app launch, no tapping, no network.
+
+[While it runs:] The same command runs in CI on every pull request.` },
+    ],
     fallback: "If it's slow, keep talking; setup.sh already ran it green.",
     next: "Now the interesting part: does it catch a real bug?",
   },
   {
     title: "6. Break it on purpose", min: 3.5,
     goal: "The core moment: a harmless-looking change is caught.",
-    say: `This branch contains a plausible refactor: "simplify the kicker row, tighten the banner". It's one file, a few lines, and it looks harmless in a code review. By accident it drops the PLUS badge and takes 2 points of padding off the breaking banner.
+    beats: [
+      { show: [{ where: "Terminal", what: "Show how small the change is.", cmd: "git diff main...demo/regression --stat", see: "1 file changed." }],
+        say: `This branch contains a plausible refactor: "simplify the kicker row, tighten the banner". It's one file, a few lines, and it looks harmless in a code review. By accident it drops the PLUS badge and takes 2 points of padding off the breaking banner.` },
+      { show: [
+          { where: "Terminal", what: "Switch to the branch with the bug.", cmd: "git checkout demo/regression", see: "Switched to branch 'demo/regression'." },
+          { where: "Terminal", what: "Run the tests: they must fail.", cmd: "make ios-test", see: "~1 min, fails: \"diff report: 29 failure(s)\"." },
+        ],
+        say: `This is supposed to fail.
 
-This is supposed to fail. [While it runs, ~1 min:] Every screen with a PLUS teaser or the banner should go red; everything else should stay green.
-
-29 of 89 screenshots fail, and the other 60 stay green: games, account, the paywall. Here is the diff: the approved picture, the new one, and in magenta the pixels that changed. The badge is simply gone. And the summary already says what kind of change each one is: 10 layout changes, because the banner got shorter, and 19 visible ones. That table is what CI posts on the pull request.`,
-    steps: [
-      { where: "Terminal", what: "Show how small the change is.", cmd: "git diff main...demo/regression --stat", see: "1 file changed." },
-      { where: "Terminal", what: "Switch to the branch with the bug.", cmd: "git checkout demo/regression", see: "Switched to branch 'demo/regression'." },
-      { where: "Terminal", what: "Run the tests: they must fail.", cmd: "make ios-test", see: "~1 min, fails: \"diff report: 29 failure(s)\"." },
-      { where: "Browser", what: "Open the diff page (it only exists after this failing run).", cmd: "open artifacts/ios/diffs/index.html", see: "Scroll to ComponentSnapshotTests/test_teaserCard_premium.dark: golden with PLUS | new without | magenta." },
-      { where: "Terminal", what: "Show the triage summary.", cmd: "cat artifacts/ios/diffs/summary.md", see: "29 changed (layout: 10, visible: 19, subtle: 0)." },
-      { where: "Terminal", what: "ALWAYS switch back to the correct code.", cmd: "git checkout main", see: "Switched to branch 'main'." },
+[While it runs, ~1 min:] Every screen with a PLUS teaser or the banner should go red; everything else should stay green.` },
+      { show: [{ where: "Browser", what: "Open the diff page (it only exists after this failing run).", cmd: "open artifacts/ios/diffs/index.html", see: "Scroll to ComponentSnapshotTests/test_teaserCard_premium.dark: golden with PLUS | new without | magenta." }],
+        say: `29 of 89 screenshots fail, and the other 60 stay green: games, account, the paywall. Here is the diff: the approved picture, the new one, and in magenta the pixels that changed. The badge is simply gone.` },
+      { show: [{ where: "Terminal", what: "Show the triage summary.", cmd: "cat artifacts/ios/diffs/summary.md", see: "29 changed (layout: 10, visible: 19, subtle: 0)." }],
+        say: `And the summary already says what kind of change each one is: 10 layout changes, because the banner got shorter, and 19 visible ones. That table is what CI posts on the pull request.` },
+      { show: [{ where: "Terminal", what: "ALWAYS switch back to the correct code.", cmd: "git checkout main", see: "Switched to branch 'main'." }],
+        say: `And back to the correct code.` },
     ],
     fallback: "If anything goes wrong: git checkout main, then open docs/regression in Finder (the captured CI result). \"Here's the captured run.\"",
     next: "The gate failed. What happens next is a human decision.",
@@ -122,15 +134,13 @@ This is supposed to fail. [While it runs, ~1 min:] Every screen with a PLUS teas
   {
     title: "7. A human decides", min: 2,
     goal: "Show both outcomes, live on GitHub.",
-    say: `When a pull request fails, a person looks at the diff and decides.
-
-If it's a bug, like this one, we fix the code and the goldens stay. This is that change as a pull request: blocked, with the bot's table.
-
-If the change is intended, like a redesign, we add the record-snapshots label. CI re-records the goldens on its fixed machine, proves them, and pushes them as a bot commit; then a design or QA code owner approves the new pictures. This second pull request did exactly that: rounder cards, 33 screenshots changed on purpose, re-recorded by the bot, then green. Goldens never come from someone's laptop, and approval is never automatic.`,
-    steps: [
-      { where: "Browser", what: `${br(`${GH}/pull/1`)}: PR #1.`, see: "Red check; the bot comment: 29 changed (10 layout, 19 visible)." },
-      { where: "Browser", what: `${br(`${GH}/pull/2/commits`)}: PR #2's commits.`, see: "\"snapshot-bot: chore(snapshots): re-record iOS goldens\", then green checks." },
-      { where: "VS Code", what: `${vs(".github/CODEOWNERS")}.`, see: "Golden folders need design/QA review." },
+    beats: [
+      { show: [{ where: "Browser", what: `${br(`${GH}/pull/1`)}: PR #1.`, see: "Red check; the bot comment: 29 changed (10 layout, 19 visible)." }],
+        say: `When a pull request fails, a person looks at the diff and decides. If it's a bug, like this one, we fix the code and the goldens stay. This is that change as a pull request: blocked, with the bot's table.` },
+      { show: [{ where: "Browser", what: `${br(`${GH}/pull/2/commits`)}: PR #2's commits.`, see: "\"snapshot-bot: chore(snapshots): re-record iOS goldens\", then green checks." }],
+        say: `If the change is intended, like a redesign, we add the record-snapshots label. CI re-records the goldens on its fixed machine, proves them, and pushes them as a bot commit. This second pull request did exactly that: rounder cards, 33 screenshots changed on purpose, re-recorded by the bot, then green.` },
+      { show: [{ where: "VS Code", what: `${vs(".github/CODEOWNERS")}.`, see: "Golden folders need design/QA review." }],
+        say: `Then a design or QA code owner approves the new pictures; this file enforces that. Goldens never come from someone's laptop, and approval is never automatic.` },
     ],
     fallback: "Offline? Open docs/regression/summary.md in Finder: \"this is what the bot posts\".",
     next: "One more question: how small a difference do we allow?",
@@ -138,20 +148,22 @@ If the change is intended, like a redesign, we add the record-snapshots label. C
   {
     title: "8. How much difference is allowed", min: 1,
     goal: "Show you thought about tolerance and human confirmation.",
-    say: `Rendering noise no person can see is ignored: a perceptual precision of 0.98 absorbs GPU anti-aliasing. Anything beyond that fails, however small: a 2-point shift and a missing badge are both small, and both are bugs. A pixel count can't tell intent, so the labels are triage, never approval. And tolerance is never loosened globally.`,
-    steps: [{ where: "VS Code", what: `${vs(`${SNAP}/SnapshotSupport.swift`)} (optional).`, see: "perceptualPrecision: 0.98, with the reason in a comment." }],
+    beats: [
+      { show: [{ where: "VS Code", what: `${vs(`${SNAP}/SnapshotSupport.swift`)}.`, see: "perceptualPrecision: 0.98, with the reason in a comment." }],
+        say: `Rendering noise no person can see is ignored: a perceptual precision of 0.98 absorbs GPU anti-aliasing. Anything beyond that fails, however small: a 2-point shift and a missing badge are both small, and both are bugs. A pixel count can't tell intent, so the labels are triage, never approval. And tolerance is never loosened globally.` },
+    ],
     next: "Now the messy reality of news content.",
   },
   {
     title: "9. Messy content and offline", min: 2.5,
     goal: "Product thinking: real content is messy, and the app handles it.",
-    say: `This fixture is what a content system really sends: ampersand entities, line breaks inside headlines, emoji, a live ticker with no entries yet, and a video over an hour long.
-
-In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03 instead of 62:03. And offline: the first load works, then the connection drops. When I pull to refresh, the articles stay, with the time they were loaded, instead of an error screen.`,
-    steps: [
-      { where: "VS Code", what: `${vs("fixtures/feed/feed_hostile_content.json")}.`, see: "&amp;, line breaks inside headlines, \"durationSeconds\": 3723." },
-      { where: "Simulator", what: "Relaunch the app with that fixture.", cmd: "make ios-run FIXTURE=feed_hostile_content", see: "~15–40 s: clean headlines, \"Noch keine Einträge\", the 1:02:03 video." },
-      { where: "Simulator", what: "Relaunch in drop-connection mode, then drag the feed down.", cmd: "make ios-run DROP_CONNECTION=1", see: "\"Offline – gespeicherte Artikel · Stand 15:13 Uhr\"; the articles stay." },
+    beats: [
+      { show: [{ where: "VS Code", what: `${vs("fixtures/feed/feed_hostile_content.json")}.`, see: "&amp;, line breaks inside headlines, \"durationSeconds\": 3723." }],
+        say: `This fixture is what a content system really sends: ampersand entities, line breaks inside headlines, emoji, a live ticker with no entries yet, and a video over an hour long.` },
+      { show: [{ where: "Simulator", what: "Relaunch the app with that fixture.", cmd: "make ios-run FIXTURE=feed_hostile_content", see: "~15–40 s: clean headlines, \"Noch keine Einträge\", the 1:02:03 video." }],
+        say: `In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03 instead of 62:03.` },
+      { show: [{ where: "Simulator", what: "Relaunch in drop-connection mode, then drag the feed down.", cmd: "make ios-run DROP_CONNECTION=1", see: "\"Offline – gespeicherte Artikel · Stand 15:13 Uhr\"; the articles stay." }],
+        say: `And offline: the first load works, then the connection drops. When I pull to refresh, the articles stay, with the time they were loaded, instead of an error screen.` },
     ],
     fallback: "If the simulator is slow, show the fixture only and describe the result.",
     next: "Screenshots only see pixels, so there are checks that see more.",
@@ -159,20 +171,22 @@ In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03
   {
     title: "10. Safety nets", min: 1.5,
     goal: "Show the tests can't pass while protecting nothing.",
-    say: `A blank golden would make a test pass while protecting nothing, so a lint rejects them. Apple's accessibility audit runs on every screen of the real app; it found hidden tabs that VoiceOver could still reach, which no screenshot can show. And my rule: every check is shown to fail once before I trust it.`,
-    steps: [
-      { where: "Terminal", what: "Run the golden lint.", cmd: "make lint-goldens", see: "\"checked 89 image(s)\" in ~2 s." },
-      { where: "VS Code", what: `${vs("ios/UITests/AccessibilityAuditTests.swift")} (optional; don't run it live, it takes ~5 min).`, see: "The audit and its documented exceptions." },
+    beats: [
+      { show: [{ where: "Terminal", what: "Run the golden lint.", cmd: "make lint-goldens", see: "\"checked 89 image(s)\" in ~2 s." }],
+        say: `A blank golden would make a test pass while protecting nothing, so a lint rejects them.` },
+      { show: [{ where: "VS Code", what: `${vs("ios/UITests/AccessibilityAuditTests.swift")} (don't run it live, it takes ~5 min).`, see: "The audit and its documented exceptions." }],
+        say: `Apple's accessibility audit runs on every screen of the real app; it found hidden tabs that VoiceOver could still reach, which no screenshot can show. And my rule: every check is shown to fail once before I trust it.` },
     ],
     next: "All of this also runs automatically on every pull request.",
   },
   {
     title: "11. CI", min: 1.5,
     goal: "It works beyond your laptop.",
-    say: `On GitHub every pull request runs all of this on the merged result: screenshots, UI tests and the accessibility audit, in 12 to 19 minutes. Here's the history: red for the regression, green for main and for the approved redesign. Real CI also taught me things a laptop didn't, like a simulator version that didn't exist on GitHub's machines, which I fixed by re-pinning it and re-recording in one reviewed pull request.`,
-    steps: [
-      { where: "Browser", what: `${br(`${GH}/actions`)}: the Actions tab.`, see: "The run history; click one run to show its steps." },
-      { where: "VS Code", what: `${vs(".github/workflows/screenshots.yml")} (optional).`, see: "The pipeline: when it runs, the iOS job, the record mode." },
+    beats: [
+      { show: [{ where: "Browser", what: `${br(`${GH}/actions`)}: the Actions tab.`, see: "The run history; click one run to show its steps." }],
+        say: `On GitHub every pull request runs all of this on the merged result: screenshots, UI tests and the accessibility audit, in 12 to 19 minutes. Here's the history: red for the regression, green for main and for the approved redesign.` },
+      { show: [{ where: "VS Code", what: `${vs(".github/workflows/screenshots.yml")}.`, see: "The pipeline: when it runs, the iOS job, the record mode." }],
+        say: `This is the pipeline. Real CI also taught me things a laptop didn't, like a simulator version that didn't exist on GitHub's machines, which I fixed by re-pinning it and re-recording in one reviewed pull request.` },
     ],
     fallback: "Offline? Describe it; the numbers are in the README.",
     next: "Finally, Android.",
@@ -180,17 +194,21 @@ In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03
   {
     title: "12. Android and rollout", min: 2,
     goal: "Show the design transfers to Android, and that you can roll it out.",
-    say: `Everything I showed works on Android the same way. Android reads the same fixture files and uses the same test names, so one regression fails in the same places on both. The tool is Roborazzi on Robolectric: Compose rendered on the JVM, no emulator. I built that version first, and it found real bugs, like a decoder difference that made a PLUS article free on Android. I cut it from the demo to keep today focused; it's in section 10 of the strategy.
-
-To roll it out: start with one app and five design-system components in report-only mode, add the shared fixtures, then make the gate required, in about four sprints. Developers own the tests, QA owns the system around them, and design approves the goldens.`,
-    steps: [{ where: "Preview", what: "The window \"STRATEGY.pdf\".", see: "§9 rollout, §10 Android." }],
+    beats: [
+      { show: [{ where: "Preview", what: "The window \"STRATEGY.pdf\", §10 Android." }],
+        say: `Everything I showed works on Android the same way. Android reads the same fixture files and uses the same test names, so one regression fails in the same places on both. The tool is Roborazzi on Robolectric: Compose rendered on the JVM, no emulator. I built that version first, and it found real bugs, like a decoder difference that made a PLUS article free on Android. I cut it from the demo to keep today focused; it's in section 10 of the strategy.` },
+      { show: [{ where: "Preview", what: "Scroll to §9 Rollout." }],
+        say: `To roll it out: start with one app and five design-system components in report-only mode, add the shared fixtures, then make the gate required, in about four sprints. Developers own the tests, QA owns the system around them, and design approves the goldens.` },
+    ],
     next: "To wrap up.",
   },
   {
     title: "Close", min: 0.5,
     goal: "Three sentences they'll remember, then questions.",
-    say: `Frozen data makes every difference meaningful. Machines compare, but a person decides what's intended. And the same fixtures carry the approach to Android. Everything is in the repository. Happy to take questions.`,
-    steps: [{ where: "Terminal", what: "Confirm you're back on main.", cmd: "git branch --show-current", see: "main" }],
+    beats: [
+      { show: [{ where: "Terminal", what: "Confirm you're back on main.", cmd: "git branch --show-current", see: "main" }],
+        say: `Frozen data makes every difference meaningful. Machines compare, but a person decides what's intended. And the same fixtures carry the approach to Android. Everything is in the repository. Happy to take questions.` },
+    ],
     next: null,
   },
 ];
@@ -236,6 +254,11 @@ ol.steps>li{counter-increment:s;position:relative;padding:0 0 14px 40px}
 ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;
 font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .where{display:inline-block;font-size:12px;font-weight:700;color:var(--teal);background:var(--chip);border-radius:6px;padding:1px 8px;margin-right:6px}
+.show+.show{margin-top:12px}
+.say{margin-top:10px;padding:10px 14px;border-left:3px solid var(--teal);background:var(--chip);border-radius:0 8px 8px 0}
+.say p{margin:0 0 8px}.say p:last-child{margin:0}
+.saylabel{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+ol.steps>li{padding-bottom:22px}
 .see{color:var(--muted);font-size:14px;margin-top:6px}.see b{color:var(--ink2);font-weight:600}
 .cmd{display:flex;align-items:stretch;margin-top:8px;border-radius:8px;overflow:hidden;background:var(--code-bg)}
 .cmd code{flex:1;min-width:0;padding:10px 12px;color:var(--code-ink);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
@@ -268,7 +291,8 @@ c.addEventListener('change',function(){try{localStorage.setItem(k,c.checked?'1':
 const cmd = (c) => `<div class="cmd"><code>${esc(c)}</code><button type="button" aria-label="Copy command">Copy</button></div>`;
 const paragraphs = (t) => t.split("\n\n").map((p) => `<p>${esc(p)}</p>`).join("");
 const total = Math.round(demo.reduce((t, s) => t + s.min, 0));
-const runCount = demo.reduce((n, s) => n + s.steps.filter((x) => x.cmd).length, 0);
+const runsIn = (s) => s.beats.reduce((n, b) => n + b.show.filter((x) => x.cmd).length, 0);
+const runCount = demo.reduce((n, s) => n + runsIn(s), 0);
 
 let body = `<h1>Demo script</h1>
 <p class="lead">A walkthrough of the project without slides: the repo, the app, how a test works, a green run, a bug caught live, the human decision on GitHub, messy content, safety nets, CI, then Android. About ${total} minutes, then questions.</p>
@@ -287,6 +311,7 @@ ${cmd("cd ~/Desktop/Task && presentation/setup.sh")}
 <tr><td><b>Preview</b></td><td><code>STRATEGY.pdf</code> (section 12).</td></tr></tbody></table></div>
 
 <div class="card"><h3>How to run the demo</h3><ul class="tips">
+<li><b>Each numbered step = show, then say:</b> switch to the window or tab (or run the command), then say the line in the "Say" box under it. Lines marked [While it runs] are for while a command is running.</li>
 <li><b>Files are already open:</b> when the script says "VS Code tab 2", just click that tab. Only the <b>${runCount} commands you run live</b> have a Copy button: press Copy, Cmd+Tab to Terminal, Cmd+V, Enter, and read the command out loud.</li>
 <li><b>Say what to look for <i>before</i> you switch windows or run a command</b>, so people know where to look.</li>
 <li><b>Section 6 is the heart of the demo.</b> Never skip it. Short on time: skip sections 8 and 10.</li>
@@ -294,14 +319,15 @@ ${cmd("cd ~/Desktop/Task && presentation/setup.sh")}
 <li><b>Screens:</b> share your whole screen; keep this page on a second device (tablet or phone) or printed.</li></ul></div>
 
 <div class="card"><h3>Running order</h3><table><thead><tr><th>Section</th><th>Min</th><th>Live commands</th><th>Goal</th></tr></thead><tbody>
-${demo.map((s, i) => `<tr><td><a href="#d${i}">${esc(s.title)}</a></td><td>${s.min}</td><td>${s.steps.filter((x) => x.cmd).length || "–"}</td><td>${esc(s.goal)}</td></tr>`).join("")}</tbody></table></div>`;
+${demo.map((s, i) => `<tr><td><a href="#d${i}">${esc(s.title)}</a></td><td>${s.min}</td><td>${runsIn(s) || "–"}</td><td>${esc(s.goal)}</td></tr>`).join("")}</tbody></table></div>`;
 
 demo.forEach((s, i) => {
-  const runs = s.steps.filter((x) => x.cmd).length;
+  const runs = runsIn(s);
   body += `<section class="card" id="d${i}"><h3>${esc(s.title)}</h3>
 <div class="meta"><span class="badge">about ${s.min} min</span>${runs ? `<span class="badge run">${runs} live command${runs > 1 ? "s" : ""}</span>` : ""}</div>
-<p class="goal"><b>Goal:</b> ${esc(s.goal)}</p><div class="label">Say</div><blockquote>${paragraphs(s.say)}</blockquote>
-<div class="label">Show / do</div><ol class="steps">${s.steps.map((st) => `<li><span class="where">${esc(st.where)}</span>${esc(st.what)}${st.cmd ? cmd(st.cmd) : ""}${st.see ? `<div class="see"><b>You'll see:</b> ${esc(st.see)}</div>` : ""}</li>`).join("")}</ol>
+<p class="goal"><b>Goal:</b> ${esc(s.goal)}</p>
+<ol class="steps">${s.beats.map((b) => `<li>${b.show.map((st) => `<div class="show"><span class="where">${esc(st.where)}</span>${esc(st.what)}${st.cmd ? cmd(st.cmd) : ""}${st.see ? `<div class="see"><b>You'll see:</b> ${esc(st.see)}</div>` : ""}</div>`).join("")}
+<div class="say"><span class="saylabel">Say</span>${paragraphs(b.say)}</div></li>`).join("")}</ol>
 ${s.fallback ? `<div class="fallback"><b>If it fails:</b> ${esc(s.fallback)}</div>` : ""}
 ${s.next ? `<p class="bridge">Bridge to the next section: <i>"${esc(s.next)}"</i></p>` : ""}</section>`;
 });
