@@ -9,6 +9,7 @@ cd "$(dirname "$0")/.." || exit 1
 [ -z "${CAFFEINATED:-}" ] && command -v caffeinate >/dev/null && CAFFEINATED=1 exec caffeinate -i "$0" "$@"   # keep the Mac awake
 
 B=$'\033[1m'; G=$'\033[32m'; R=$'\033[31m'; Y=$'\033[33m'; N=$'\033[0m'
+rm -rf artifacts   # start clean: no leftovers from earlier runs (artifacts/ is test output, never in git)
 LOG=artifacts/setup-logs; mkdir -p "$LOG"
 step() { printf '\n%s▶ %s%s\n' "$B" "$1" "$N"; }
 ok()   { printf '  %s✓ %s%s\n' "$G" "$1" "$N"; }
@@ -36,6 +37,7 @@ step "3/6 demo/regression: must fail on exactly 29 screenshots (~1.5 min, the fa
 git checkout -q demo/regression || die "could not switch to demo/regression"
 make ios-test > "$LOG/regression-ios-test.log" 2>&1
 if grep -q "^\*\*29 changed\*\*" artifacts/ios/diffs/summary.md 2>/dev/null; then ok "regression behaves: $(head -1 artifacts/ios/diffs/summary.md | sed 's/\*//g')"; else warn "unexpected regression result: see $LOG/regression-ios-test.log"; fi
+rm -rf artifacts/ios && ok "regression diffs removed: artifacts/ios/diffs appears only after your live failing run (section 4)"
 git checkout -q main && ok "back on main"
 
 step "4/6 Golden lint and gallery"
