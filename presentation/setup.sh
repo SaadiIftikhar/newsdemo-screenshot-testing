@@ -46,13 +46,9 @@ step "5/6 The app in the simulator (first time ~1.5 min)"
 make ios-run > "$LOG/ios-run.log" 2>&1 && ok "NewsDemo is running in the simulator" || die "the app did not launch: see $LOG/ios-run.log"
 
 step "6/6 Opening the windows, in the order the demo uses them"
-xed ios/NewsKit >/dev/null 2>&1; sleep 4
-xed "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" >/dev/null 2>&1; sleep 2
-xed "ios/UITests/AccessibilityAuditTests.swift" >/dev/null 2>&1; sleep 2
-ok "Xcode: NewsKit package + FeedScreenSnapshotTests.swift, AccessibilityAuditTests.swift"
 "$VSCODE" --new-window . >/dev/null 2>&1; sleep 3
-"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift" ".github/CODEOWNERS" "ios/NewsKit/Tests/NewsUISnapshotTests/SnapshotSupport.swift" "fixtures/feed/feed_hostile_content.json" ".github/workflows/screenshots.yml" >/dev/null 2>&1
-ok "VS Code tabs: 1 feed_default.json, 2 FixtureStore.swift, 3 CODEOWNERS, 4 SnapshotSupport.swift, 5 feed_hostile_content.json, 6 screenshots.yml"
+"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" "ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift" ".github/CODEOWNERS" "ios/NewsKit/Tests/NewsUISnapshotTests/SnapshotSupport.swift" "fixtures/feed/feed_hostile_content.json" "ios/UITests/AccessibilityAuditTests.swift" ".github/workflows/screenshots.yml" >/dev/null 2>&1
+ok "VS Code tabs: 1 feed_default.json, 2 FeedScreenSnapshotTests.swift, 3 FixtureStore.swift, 4 CODEOWNERS, 5 SnapshotSupport.swift, 6 feed_hostile_content.json, 7 AccessibilityAuditTests.swift, 8 screenshots.yml"
 open "ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests" && ok "Finder: the goldens folder FeedScreenSnapshotTests"
 open "artifacts/gallery/index.html"; sleep 1
 open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/1"; sleep 1

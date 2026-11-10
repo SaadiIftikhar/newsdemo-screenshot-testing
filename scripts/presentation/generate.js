@@ -12,15 +12,13 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const SNAP = "ios/NewsKit/Tests/NewsUISnapshotTests";
 const vscodeTabs = [
   ["fixtures/feed/feed_default.json", "the fake API response (section 3)"],
+  [`${SNAP}/FeedScreenSnapshotTests.swift`, "a screenshot test (section 3)"],
   ["ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift", "where the clock, locale and time zone are pinned (section 4)"],
   [".github/CODEOWNERS", "who must approve golden changes (section 7)"],
   [`${SNAP}/SnapshotSupport.swift`, "the tolerance setting (section 8)"],
   ["fixtures/feed/feed_hostile_content.json", "messy CMS content (section 9)"],
-  [".github/workflows/screenshots.yml", "the CI pipeline (section 11)"],
-];
-const xcodeFiles = [
-  [`${SNAP}/FeedScreenSnapshotTests.swift`, "a screenshot test (section 3)"],
   ["ios/UITests/AccessibilityAuditTests.swift", "the accessibility audit (section 10)"],
+  [".github/workflows/screenshots.yml", "the CI pipeline (section 11)"],
 ];
 const browserTabs = [
   ["artifacts/gallery/index.html", "every approved screenshot on one page (section 3)"],
@@ -79,7 +77,7 @@ Two: the test. One line renders the real production feed screen with that data, 
 Three: that approved picture, the golden, stored in git. One PNG per screen and variant: light, dark, the largest text size. If the new picture matches, the test passes. If not, it fails and shows me the difference. And here are all 89 approved states on one page.`,
     steps: [
       { where: "VS Code", what: `${vs("fixtures/feed/feed_default.json")}.`, see: "Point at \"premium\": true on the item tsr-002." },
-      { where: "Xcode", what: `The tab "FeedScreenSnapshotTests.swift" (the NewsKit package is open; the Test navigator, Cmd+6, lists every test).`, see: "func test_feed_default: one line renders the real feed with the fixture and compares it." },
+      { where: "VS Code", what: `${vs(`${SNAP}/FeedScreenSnapshotTests.swift`)}.`, see: "func test_feed_default: one line renders the real feed with the fixture and compares it." },
       { where: "Finder", what: "The window \"FeedScreenSnapshotTests\" (the goldens folder).", see: "test_feed_default.light.png, .dark.png, .light_xxxl.png… Press Space on one to preview it." },
       { where: "Browser", what: `${br("artifacts/gallery/index.html")}: the gallery.`, see: "All 89 approved screenshots, grouped by test; light, dark and largest text side by side." },
     ],
@@ -164,7 +162,7 @@ In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03
     say: `A blank golden would make a test pass while protecting nothing, so a lint rejects them. Apple's accessibility audit runs on every screen of the real app; it found hidden tabs that VoiceOver could still reach, which no screenshot can show. And my rule: every check is shown to fail once before I trust it.`,
     steps: [
       { where: "Terminal", what: "Run the golden lint.", cmd: "make lint-goldens", see: "\"checked 89 image(s)\" in ~2 s." },
-      { where: "Xcode", what: "The tab \"AccessibilityAuditTests.swift\" (optional; don't run it live, it takes ~5 min).", see: "The audit and its documented exceptions." },
+      { where: "VS Code", what: `${vs("ios/UITests/AccessibilityAuditTests.swift")} (optional; don't run it live, it takes ~5 min).`, see: "The audit and its documented exceptions." },
     ],
     next: "All of this also runs automatically on every pull request.",
   },
@@ -276,7 +274,7 @@ let body = `<h1>Demo script</h1>
 <p class="lead">A walkthrough of the project without slides: the repo, the app, how a test works, a green run, a bug caught live, the human decision on GitHub, messy content, safety nets, CI, then Android. About ${total} minutes, then questions.</p>
 
 <div class="card"><h3>Before you start: one command</h3>
-<p class="goal">Run this in Terminal 15–30 minutes before. It checks your tools, makes sure both branches build and behave (main green, the regression failing on 29), then opens every window you'll point at, in the order you'll need them. About 6–10 minutes.</p>
+<p class="goal">Run this in Terminal 15–30 minutes before. It checks your tools, makes sure both branches build and behave (main green, the regression failing on 29), then opens every window you'll point at, in the order you'll need them. About 3 minutes (up to 10 on a cold machine).</p>
 ${cmd("cd ~/Desktop/Task && presentation/setup.sh")}
 <div class="see"><b>You'll see at the end:</b> "READY" and a list of what is open where. (The regression check prints a failure on purpose: that's the bug the demo catches.)</div></div>
 
@@ -284,7 +282,6 @@ ${cmd("cd ~/Desktop/Task && presentation/setup.sh")}
 <tr><td><b>Terminal</b></td><td>The project folder <code>~/Desktop/Task</code>, on <code>main</code>. You type the live commands here.</td></tr>
 <tr><td><b>Simulator</b></td><td>The NewsDemo app, on the feed.</td></tr>
 <tr><td><b>VS Code</b></td><td><ol style="margin:0;padding-left:18px">${vscodeTabs.map(([f, d]) => `<li><code>${esc(path.basename(f))}</code>: ${esc(d)}</li>`).join("")}</ol></td></tr>
-<tr><td><b>Xcode</b></td><td>The NewsKit package, with ${xcodeFiles.map(([f, d]) => `<code>${esc(path.basename(f))}</code> (${esc(d)})`).join(" and ")}.</td></tr>
 <tr><td><b>Finder</b></td><td>The goldens folder <code>FeedScreenSnapshotTests</code> (section 3).</td></tr>
 <tr><td><b>Browser</b></td><td><ol style="margin:0;padding-left:18px">${browserTabs.map(([u, d]) => `<li>${esc(d)}</li>`).join("")}</ol></td></tr>
 <tr><td><b>Preview</b></td><td><code>STRATEGY.pdf</code> (section 12).</td></tr></tbody></table></div>
@@ -369,9 +366,6 @@ step "5/6 The app in the simulator (first time ~1.5 min)"
 make ios-run > "$LOG/ios-run.log" 2>&1 && ok "NewsDemo is running in the simulator" || die "the app did not launch: see $LOG/ios-run.log"
 
 step "6/6 Opening the windows, in the order the demo uses them"
-xed ios/NewsKit >/dev/null 2>&1; sleep 4
-${xcodeFiles.map(([f]) => `xed ${q(f)} >/dev/null 2>&1; sleep 2`).join("\n")}
-ok "Xcode: NewsKit package + ${xcodeFiles.map(([f]) => path.basename(f)).join(", ")}"
 "$VSCODE" --new-window . >/dev/null 2>&1; sleep 3
 "$VSCODE" --reuse-window ${vscodeTabs.map(([f]) => q(f)).join(" ")} >/dev/null 2>&1
 ok "VS Code tabs: ${vscodeTabs.map(([f], i) => `${i + 1} ${path.basename(f)}`).join(", ")}"
