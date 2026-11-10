@@ -15,3 +15,6 @@ xcuserdata/
 node_modules/
 .venv/
 package-lock.json
+
+# PowerPoint lock files
+~$*
