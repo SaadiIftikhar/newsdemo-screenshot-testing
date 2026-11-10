@@ -187,7 +187,7 @@ const runsIn = (s) => s.beats.reduce((n, b) => n + b.show.filter((x) => x.cmd).l
 const runCount = demo.reduce((n, s) => n + runsIn(s), 0);
 
 let body = `<h1>Demo script</h1>
-<p class="lead">The project, live, without slides. About ${total} minutes, then questions.</p>
+<p class="lead">The project, live, without slides. About ${total} minutes, then questions. New to the project? Read <a href="Guide.html">Guide.html</a> first.</p>
 
 <div class="card"><h3>Before you start: one command</h3>
 <p class="goal">In Terminal, 15–30 minutes before. It checks both branches (main green, the regression failing on 29) and opens every window in demo order. About 3 minutes.</p>

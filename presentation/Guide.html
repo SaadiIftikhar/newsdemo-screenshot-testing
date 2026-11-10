@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Screenshot Testing Guide</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f3b;--ink2:#4a5270;--muted:#6b7389;--line:#dfe3ec;--teal:#0e8c99;--teal-bg:#e3f4f6;
+--red:#c62828;--red-bg:#fdecec;--green:#2e7d4f;--green-bg:#e6f4ec;--amber:#a15c00;--amber-bg:#fff3df;--violet:#5b4bc4;--violet-bg:#eeebfb;
+--chip:#eef1f6;--code-bg:#1b1f3b;--code-ink:#e8ecf5;--shadow:0 1px 2px rgba(27,31,59,.06),0 4px 16px rgba(27,31,59,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;
+--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;
+--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;
+--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px 96px}
+h1{font-size:34px;line-height:1.15;margin:40px 0 8px}h2{font-size:24px;margin:56px 0 6px;line-height:1.25}h3{font-size:18px;margin:0 0 6px}
+h2 .n{color:var(--teal);margin-right:8px}
+p{margin:0 0 12px;max-width:72ch}.lead{font-size:18px;color:var(--ink2)}.sub{color:var(--ink2);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:720px){.g2,.g3{grid-template-columns:1fr}h1{font-size:27px}h2{font-size:21px}}
+code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;word-break:break-word}
+pre{background:var(--code-bg);color:var(--code-ink);padding:14px 16px;border-radius:10px;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0}
+pre .c{color:#8b94b8}
+.toc{columns:2;column-gap:28px;margin:0;padding-left:20px}.toc li{margin:0 0 4px;break-inside:avoid}
+@media (max-width:720px){.toc{columns:1}}
+a{color:var(--teal)}
+.callout{border-left:4px solid var(--teal);background:var(--teal-bg);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0 16px}
+.callout p:last-child{margin:0}
+dl.gloss{display:grid;grid-template-columns:minmax(140px,200px) 1fr;gap:10px 18px;margin:0}
+dl.gloss dt{font-weight:700}dl.gloss dd{margin:0;color:var(--ink2)}
+@media (max-width:620px){dl.gloss{grid-template-columns:1fr;gap:2px}dl.gloss dd{margin-bottom:10px}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.chip{background:var(--chip);border-radius:999px;padding:4px 12px;font-size:14px}
+.chip b{color:var(--teal)}
+figure{margin:0}figcaption{color:var(--muted);font-size:14px;margin-top:8px}
+.shot{background:var(--chip);border-radius:10px;padding:10px;display:flex;align-items:flex-start;justify-content:center}
+.shot img{max-width:100%;height:auto;display:block;border-radius:6px}
+.tall img{max-height:520px}.g3 .shot img{max-height:300px;width:auto}
+svg.diagram{width:100%;height:auto;display:block}
+svg .box{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+svg .box.teal{fill:var(--teal-bg);stroke:var(--teal)}svg .box.green{fill:var(--green-bg);stroke:var(--green)}
+svg .box.red{fill:var(--red-bg);stroke:var(--red)}svg .box.violet{fill:var(--violet-bg);stroke:var(--violet)}svg .box.amber{fill:var(--amber-bg);stroke:var(--amber)}
+svg text{fill:var(--ink);font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+svg text.small{font-weight:400;font-size:12.5px;fill:var(--ink2)}svg text.lbl{font-size:12.5px;font-weight:700;fill:var(--muted)}
+svg .arrow{stroke:var(--muted);stroke-width:2;fill:none}svg .head{fill:var(--muted)}
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{display:grid;grid-template-columns:200px 1fr 120px;gap:14px;align-items:center;border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+.layer b{display:block}.layer span{color:var(--ink2);font-size:14px}.layer .t{text-align:right;font-weight:700;font-size:14px}
+.l1{background:var(--violet-bg)}.l2{background:var(--teal-bg)}.l3{background:var(--amber-bg)}
+@media (max-width:620px){.layer{grid-template-columns:1fr}.layer .t{text-align:left}}
+.scen{border-top:4px solid var(--line)}
+.scen.green{border-top-color:var(--green)}.scen.red{border-top-color:var(--red)}.scen.violet{border-top-color:var(--violet)}.scen.amber{border-top-color:var(--amber)}.scen.teal{border-top-color:var(--teal)}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.tag.green{background:var(--green-bg);color:var(--green)}.tag.red{background:var(--red-bg);color:var(--red)}.tag.violet{background:var(--violet-bg);color:var(--violet)}
+.tag.amber{background:var(--amber-bg);color:var(--amber)}.tag.teal{background:var(--teal-bg);color:var(--teal)}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;font-size:15px;margin-top:8px}
+.kv .k{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+@media (max-width:620px){.kv{grid-template-columns:1fr;gap:0}.kv .k{margin-top:8px}}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.tablewrap{overflow-x:auto}
+.qa details{border-bottom:1px solid var(--line);padding:12px 0}.qa details:last-child{border-bottom:0}
+.qa summary{cursor:pointer;font-weight:700;list-style:none}.qa summary::-webkit-details-marker{display:none}
+.qa summary::before{content:"+";display:inline-block;width:20px;color:var(--teal)}.qa details[open] summary::before{content:"–"}
+.qa details p{margin:8px 0 0 20px;color:var(--ink2)}
+.roles .card h3{display:flex;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<h1>How the screenshot tests work</h1>
+<p class="lead">A guide for someone seeing this project for the first time: what problem it solves, how one test works, what happens on every pull request, and what to do in each situation. No prior knowledge of screenshot testing needed.</p>
+
+<div class="card">
+<h3>Contents</h3>
+<ol class="toc">
+<li><a href="#problem">The problem in one minute</a></li>
+<li><a href="#words">Words you'll hear</a></li>
+<li><a href="#one-test">How one screenshot test works</a></li>
+<li><a href="#frozen">Why the pictures don't go out of date</a></li>
+<li><a href="#layers">The three kinds of tests</a></li>
+<li><a href="#workflow">What happens on every pull request</a></li>
+<li><a href="#scenarios">Scenarios: what you see, what you do</a></li>
+<li><a href="#tolerance">How small a difference counts</a></li>
+<li><a href="#roles">Who does what</a></li>
+<li><a href="#where">Where everything lives</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#android">Android</a></li>
+<li><a href="#qa">Questions people ask</a></li>
+</ol>
+</div>
+
+<!-- 1 -->
+<h2 id="problem"><span class="n">1</span>The problem in one minute</h2>
+<p class="sub">Why this exists.</p>
+<div class="card">
+<p>News apps like BILD and WELT change all the time: new features, new designs, refactors. Some changes break the <b>look</b> of a screen without breaking any logic. A PLUS badge disappears, a headline gets cut off, a banner shrinks by a few points. Normal tests don't notice, because the code still "works". Readers notice.</p>
+<p><b>Screenshot tests</b> catch this. They take a picture of every important screen and compare it with a picture someone already approved. If even a small visible part changes, the test fails and shows exactly what changed.</p>
+<div class="callout"><p><b>The tricky part:</b> the news changes every minute. If the test used live news, every picture would be different every time, and the tests would be useless. That's why the tests use <b>fake, frozen data</b> (section 4).</p></div>
+</div>
+
+<!-- 2 -->
+<h2 id="words"><span class="n">2</span>Words you'll hear</h2>
+<p class="sub">Plain-language definitions. Everything else in this guide uses these words.</p>
+<div class="card">
+<dl class="gloss">
+<dt>Screenshot test</dt><dd>A test that draws a screen, takes a picture of it, and compares it with an approved picture. Also called a "snapshot test".</dd>
+<dt>Golden</dt><dd>The approved picture a screenshot test compares against. A PNG file stored in git, next to the tests. This project has 89.</dd>
+<dt>Fixture</dt><dd>Fake data that looks exactly like what the real server sends (a JSON file). Also called "mock data". Every test reads the same fixtures.</dd>
+<dt>Diff</dt><dd>The difference between the golden and the new picture. Shown as three pictures side by side: golden, new, and the changed pixels in magenta.</dd>
+<dt>Regression</dt><dd>Something that used to work and is now broken, usually by accident.</dd>
+<dt>Simulator</dt><dd>A virtual iPhone that runs on the Mac. The tests use one fixed model and iOS version, so every run renders exactly the same pixels.</dd>
+<dt>Pull request (PR)</dt><dd>A proposed change to the code on GitHub. Others review it before it's merged into the main code.</dd>
+<dt>CI</dt><dd>"Continuous integration": GitHub's own Mac runs every test automatically on every pull request. A red result blocks the merge.</dd>
+<dt>Code owner</dt><dd>The person or team who must approve changes to certain files. Here, design or QA must approve any change to goldens.</dd>
+<dt>Record / re-record</dt><dd>Creating new goldens from the current code. Only done when a visual change is intended.</dd>
+<dt>Tolerance</dt><dd>How much invisible difference is allowed before a test fails. Here, only rendering noise a person can't see.</dd>
+<dt>Flaky test</dt><dd>A test that sometimes passes and sometimes fails without any code change. The enemy of trust in tests.</dd>
+</dl>
+</div>
+
+<!-- 3 -->
+<h2 id="one-test"><span class="n">3</span>How one screenshot test works</h2>
+<p class="sub">Four steps, all inside the test. The app is never opened and nobody taps anything.</p>
+<div class="card">
+<svg class="diagram" viewBox="0 0 960 210" role="img" aria-label="Fixture, then real screen, then picture in memory, then compare with golden: same means pass, different means fail with a diff">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+  <rect class="box violet" x="10" y="40" width="180" height="90" rx="12"/>
+  <text x="100" y="72" text-anchor="middle">① Fixture</text>
+  <text class="small" x="100" y="94" text-anchor="middle">frozen fake data</text>
+  <text class="small" x="100" y="112" text-anchor="middle">feed_default.json</text>
+  <path class="arrow" d="M190,85 H238" marker-end="url(#ah)"/>
+  <rect class="box teal" x="242" y="40" width="180" height="90" rx="12"/>
+  <text x="332" y="72" text-anchor="middle">② Real screen</text>
+  <text class="small" x="332" y="94" text-anchor="middle">the same SwiftUI view</text>
+  <text class="small" x="332" y="112" text-anchor="middle">the app uses</text>
+  <path class="arrow" d="M422,85 H470" marker-end="url(#ah)"/>
+  <rect class="box teal" x="474" y="40" width="180" height="90" rx="12"/>
+  <text x="564" y="72" text-anchor="middle">③ Picture</text>
+  <text class="small" x="564" y="94" text-anchor="middle">drawn in memory</text>
+  <text class="small" x="564" y="112" text-anchor="middle">light, dark, large text</text>
+  <path class="arrow" d="M654,85 H702" marker-end="url(#ah)"/>
+  <rect class="box" x="706" y="40" width="130" height="90" rx="12"/>
+  <text x="771" y="72" text-anchor="middle">④ Compare</text>
+  <text class="small" x="771" y="94" text-anchor="middle">with the golden</text>
+  <text class="small" x="771" y="112" text-anchor="middle">PNG in git</text>
+  <path class="arrow" d="M836,70 L866,40" marker-end="url(#ah)"/>
+  <path class="arrow" d="M836,100 L866,140" marker-end="url(#ah)"/>
+  <rect class="box green" x="868" y="10" width="86" height="50" rx="10"/>
+  <text x="911" y="32" text-anchor="middle">same</text>
+  <text class="small" x="911" y="50" text-anchor="middle">✓ pass</text>
+  <rect class="box red" x="868" y="120" width="86" height="60" rx="10"/>
+  <text x="911" y="142" text-anchor="middle">different</text>
+  <text class="small" x="911" y="160" text-anchor="middle">✗ fail + diff</text>
+</svg>
+</div>
+<div class="grid g2">
+<div class="card">
+<h3>In the code</h3>
+<p>A whole test is a few lines (<code>FeedScreenSnapshotTests.swift</code>):</p>
+<pre><span class="c">// ① load the fixture, ② build the real feed screen with it,
+// ③+④ draw it and compare with the goldens (light, dark, largest text)</span>
+func test_feed_default() throws {
+    assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_default"))))
+}</pre>
+<p style="margin-top:12px">"Drawn in memory" means the screen is rendered straight into an image. No app starts, no network is used, and nothing appears on screen. That's why all 89 pictures take under a minute.</p>
+</div>
+<div class="card">
+<h3>What a golden looks like</h3>
+<p>One test usually has several goldens: one per variant. This is the PLUS teaser card in light, dark and the largest text size:</p>
+<div class="grid g3">
+<figure class="shot"><img src="../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.light.png" alt="PLUS teaser card, light"></figure>
+<figure class="shot"><img src="../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.dark.png" alt="PLUS teaser card, dark"></figure>
+<figure class="shot"><img src="../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.light_xxxl.png" alt="PLUS teaser card, largest text"></figure>
+</div>
+<figcaption>File names say which test and which variant: <code>test_teaserCard_premium.dark.png</code>.</figcaption>
+</div>
+</div>
+
+<!-- 4 -->
+<h2 id="frozen"><span class="n">4</span>Why the pictures don't go out of date</h2>
+<p class="sub">The most common question: "the news changes every minute, so won't the goldens be wrong tomorrow?"</p>
+<div class="card">
+<p>No. A golden belongs to a <b>fixture</b>, not to live news. Everything that could make two runs look different is frozen:</p>
+<div class="chips">
+<span class="chip"><b>Data:</b> fixed JSON fixtures</span>
+<span class="chip"><b>Clock:</b> always 5 Nov 2026, 15:13</span>
+<span class="chip"><b>Language:</b> German (de_DE)</span>
+<span class="chip"><b>Time zone:</b> Berlin</span>
+<span class="chip"><b>Images:</b> bundled, never downloaded</span>
+<span class="chip"><b>Animations:</b> off</span>
+<span class="chip"><b>Random numbers:</b> fixed seed</span>
+<span class="chip"><b>Device:</b> one pinned simulator (iPhone 17, iOS 27.0)</span>
+</div>
+<p style="margin-top:12px">So "vor 9 Min." (9 minutes ago) shows "vor 9 Min." forever. If a picture changes, the <b>only</b> possible reason is that the code changed. That's what makes every failure worth looking at.</p>
+<div class="callout"><p><b>What about real content changing shape?</b> New fields, missing images, weird characters from the CMS: that's tested separately, without pictures. Contract tests check the fixtures match the API, a fuzz test throws random broken data at the decoder, and special fixtures hold messy content (scenario E and F below).</p></div>
+</div>
+
+<!-- 5 -->
+<h2 id="layers"><span class="n">5</span>The three kinds of tests</h2>
+<p class="sub">Screenshots are one layer. Each layer catches what the others can't.</p>
+<div class="card">
+<div class="layers">
+<div class="layer l1"><div><b>Logic & contract tests</b><span>35 tests, no pictures</span></div><span>Decoding the API, cleaning messy text, paywall rules, login rules, fixtures matching the API contract, colour contrast.</span><div class="t">seconds</div></div>
+<div class="layer l2"><div><b>Screenshot tests</b><span>51 tests → 89 goldens</span></div><span>How every screen and component <i>looks</i>, in light, dark and the largest text size, on phone, small phone and tablet.</span><div class="t">&lt; 1 min</div></div>
+<div class="layer l3"><div><b>UI tests + accessibility audit</b><span>15 tests, real app</span></div><span>Launches the real app in the simulator and taps through it: tabs, paywall, login, games, offline. Apple's audit checks every screen for VoiceOver and contrast problems.</span><div class="t">~5 min</div></div>
+</div>
+<p style="margin-top:14px"><code>make ios-test</code> runs the first two layers; <code>make ios-ui-test</code> runs the third. CI runs all three on every pull request.</p>
+</div>
+
+<!-- 6 -->
+<h2 id="workflow"><span class="n">6</span>What happens on every pull request</h2>
+<p class="sub">The everyday workflow, from opening a pull request to merging it.</p>
+<div class="card">
+<svg class="diagram" viewBox="0 0 960 470" role="img" aria-label="Pull request workflow: CI runs all tests; if green, normal review and merge; if red, a diff report and bot comment; a person decides whether the change was intended; if it's a bug, fix the code and CI runs again; if intended, add the record-snapshots label, the bot re-records and pushes the goldens, and a design or QA code owner approves before merge.">
+  <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+  <!-- row 1 -->
+  <rect class="box" x="10" y="20" width="200" height="66" rx="12"/>
+  <text x="110" y="48" text-anchor="middle">Developer opens</text><text x="110" y="68" text-anchor="middle">a pull request</text>
+  <path class="arrow" d="M210,53 H258" marker-end="url(#ah2)"/>
+  <rect class="box teal" x="262" y="20" width="220" height="66" rx="12"/>
+  <text x="372" y="46" text-anchor="middle">CI runs every test</text><text class="small" x="372" y="66" text-anchor="middle">on GitHub's Mac, ~15 min</text>
+  <path class="arrow" d="M482,53 H530" marker-end="url(#ah2)"/>
+  <polygon class="box" points="600,13 670,53 600,93 530,53"/>
+  <text x="600" y="58" text-anchor="middle">Green?</text>
+  <path class="arrow" d="M670,53 H738" marker-end="url(#ah2)"/><text class="lbl" x="700" y="44" text-anchor="middle">yes</text>
+  <rect class="box green" x="742" y="20" width="208" height="66" rx="12"/>
+  <text x="846" y="48" text-anchor="middle">Normal code review</text><text x="846" y="68" text-anchor="middle">→ merge</text>
+  <!-- down to report -->
+  <path class="arrow" d="M600,93 V140" marker-end="url(#ah2)"/><text class="lbl" x="612" y="122">no</text>
+  <rect class="box red" x="480" y="144" width="240" height="70" rx="12"/>
+  <text x="600" y="172" text-anchor="middle">Diff report + bot comment</text><text class="small" x="600" y="194" text-anchor="middle">what changed, and what kind</text>
+  <path class="arrow" d="M600,214 V256" marker-end="url(#ah2)"/>
+  <polygon class="box" points="600,260 690,300 600,340 510,300"/>
+  <text x="600" y="296" text-anchor="middle">A person:</text><text class="small" x="600" y="314" text-anchor="middle">intended?</text>
+  <!-- bug branch -->
+  <path class="arrow" d="M510,300 H386" marker-end="url(#ah2)"/><text class="lbl" x="448" y="290" text-anchor="middle">no, a bug</text>
+  <rect class="box amber" x="166" y="268" width="216" height="66" rx="12"/>
+  <text x="274" y="296" text-anchor="middle">Fix the code,</text><text x="274" y="316" text-anchor="middle">push again</text>
+  <path class="arrow" d="M274,268 V180 H372 V90" marker-end="url(#ah2)"/><text class="lbl" x="282" y="200">CI runs again</text>
+  <!-- intended branch -->
+  <path class="arrow" d="M690,300 H738" marker-end="url(#ah2)"/><text class="lbl" x="712" y="290" text-anchor="middle">yes</text>
+  <rect class="box violet" x="742" y="268" width="208" height="66" rx="12"/>
+  <text x="846" y="294" text-anchor="middle">Add the label</text><text class="small" x="846" y="314" text-anchor="middle">record-snapshots</text>
+  <path class="arrow" d="M846,334 V382" marker-end="url(#ah2)"/>
+  <rect class="box violet" x="742" y="386" width="208" height="70" rx="12"/>
+  <text x="846" y="412" text-anchor="middle">Bot re-records</text><text class="small" x="846" y="432" text-anchor="middle">proves + pushes the goldens</text>
+  <path class="arrow" d="M742,421 H674" marker-end="url(#ah2)"/>
+  <rect class="box green" x="410" y="386" width="260" height="70" rx="12"/>
+  <text x="540" y="412" text-anchor="middle">Design/QA code owner</text><text class="small" x="540" y="432" text-anchor="middle">approves the new pictures → merge</text>
+</svg>
+</div>
+<div class="grid g2">
+<div class="card">
+<h3>What the bot posts on a red pull request</h3>
+<p>A sticky comment with a table, so the reviewer knows <b>what kind</b> of change it is before opening a single picture:</p>
+<pre>29 changed (layout: 10, visible: 19, subtle: 0), 0 new
+
+| Snapshot                              | Kind    |
+| test_breakingBanner_default.light.png | layout  |
+| test_teaserCard_premium.dark.png      | visible |
+| …                                     |         |</pre>
+<p style="margin-top:12px"><b>layout</b> = the picture changed size (something moved or shrank). <b>visible</b> = pixels a person can see changed. <b>subtle</b> = only a tiny colour shift. These labels help sort; they never approve anything.</p>
+</div>
+<div class="card">
+<h3>Two rules that never bend</h3>
+<p><b>1. Goldens never come from someone's laptop.</b> Only CI records them, on its fixed machine. A laptop with a slightly different setup could produce slightly different pixels and cause false failures for everyone.</p>
+<p><b>2. Approval is never automatic.</b> A machine can say <i>what</i> changed; only a person can say whether it was <i>meant</i> to. A design or QA code owner signs off every golden change.</p>
+</div>
+</div>
+
+<!-- 7 -->
+<h2 id="scenarios"><span class="n">7</span>Scenarios: what you see, what you do</h2>
+<p class="sub">Every situation you'll run into, from "nothing changed" to "it only fails on CI".</p>
+
+<div class="grid g2">
+<div class="card scen green">
+<span class="tag green">A · Most pull requests</span>
+<h3>No visual change</h3>
+<p>A bug fix, a refactor, new logic: nothing on screen changes.</p>
+<div class="kv"><div class="k">You see</div><div>All checks green. Every new picture matches its golden.</div>
+<div class="k">You do</div><div>Nothing extra. Normal code review, then merge.</div></div>
+</div>
+<div class="card scen red">
+<span class="tag red">B · The bug the tests exist for</span>
+<h3>An unintended change</h3>
+<p>A refactor accidentally drops the PLUS badge.</p>
+<div class="kv"><div class="k">You see</div><div>Red check. Bot comment: "29 changed". The diff report shows each one.</div>
+<div class="k">You do</div><div>Fix the code and push. The goldens stay as they are. CI runs again and goes green.</div></div>
+</div>
+</div>
+
+<div class="card">
+<h3>Scenario B in real life: the diff for the missing PLUS badge</h3>
+<p>From the deliberate regression in this project (<code>demo/regression</code>, PR #1). Left: the golden. Middle: the new picture. Right: changed pixels in magenta.</p>
+<figure class="shot"><img src="../docs/regression/ComponentSnapshotTests__test_teaserCard_premium.dark.png" alt="Diff: golden with PLUS badge, new picture without it, changed pixels in magenta"></figure>
+<figcaption>The change looked harmless in code review: one file, a few lines. 29 of 89 pictures failed; the other 60 stayed green.</figcaption>
+</div>
+
+<div class="grid g2">
+<div class="card scen violet">
+<span class="tag violet">C · A redesign</span>
+<h3>An intended change</h3>
+<p>Design wants rounder cards. Many pictures change on purpose.</p>
+<div class="kv"><div class="k">You see</div><div>Red check, e.g. "33 changed". The diffs show exactly the new corners.</div>
+<div class="k">You do</div><div>Check the diffs show <i>only</i> what was intended. Add the <code>record-snapshots</code> label. CI re-records, proves the new goldens pass, and pushes them as a "snapshot-bot" commit. A design/QA code owner approves. Merge. (PR #2 in this project.)</div></div>
+</div>
+<div class="card scen teal">
+<span class="tag teal">D · New screen</span>
+<h3>A new screenshot test</h3>
+<p>You add a test for a new screen or state. It has no golden yet.</p>
+<div class="kv"><div class="k">You see</div><div>Locally the test fails with "no golden". On CI the summary lists it as <b>new</b>; it's never skipped silently.</div>
+<div class="k">You do</div><div>Run <code>make ios-record-missing</code> (records only new tests), look at the new pictures, commit them. For the final version, let CI record via the label, like scenario C.</div></div>
+</div>
+<div class="card scen amber">
+<span class="tag amber">E · The API changes</span>
+<h3>The server sends a new shape of data</h3>
+<p>A new field, a renamed field, a missing image.</p>
+<div class="kv"><div class="k">You see</div><div>Contract tests fail, not screenshots: the fixtures no longer match the API contract.</div>
+<div class="k">You do</div><div>Update the shared fixture JSON in <code>/fixtures</code>, update the code, then re-record any pictures that changed because of it (scenario C).</div></div>
+</div>
+<div class="card scen amber">
+<span class="tag amber">F · Messy real content</span>
+<h3>Strange text from the CMS</h3>
+<p>HTML entities like <code>&amp;amp;</code>, line breaks inside headlines, emoji, an empty live ticker, an hour-long video.</p>
+<div class="kv"><div class="k">You see</div><div>Covered by <code>feed_hostile_content.json</code> and its goldens. If the cleanup breaks, those pictures fail.</div>
+<div class="k">You do</div><div>New kind of mess found in production? Add it to that fixture, fix the cleanup, record the golden.</div></div>
+</div>
+<div class="card scen red">
+<span class="tag red">G · "Works on my machine"</span>
+<h3>Fails on CI, passes locally</h3>
+<p>Usually a different simulator or iOS version.</p>
+<div class="kv"><div class="k">You see</div><div>Red on CI only.</div>
+<div class="k">You do</div><div>CI is the source of truth. Download the <code>ios-snapshot-diffs</code> artifact from the run (the bot comment already says what kind of change). Use the same pinned simulator locally (<code>scripts/ios-sim.sh</code> creates it) to reproduce exactly.</div></div>
+</div>
+<div class="card scen green">
+<span class="tag green">H · Invisible noise</span>
+<h3>A difference nobody can see</h3>
+<p>Tiny anti-aliasing differences between graphics chips.</p>
+<div class="kv"><div class="k">You see</div><div>Nothing: the test passes. The tolerance absorbs it (section 8).</div>
+<div class="k">You do</div><div>Nothing. Never loosen the tolerance to make a real change pass.</div></div>
+</div>
+<div class="card scen red">
+<span class="tag red">I · Flaky test</span>
+<h3>Fails sometimes, passes sometimes</h3>
+<p>Usually a test racing an animation or a slow machine.</p>
+<div class="kv"><div class="k">You see</div><div>Random red runs without code changes.</div>
+<div class="k">You do</div><div>No automatic retries (they hide the problem). Quarantine the test within 24 hours with an owner, then fix the cause. CI found one real case here: a UI test tapping before the paywall finished appearing. Fixed with an explicit wait.</div></div>
+</div>
+<div class="card scen teal">
+<span class="tag teal">J · Offline reader</span>
+<h3>No connection</h3>
+<p>The reader loses signal after the feed loaded.</p>
+<div class="kv"><div class="k">You see</div><div>Goldens for offline, offline-with-cached-articles and refresh-failed states. A UI test pulls to refresh while offline.</div>
+<div class="k">You do</div><div>Nothing special: these states are protected like any other screen.</div></div>
+</div>
+</div>
+
+<div class="grid g2">
+<div class="card"><h3>Messy content, cleaned</h3>
+<figure class="shot tall"><img src="../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests/test_feed_hostileContent.light.png" alt="Feed with messy CMS content, cleaned up"></figure>
+<figcaption>Golden for scenario F: readable headlines, "Noch keine Einträge", 1:02:03.</figcaption></div>
+<div class="card"><h3>Offline with saved articles</h3>
+<figure class="shot tall"><img src="../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests/test_feed_offlineCached.light.png" alt="Feed offline with cached articles and the time they were loaded"></figure>
+<figcaption>Golden for scenario J: the articles stay, with the time they were loaded.</figcaption></div>
+</div>
+
+<!-- 8 -->
+<h2 id="tolerance"><span class="n">8</span>How small a difference counts</h2>
+<p class="sub">"Do two pictures have to match pixel for pixel?"</p>
+<div class="card">
+<p>Almost. The comparison uses a <b>perceptual precision of 0.98</b>: each pixel may differ by an amount the human eye can't see (about ΔE 2, a standard measure of colour difference). That absorbs graphics-chip noise.</p>
+<p>Anything beyond that fails, <b>however small</b>. A 2-point shift and a missing badge are both "small", and both are bugs. A pixel count can't tell whether a change was intended, so a person always decides.</p>
+<div class="callout"><p><b>The one blind spot, and how it's covered:</b> a colour change smaller than the eye can see (e.g. a very slight brand-colour tweak) passes the tolerance. That's why colour tokens have their own contrast tests, and design reviews any change to them.</p></div>
+</div>
+
+<!-- 9 -->
+<h2 id="roles"><span class="n">9</span>Who does what</h2>
+<div class="grid g3 roles">
+<div class="card"><h3><span class="dot" style="background:var(--teal)"></span>Developers</h3><p>Write and maintain the tests with the feature, like any other test. Fix the code when a diff shows a bug.</p></div>
+<div class="card"><h3><span class="dot" style="background:var(--violet)"></span>QA</h3><p>Owns the system around the tests: fixtures, CI, the diff report, flaky-test quarantine, and the strategy. Co-approves golden changes.</p></div>
+<div class="card"><h3><span class="dot" style="background:var(--green)"></span>Design</h3><p>Approves every golden change as a code owner: "yes, this is what it should look like now".</p></div>
+</div>
+
+<!-- 10 -->
+<h2 id="where"><span class="n">10</span>Where everything lives</h2>
+<div class="card">
+<pre>Task/
+├── fixtures/                     <span class="c">fake API data every test reads (shared by iOS and Android)</span>
+│   ├── feed/*.json               <span class="c">default, edge cases, empty, messy content, long headlines</span>
+│   └── images/                   <span class="c">bundled images (never downloaded in tests)</span>
+├── ios/
+│   ├── NewsKit/Sources/          <span class="c">the app's code: feed, account, games, paywall</span>
+│   ├── NewsKit/Tests/
+│   │   ├── NewsUISnapshotTests/  <span class="c">SCREENSHOT TESTS</span>
+│   │   │   └── __Snapshots__/    <span class="c">the GOLDENS (89 approved PNGs)</span>
+│   │   └── NewsCoreTests/        <span class="c">logic and contract tests (no pictures)</span>
+│   └── UITests/                  <span class="c">real-app tests + accessibility audit</span>
+├── scripts/                      <span class="c">diff report, gallery, golden lint, simulator pinning</span>
+├── docs/regression/              <span class="c">the captured result of the deliberate regression</span>
+├── .github/workflows/            <span class="c">the CI pipeline</span>
+├── .github/CODEOWNERS            <span class="c">who must approve golden changes</span>
+├── presentation/                 <span class="c">this guide, the demo script, setup.sh</span>
+└── artifacts/                    <span class="c">OUTPUT of test runs (not in git, recreated by every run)</span>
+    ├── ios/diffs/index.html      <span class="c">the diff report (only after a failing run)</span>
+    └── gallery/index.html        <span class="c">every golden on one page</span></pre>
+</div>
+
+<!-- 11 -->
+<h2 id="commands"><span class="n">11</span>Commands</h2>
+<p class="sub">Everything is one <code>make</code> command, run from the project folder. <code>make help</code> lists them.</p>
+<div class="card tablewrap">
+<table>
+<thead><tr><th>Command</th><th>What it does</th><th>When</th></tr></thead>
+<tbody>
+<tr><td><code>make ios-test</code></td><td>Draws every screen, compares with its golden, runs the logic tests. On failure: <code>artifacts/ios/diffs/index.html</code></td><td>After any change (&lt; 1 min)</td></tr>
+<tr><td><code>make ios-ui-test</code></td><td>Taps through the real app + accessibility audit</td><td>Before merging (~5 min)</td></tr>
+<tr><td><code>make gallery</code></td><td>Every golden on one page: <code>artifacts/gallery/index.html</code></td><td>Design review</td></tr>
+<tr><td><code>make lint-goldens</code></td><td>Fails on blank or broken goldens (a blank golden would pass while protecting nothing)</td><td>After recording</td></tr>
+<tr><td><code>make ios-record-missing</code></td><td>Records goldens only for new tests</td><td>After adding a test</td></tr>
+<tr><td><code>make ios-record</code></td><td>Re-records all goldens (CI does this via the label)</td><td>Intended visual change</td></tr>
+<tr><td><code>make ios-run</code></td><td>Opens the app in the simulator. Options: <code>FIXTURE=…</code>, <code>OFFLINE=1</code>, <code>DROP_CONNECTION=1</code>, <code>TAB=…</code>, <code>SIGNED_IN=1</code></td><td>To look at a state by hand</td></tr>
+<tr><td><code>make clean</code></td><td>Deletes build output and artifacts</td><td>When something seems stuck</td></tr>
+</tbody></table>
+</div>
+
+<!-- 12 -->
+<h2 id="android"><span class="n">12</span>Android</h2>
+<div class="card">
+<p>The demo is iOS, but the approach is the same on Android, and it was built first on both:</p>
+<div class="grid g2">
+<div><h3>The same</h3><p>Same fixture files, same test names, same goldens-in-git, same label-based re-record and code-owner approval. One regression fails in the same places on both platforms.</p></div>
+<div><h3>Different</h3><p>The tool: <b>Roborazzi</b> on <b>Robolectric</b>, which draws Jetpack Compose screens on the JVM, so no emulator is needed. iOS has no equivalent, so it uses a simulator.</p></div>
+</div>
+<div class="callout"><p><b>Do iOS and Android need to look identical?</b> No. Each platform has its own goldens and is compared only with itself. Small native differences (fonts, system controls) are expected. What must match is the <b>content and states</b>, which the shared fixtures guarantee.</p></div>
+<p>Details: section 10 of <code>STRATEGY.pdf</code>.</p>
+</div>
+
+<!-- 13 -->
+<h2 id="qa"><span class="n">13</span>Questions people ask</h2>
+<div class="card qa">
+<details><summary>Is this using real data from the BILD/WELT API?</summary><p>No. Fake data (fixtures) shaped exactly like the API. That keeps every run identical. Contract tests make sure the fixtures still match the real API's shape.</p></details>
+<details><summary>Does the test open the app?</summary><p>The screenshot tests don't: they draw each screen straight from code in memory, on the pinned simulator, with nothing shown on screen. Only the UI tests (<code>make ios-ui-test</code>) launch the real app and tap through it.</p></details>
+<details><summary>Will the goldens be wrong tomorrow when the news changes?</summary><p>No. Goldens belong to frozen fixtures, not live news. They only change when the code changes the look on purpose.</p></details>
+<details><summary>When do the tests run?</summary><p>Locally whenever you run <code>make ios-test</code>. On GitHub automatically on every pull request, when a label is added, and on every push to main. A red result blocks the merge.</p></details>
+<details><summary>How long does it take?</summary><p>Locally under a minute for screenshots + logic, ~5 minutes for UI tests. On GitHub 12–19 minutes for everything. At scale: only run affected modules, split across machines, move the slowest checks to a nightly run.</p></details>
+<details><summary>Who approves new goldens?</summary><p>A design or QA code owner, on every pull request that changes them. AI or a bot may sort and summarise; a person always approves.</p></details>
+<details><summary>Can a developer just re-record to make a red test green?</summary><p>They can add the label, but the pull request still can't merge without a design/QA code owner approving the new pictures. And CI records them, not the developer's laptop.</p></details>
+<details><summary>What if a golden is blank or broken?</summary><p>A blank golden would make a test pass while protecting nothing. <code>make lint-goldens</code> rejects them, and CI runs it on every pull request.</p></details>
+<details><summary>What does a screenshot test NOT catch?</summary><p>Behaviour (does tapping work?), accessibility (can VoiceOver reach it?), and colour changes below the tolerance. That's why there are UI tests, an accessibility audit and colour-contrast tests next to it.</p></details>
+<details><summary>Why is the demo iOS only?</summary><p>The brief asks for a working demo on at least one platform and a strategy for both. The Android version was built too, then cut to keep the demo focused; the strategy describes it.</p></details>
+<details><summary>How would this roll out at BILD/WELT?</summary><p>Start with one app and a few design-system components in report-only mode (failures shown, not blocking). Add the shared fixtures. Then make the check required. About four sprints.</p></details>
+</div>
+
+</main>
+</body>
+</html>

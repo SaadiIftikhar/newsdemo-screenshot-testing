@@ -150,6 +150,8 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decisions for that round: the script went from 14 sections and 12 live commands to 9 and 6, about 68% fewer words. Tolerance, safety nets and CI details moved to the "If they ask" answers. The login pre-fill applies only to the demo app; the screenshot tests pass explicit values, so no golden changed, and the empty-form golden still covers the placeholders.)
 
+> in the presentation folder make another file which has the script but more details on the steps so if someone read that for the first time they will underttand and also add visual aid in the file and also explain simpler things like , also cover questions and other deatils like scrfnearios for exmaple when no change when there is some change etc and visual aids will be great ake a presentation just to undertand everythign related and how everything is in the worklfow so a new person cna easily undetand it
+
 ## 3. How the AI was used
 
 - **Research:**
