@@ -5,7 +5,7 @@ import NewsFixtures
 import XCTest
 
 /// Behaviour tests for the new screens' logic. Snapshots prove how a state LOOKS;
-/// these prove the app GETS into the right state. Mirrored 1:1 in the Android suite.
+/// these prove the app GETS into the right state.
 final class GameLogicTests: XCTestCase {
 
     func test_ticTacToe_detectsRowColumnAndDiagonalWins() {
@@ -43,7 +43,7 @@ final class GameLogicTests: XCTestCase {
         XCTAssertTrue(counts.values.allSatisfy { $0 == 2 })
     }
 
-    /// Pins the shuffle so Android can assert the very same order (cross-platform parity).
+    /// Pins the shuffle: the same seed must always give the same order (and any other platform can assert it).
     func test_pairs_seed42Layout() {
         XCTAssertEqual(PairsGame(seed: 42).cards.map(\.symbol), PairsLayout.seed42)
     }

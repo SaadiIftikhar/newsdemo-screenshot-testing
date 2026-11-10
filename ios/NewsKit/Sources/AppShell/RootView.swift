@@ -29,7 +29,7 @@ public enum AppTab: String, Hashable, Sendable, CaseIterable {
 ///
 /// Why not the system `TabView` in this demo? On iOS 26 its floating "Liquid Glass" bar is not captured by
 /// in-process snapshots (the glass renders blank, lazy tab content isn't laid out before capture). For a demo
-/// whose point is screenshot coverage, a custom bar (identical on Android) keeps every pixel testable.
+/// whose point is screenshot coverage, a custom bar keeps every pixel testable.
 /// In a production app we would NOT change product UI for a test tool: keep the system bar, snapshot the tab
 /// *content*, and cover the system chrome in Layer 2 (XCUITest/Maestro on a real simulator). See STRATEGY.md.
 public struct RootView: View {
@@ -91,7 +91,7 @@ public struct RootView: View {
     }
 }
 
-/// Hovering, capsule-shaped tab bar (mirrored by the Compose `FloatingTabBar` on Android).
+/// Hovering, capsule-shaped tab bar.
 struct FloatingTabBar: View {
     @Binding var selection: AppTab
     static let reservedHeight: CGFloat = 88

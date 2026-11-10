@@ -1,5 +1,5 @@
 {
-  "_comment": "Synthetic stress data (not real articles). Pins how messy CMS/RSS text is cleaned and rendered. Contract: ContractAndPolicyTests (iOS) and FeatureLogicTests (Android) assert the same cleaned literal.",
+  "_comment": "Synthetic stress data (not real articles). Pins how messy CMS/RSS text is cleaned and rendered. Contract: EdgeCaseScenarioTests asserts the exact cleaned literal.",
   "breaking": {
     "id": "brk-301",
     "headline": "  Bundestag stimmt über\n„Sondervermögen“ ab &amp; Opposition   kündigt Klage an ",

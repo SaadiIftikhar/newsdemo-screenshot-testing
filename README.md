@@ -1,140 +1,102 @@
-# NewsDemo: cross-platform screenshot testing with mocked data
+# Screenshot testing with mocked data: a news app demo (iOS)
 
-A small news app, built natively on **iOS (SwiftUI)** and **Android (Compose)** with the same design, behaviour and test names:
+A small news app in **SwiftUI**, covered by **screenshot tests driven by fixed fake data**, gated in **GitHub Actions** on every pull request. It answers the take-home challenge: *how do we catch unintended visual changes in the BILD and WELT apps, without the content changing under us?*
 
-- **Nachrichten** (feed):
-  - breaking-news banner, live ticker (live and ended), teasers with and without images
-  - **PLUS** (paywalled) teasers
-  - video teaser, ad slot (and an ad that returned nothing, which collapses)
-  - skeleton loading, empty, offline and error states
-  - **offline with cached content:** the last feed stays, with "Stand 15:02 Uhr" and pull-to-refresh
-  - **messy CMS text** cleaned identically on both platforms: `&amp;`, stray line breaks, emoji, soft hyphens
-  - headlines are **real public WELT/BILD articles**; tapping one opens the publisher's page in-app
-  - **PLUS articles open only for subscribers**; everyone else sees a paywall
-- **Spiele** (games): Tic-Tac-Toe against the computer, a pairs card game, a 4×4 Mini-Sudoku.
-- **Konto** (account): login with validation, two demo accounts (subscriber and basic), and the profile.
-- A **floating 3-tab bar** above the content.
+The strategy covers iOS and Android; this demo implements **iOS end to end** (app, tests, CI). Android works the same way with the same fixtures ([STRATEGY.md §10](STRATEGY.md)).
 
-Every screen is covered by screenshot tests driven by **one shared set of JSON fixtures** (`/fixtures`).
+## Deliverables
 
-| | iOS | Android |
-|---|---|---|
-| Screenshot tool | swift-snapshot-testing 1.19.7 | Roborazzi 1.77.0 on Robolectric 4.17 |
-| Golden images | 89 | 89 (identical names, enforced by `make lint-goldens`) |
-| Logic / contract / contrast / edge-case tests | 35 | 36 (same cases + an Arabic-locale digit test) |
-| UI interaction tests | 9 (XCUITest, real app on the simulator) | 10 (Robolectric) |
-| Accessibility audits (every screen) | 6 (`performAccessibilityAudit`) | 6 (Google ATF via Roborazzi) |
-| `make` time (measured, after the first build) | about 30 s (+ about 2 min UI tests and audits) | about 20 s |
-
-- **Strategy:** [STRATEGY.md](STRATEGY.md) (PDF: [STRATEGY.pdf](STRATEGY.pdf))
-- **Evidence** (what building and running it found, devil's advocate): [docs/EVIDENCE.md](docs/EVIDENCE.md)
-- **CI on GitHub:** private repo `SaadiIftikhar/newsdemo-screenshot-testing`; PR #1 (re-pin + CI re-record, green), PR #2 (deliberate regression, blocked)
-- **Walkthrough notes:** [WALKTHROUGH.md](WALKTHROUGH.md)
-- **Prompts used:** [PROMPTS.md](PROMPTS.md)
-- **Deliberate regression:** branch `demo/regression`, captured diffs in [docs/regression/](docs/regression/)
-
-```
-fixtures/            shared JSON + images  ← single source of truth for UI states (both platforms)
-ios/NewsKit/         SPM package: NewsCore · NewsUI (feed, paywall) · Games · Account · AppShell · NewsFixtures
-  Tests/NewsUISnapshotTests/__Snapshots__/   iOS goldens
-ios/App, ios/UITests, project.yml            app shell + XCUITest (XcodeGen)
-android/app/         Compose app: core/ · ui/ (feed, paywall, app shell) · games/ · account/
-  src/test/screenshots/                      Android goldens
-scripts/             pinned simulator, run helpers, diff report, golden lint, PDF export
-.github/             CI workflow (lint / verify / record), CODEOWNERS for goldens
-```
-
-## 2-minute reviewer path (no Xcode beta needed)
-
-Run these from the repository root. You need JDK 21 and the Android SDK platform 37 (`sdkmanager "platforms;android-37.0"`).
-
-```bash
-make android-test                                           # 89 screenshots + logic + interaction + accessibility: green
-git checkout demo/regression && make android-test           # fails on 29 screenshots (PLUS badge dropped, banner −2pt)
-open artifacts/android/diffs/index.html                     # golden | this change | changed pixels
-git checkout main
-```
-
-## Prerequisites (everything)
-
-| Platform | Needs |
+| Deliverable | Where |
 |---|---|
-| iOS | macOS with **Xcode 27** (currently a beta/preview release) and the iOS 27.0 simulator runtime (`xcodebuild -downloadPlatform iOS -buildVersion 27.0`; the same runtime the CI image has). `make` creates the pinned "NewsDemo Snapshots" iPhone 17 simulator. `xcodegen` is needed for the app and UI tests |
-| Android | JDK 21, Android SDK platform 37, `ANDROID_HOME` or `android/local.properties`. No emulator needed for tests |
+| Strategy document (~3 pages) | [STRATEGY.md](STRATEGY.md) · [STRATEGY.pdf](STRATEGY.pdf) · evidence: [docs/EVIDENCE.md](docs/EVIDENCE.md) |
+| Working demo with goldens | `ios/` (app + tests), `fixtures/` (fake data), 89 goldens in `ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/` |
+| Deliberate regression with diff | branch `demo/regression` · captured result: [docs/regression/](docs/regression/) |
+| How to run and regenerate | this README |
+| Prompts used | [PROMPTS.md](PROMPTS.md) |
+| Walkthrough | [presentation/](presentation/): slides, a presenter script with every command, and a no-slides demo flow |
+| CI/CD | [.github/workflows/screenshots.yml](.github/workflows/screenshots.yml), running on GitHub Actions |
 
-Run everything from the repository root. `make help` lists all commands.
+## Quick start
 
-## Run the tests
+**Needs:** macOS with **Xcode 27** (a beta/preview release at the time of writing), the **iOS 27.0 simulator runtime** (`xcodebuild -downloadPlatform iOS -buildVersion 27.0`) and **XcodeGen** (`brew install xcodegen`, for the app and UI tests). Run everything from the repository root.
 
 ```bash
-make ios-test          # iOS screenshots (89) + logic/contract/contrast/edge-case tests
-make ios-ui-test       # iOS UI interaction tests + accessibility audit on the real app (XCUITest)
-make android-test      # Android screenshots (89) + logic/contract/edge-case + interaction + accessibility (ATF)
-make lint-goldens      # no blank golden, and iOS/Android golden names must match
-make gallery           # iOS vs Android side by side: open artifacts/side-by-side/index.html
+make ios-test                       # 89 screenshots + logic tests: green
+git checkout demo/regression        # a "refactor" that drops the PLUS badge
+make ios-test                       # fails: 29 of 89
+open artifacts/ios/diffs/index.html # golden | this change | changed pixels
+git checkout main                   # always switch back
 ```
 
-## Regenerate goldens (only after an intended UI change)
+## What's where
 
+```
+├── README.md · STRATEGY.md/.pdf · PROMPTS.md       the documents
+├── Makefile                      every command (make help)
+├── fixtures/                     FAKE DATA: feed JSON + images, the input of every test (see fixtures/README.md)
+├── ios/
+│   ├── NewsKit/Sources/          the app code: NewsCore (models), NewsUI (feed), Games, Account, AppShell
+│   ├── NewsKit/Tests/
+│   │   ├── NewsUISnapshotTests/  SCREENSHOT TESTS, and __Snapshots__/ = the GOLDENS (approved PNGs)
+│   │   └── NewsCoreTests/        logic, contract, edge-case and contrast tests (no pictures)
+│   ├── UITests/                  tap-through tests + Apple's accessibility audit on the real app
+│   └── App/, project.yml         the app target (XcodeGen)
+├── scripts/                      simulator pinning, diff report, golden lint, gallery, run helper, PDF export
+├── docs/                         EVIDENCE.md, regression/ (captured result of the deliberate regression)
+├── presentation/                 slides + scripts for presenting the project
+├── .github/                      CI workflow, CODEOWNERS (who approves goldens)
+└── artifacts/                    OUTPUT of test runs (not in git; recreated by every run)
+```
+
+## Commands
+
+| Command | What it does | When |
+|---|---|---|
+| `make ios-test` | Renders every screen with the fake data, compares it with its golden, runs the logic tests. On failure: `artifacts/ios/diffs/index.html` + `summary.md` | After any change |
+| `make ios-ui-test` | Taps through the real app on the simulator + Apple's accessibility audit (~5 min) | Before merging |
+| `make lint-goldens` | Fails on blank or unreadable goldens | After recording |
+| `make gallery` | Every golden on one page: `artifacts/gallery/index.html` | Design review |
+| `make ios-record-missing` | Records goldens only for new tests | After adding a test |
+| `make ios-record` | Re-records all goldens from an empty folder | After an intended visual change |
+| `make ios-run` | Opens the app in the simulator. Options: `FIXTURE=feed_hostile_content`, `OFFLINE=1`, `DROP_CONNECTION=1`, `TAB=games\|account`, `SIGNED_IN=1` | To look at a state |
+| `make help` | Lists every command | |
+
+## Workflows
+
+**A test fails and you did NOT mean it (a bug):** open `artifacts/ios/diffs/index.html` (golden | new | changed pixels in magenta) and `summary.md` (each change labelled *layout*, *visible* or *subtle*). Fix the code. **Never re-record to make a red test green.**
+
+**The appearance changes on purpose (a redesign):** check the diff shows only the intended change, then update the goldens. In a team, add the `record-snapshots` label to the pull request: CI re-records on its pinned machine, proves the new goldens and pushes them; a design/QA code owner approves the image diff. Locally:
 ```bash
-make ios-record        # starts from an empty golden folder; record mode always reports "failed"
-make android-record
+make ios-record      # always reports "failed": that's normal in record mode
 make lint-goldens
-git status             # review every changed or deleted PNG before committing
+git status           # review every changed PNG before committing
 ```
 
-In a team setup only CI records goldens: add the `record-snapshots` label to a PR (see `.github/workflows/screenshots.yml`).
-
-## The regression and the review workflow
-
+**Add a new screenshot:** add or extend a fixture in `fixtures/feed/`, add a `func test_…()` in `ios/NewsKit/Tests/NewsUISnapshotTests/` (copy an existing one; it's one line), then:
 ```bash
-git checkout demo/regression
-make ios-test                          # fails: 29 screenshots
-open artifacts/ios/diffs/index.html    # golden | this change | changed pixels (magenta = clear, orange = subtle)
-cat artifacts/ios/diffs/summary.md     # each change classified: layout / visible / subtle (what CI posts on the PR)
-make android-test                      # fails on the same 29
-open artifacts/android/diffs/index.html
-git checkout main                      # always switch back
+make ios-record-missing   # records only the new golden
+make lint-goldens && make ios-test
 ```
+Look at the new PNG yourself before committing: a new golden is approved by a person, never trusted blindly.
 
-Pre-captured output: [docs/regression/](docs/regression/).
+**The API changes shape:** update the fixture from an anonymised real response in its own pull request; contract and precondition tests tell you if a golden would now mean something different.
 
-## Run the apps (mock mode)
+**It fails only on CI, or only sometimes:** CI is the source of truth; download the `ios-snapshot-diffs` artifact from the run. Check the pinned simulator runtime (`scripts/ios-sim.sh`). Flaky tests are never retried: fix the cause or quarantine the test within 24 hours with an owner.
 
-```bash
-make ios-run                                  # (re)builds, boots the pinned simulator, opens it, launches (first time ~75 s)
-make ios-run FIXTURE=feed_long_headlines      # feed_default | feed_long_headlines | feed_edge_cases | feed_hostile_content | feed_empty
-make ios-run OFFLINE=1                        # offline state
-make ios-run DROP_CONNECTION=1                # loads, then goes offline: pull down to see the cached-content notice
-make ios-run TAB=games                        # start on Spiele (or TAB=account)
-make ios-run TAB=account SIGNED_IN=1          # logged in as the PLUS subscriber
-make android-run                              # same options; uses a plugged-in phone, a running emulator, or boots NewsDemo_API34
-```
+## The app
 
-- **Demo logins** (password `demo1234` for both):
-  - `demo@newsdemo.app`: PLUS subscriber, so PLUS articles open
-  - `basis@newsdemo.app`: no subscription, so PLUS articles show the paywall
-- **Xcode 27** replaced Simulator.app with **DeviceHub**; `ios-run` handles both.
-- **Demo toggles:**
-  - iOS: `xcrun simctl ui booted appearance dark`, `xcrun simctl ui booted content_size accessibility-extra-extra-extra-large`
-  - Android: `adb shell cmd uimode night yes`, `adb shell settings put system font_scale 2.0`
+- **Nachrichten (feed):** breaking banner, live ticker (live, ended, no entries yet), teasers with and without images, **PLUS** teasers behind a paywall, video, ads (and an ad that returned nothing), skeleton loading, empty, offline, error, and **offline with cached content** ("Stand 15:02 Uhr", pull to refresh). Headlines are **real public WELT/BILD articles**; tapping one opens the publisher's page.
+- **Spiele:** Tic-Tac-Toe against the computer, a pairs game, a 4×4 Mini-Sudoku.
+- **Konto:** login with validation, profile. Demo logins (password `demo1234`): `demo@newsdemo.app` (PLUS subscriber), `basis@newsdemo.app` (no subscription: PLUS articles show the paywall).
+- Messy CMS text (`&amp;`, stray line breaks, soft hyphens, emoji) is cleaned before it reaches the screen.
 
 ## Content and licensing
 
-- **Headlines and links:** real, from the public RSS feeds of welt.de and bild.de (fetched 2026-11-05).
-- **Teaser sentences:** our own, and they only restate the headline.
-- **Article text:** never copied. Tapping opens the publisher's own page.
-- **Images, video durations, the paywall offer and prices:** demo placeholders.
-- **Games:** generic public-domain classics written from scratch.
+Headlines and links are real, from the public RSS feeds of welt.de and bild.de (fetched 2026-11-05). Teaser sentences are our own and only restate the headline; article text is never copied. Images, video durations, the paywall offer and prices are placeholders. The games are generic public-domain classics written from scratch.
 
 ## Honest notes
 
-- **Goldens are recorded by CI** (the first ones came from the `record-snapshots` run in PR #1). This Mac verifies them on both platforms, so local and CI agree. Android renders on macOS and Linux within 2/255 on about 0.005% of pixels, inside Roborazzi's per-pixel tolerance.
-- **CI runs on GitHub** (private repo). Without a `SNAPSHOT_BOT_TOKEN` secret the bot's golden commit does not start a new run; push any commit (or re-run) to verify it.
-- **Android tests run on Robolectric's SDK 36 runtime**, while the app compiles against and targets SDK 37. On the SDK 37 runtime most captures came out blank ([docs/EVIDENCE.md](docs/EVIDENCE.md)).
-- **Keep the Mac awake for long runs.** A laptop that sleeps mid-run turns green tests into timeouts. The `make` test targets wrap the runs in `caffeinate -i`.
-- **Verified on this machine** (see STRATEGY §6 and [docs/EVIDENCE.md](docs/EVIDENCE.md)):
-  - 10 consecutive full runs per platform, all green
-  - both suites pass on `main` and fail on the same snapshots on `demo/regression`
-  - every `make` command was run
-  - both apps launch in every mode
+- **Xcode 27 is a preview release** at the time of writing; the CI job uses GitHub's `xcode-27` preview runner.
+- **Goldens are recorded by CI** on the pinned simulator (iOS 27.0, iPhone 17); a Mac with the same runtime verifies them, so local and CI agree.
+- **Without a `SNAPSHOT_BOT_TOKEN` secret**, the bot's re-recorded goldens don't start a new CI run on their own; push any commit or re-run the workflow.
+- **The nightly run** recommended in the strategy is switched off in this repo to save CI minutes (see the comment in the workflow).

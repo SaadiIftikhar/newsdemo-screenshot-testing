@@ -2,7 +2,7 @@ import Foundation
 import NewsCore
 import UIKit
 
-/// Loads the shared, cross-platform fixtures in `/fixtures` (the same files Android uses).
+/// Loads the shared fixtures in `/fixtures` (plain JSON, so any platform's tests can use the same files).
 public struct FixtureStore: Sendable {
     public let root: URL
 

@@ -47,7 +47,7 @@ public final class AccountViewModel {
         } catch AuthError.offline {
             state = .failed(Self.offline)
         } catch {
-            state = .failed(Self.generic) // same three messages as Android
+            state = .failed(Self.generic) // one of three fixed messages: wrong credentials, offline, generic
         }
         if case .failed(let message) = state { announce(message) }
     }

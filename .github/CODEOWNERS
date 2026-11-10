@@ -2,5 +2,4 @@
 # "just re-record and merge" from turning snapshot tests into rubber stamps.
 # (Team handles are placeholders for the real GitHub teams.)
 **/__Snapshots__/**          @newsdemo/design-review @newsdemo/qa
-android/app/src/test/screenshots/**  @newsdemo/design-review @newsdemo/qa
 /fixtures/**                 @newsdemo/qa

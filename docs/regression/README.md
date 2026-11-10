@@ -1,38 +1,43 @@
 # Deliberate regression: what the gate shows a reviewer
 
-Branch **`demo/regression`** contains a plausible "refactor" commit on each platform:
+Branch **`demo/regression`** contains a plausible "refactor" ("simplify the kicker row, tighten the banner") that changes two things by accident:
 
 1. **The PLUS (paywall) badge is silently dropped** from the teaser card. This is the brief's own example: *"a paywall badge that disappears after a refactor"*.
-2. **The breaking-news banner's vertical padding shrinks by 2pt/dp.** This is a subtle change that a human reviewer would miss in a screenshot. It proves the tolerance setting doesn't hide real layout shifts.
+2. **The breaking-news banner's vertical padding shrinks by 2pt.** A change a human reviewer would miss in a screenshot; it proves the tolerance setting doesn't hide real layout shifts.
 
-## Result (GitHub Actions, PR #2, run 42691506706)
+## Result
 
-Captured on CI, not on a laptop: PR #2 on the private repo is blocked by both the iOS and the Android job, and the bot comment shows the table below for each platform.
+| | |
+|---|---|
+| Failing snapshots | **29 of 89** (list: `failing-tests.txt`) |
+| Failing test methods | 15 |
+| Triage (`summary.md`, what CI posts on the PR) | **10 layout** changes (the banner got 4pt shorter, so the image size changed), **19 visible**, 0 subtle |
+| Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states, all Games, Account and Paywall screens |
 
-| | iOS (swift-snapshot-testing) | Android (Roborazzi) |
-|---|---|---|
-| Failing snapshots | 29 (of 89) | 29 (of 89) |
-| Failing tests | 15 test methods | 15 test methods |
-| Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states, all Games, Account and Paywall screens | same |
+The failures include the app shell's feed tab, the offline (cached content) and hostile-content feeds, and a real WELTplus teaser losing its PLUS badge.
 
-The two platforms fail on **exactly the same 29 snapshots** (lists in `ios/failing-tests.txt` and `android/failing-snapshots.txt`), because they share fixtures, test names and the variant matrix. The failures include the app shell's feed tab, the offline (cached content) and hostile-content feeds, and a real WELTplus teaser losing its PLUS badge.
+## What's in this folder
 
-**Triage before opening an image** (`ios/summary.md`, `android/summary.md`; this is what CI posts on the PR): 10 snapshots are **layout** changes (the banner got 4pt shorter, so the image size changed) and 19 are **visible** changes. None is "subtle", which is what you would expect from a dropped badge and a padding change.
+| File | What it is |
+|---|---|
+| `ComponentSnapshotTests__test_teaserCard_premium.dark.png` | **golden \| this PR \| changed pixels (magenta)** for the PLUS teaser: the badge is gone |
+| `ComponentSnapshotTests__test_breakingBanner_default.light.png` | the banner 4pt shorter: a "layout" change |
+| `AppShellSnapshotTests__test_appShell_feedTab.light.png` | the whole feed tab: both changes at once |
+| `summary.md` | the triage table (kind of change and pixel counts per snapshot) |
+| `failing-tests.txt` | the 29 failing snapshot names |
 
-## Review artifacts
-
-- **iOS:** `ios/` has composites (teaser, breaking banner, whole app shell) from `scripts/diff-report.swift`, showing **golden | this PR | changed pixels (magenta)**. Locally, `make ios-test` writes the full gallery to `artifacts/ios/diffs/index.html`.
-- **Android:** `android/` has Roborazzi's built-in `_compare.png` for the same three screens (**Reference | Diff | New**). Locally, `make android-test` writes the same gallery as iOS to `artifacts/android/diffs/index.html`.
-
-In CI these are uploaded as run artifacts and linked from an automatic PR comment (see `.github/workflows/screenshots.yml`).
+These are a committed copy of what `scripts/diff-report.swift` produced on CI. Locally, `make ios-test` on the branch writes the full gallery to `artifacts/ios/diffs/index.html`.
 
 ## Reviewer decision
 
 - **Unintended (as here):** fix the code. The goldens stay unchanged.
-- **Intended:** add the `record-snapshots` label. CI re-records on the pinned image and pushes the new goldens, and `CODEOWNERS` requires design/QA approval of that golden diff.
+- **Intended:** add the `record-snapshots` label. CI re-records on the pinned image, proves and pushes the new goldens, and `CODEOWNERS` requires design/QA approval of that golden diff.
 
 Reproduce:
 
 ```bash
-git checkout demo/regression && make ios-test ; make android-test ; git checkout main
+git checkout demo/regression
+make ios-test                              # fails: 29 of 89
+open artifacts/ios/diffs/index.html        # golden | this PR | changed pixels
+git checkout main
 ```

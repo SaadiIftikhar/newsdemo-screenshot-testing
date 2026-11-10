@@ -64,7 +64,7 @@ public enum LoginValidator {
 
     public static func validate(email: String, password: String) -> Errors {
         var errors = Errors()
-        // Same rules as Android: trim whitespace AND newlines; length counted in Unicode code points.
+        // Trim whitespace AND newlines; length counted in Unicode code points (portable across platforms).
         let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
             errors.email = "Bitte E-Mail-Adresse eingeben."

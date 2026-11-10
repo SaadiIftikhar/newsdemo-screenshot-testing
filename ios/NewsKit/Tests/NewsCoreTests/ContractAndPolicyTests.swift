@@ -5,11 +5,11 @@ import NewsUI
 import UIKit
 import XCTest
 
-/// Cross-platform contract for messy backend data. Android asserts the SAME expectations (same ids, same flags),
-/// so the two decoders cannot drift apart again (they did: a missing `premium` failed the whole feed on iOS and
-/// silently became "free" on Android).
+/// Contract for messy backend data: the exact items and flags a decoder must produce. Written as a literal so any
+/// other client (e.g. an Android app) can assert the same expectations. Before this contract, one missing `premium`
+/// field failed the whole feed in one decoder and silently made a PLUS article free in another.
 final class EdgeCaseDecodingContractTests: XCTestCase {
-    func test_edgeCases_decodeToTheSameItemsAsAndroid() throws {
+    func test_edgeCases_decodeToTheContractedItems() throws {
         let feed = try FixtureStore.repository().feed("feed_edge_cases")
         XCTAssertNil(feed.breaking)
         XCTAssertEqual(feed.items.map(\.id), ["live-201", "tsr-201", "ad-201", "tsr-202", "tsr-203"])
@@ -95,7 +95,7 @@ final class DateFormatterTests: XCTestCase {
 }
 
 /// WCAG 2.2 contrast of every text-on-background token pair, light and dark. Golden review missed contrast bugs
-/// (the screenshots were approved); this test would have caught them. Android runs the same pairs.
+/// (the screenshots were approved); this test would have caught them.
 final class ContrastTests: XCTestCase {
     struct Pair { let name: String; let fg: UIColor; let bg: UIColor; let minimum: Double }
 

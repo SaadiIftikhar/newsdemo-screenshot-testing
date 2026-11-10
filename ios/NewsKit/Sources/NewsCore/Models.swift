@@ -1,6 +1,6 @@
 import Foundation
 
-// Decoding rules (identical on Android, enforced by the shared `feed_edge_cases.json` contract test):
+// Decoding rules (enforced by the `feed_edge_cases.json` contract test; any other client must follow the same):
 //  - one malformed item is DROPPED, never fails the whole feed (losing the front page during breaking news
 //    is the most expensive failure a news app can have)
 //  - unknown or missing `type` → dropped (forward compatibility)
@@ -28,7 +28,7 @@ public struct Feed: Equatable, Sendable, Decodable {
         breaking = (try? container.decodeIfPresent(BreakingNews.self, forKey: .breaking))?.cleaned
         let decoded = try container.decode([LossyItem].self, forKey: .items).compactMap(\.item)
         var seen = Set<String>()
-        if let breaking { seen.insert(breaking.id) } // same as Android: an item may not reuse the banner's id
+        if let breaking { seen.insert(breaking.id) } // an item may not reuse the banner's id
         items = decoded.filter { $0 != .unsupported && seen.insert($0.id).inserted }.map(\.cleaned)
     }
 
@@ -184,7 +184,7 @@ public struct AdSlot: Equatable, Sendable, Decodable, Identifiable {
 
 // MARK: - Text cleaning
 
-/// Cleans editorial text from the CMS/feeds. Mirror of Android `TextCleaner`; the shared contract is
+/// Cleans editorial text from the CMS/feeds. The contract is
 /// `fixtures/feed/feed_hostile_content.json`, asserted with the same literal on both platforms.
 public enum TextCleaner {
     /// Entities that really occur in German editorial feeds. An unknown name stays as written (visible in review).

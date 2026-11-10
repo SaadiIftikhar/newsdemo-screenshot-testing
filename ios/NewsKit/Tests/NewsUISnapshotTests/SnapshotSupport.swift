@@ -5,7 +5,7 @@ import SwiftUI
 import UIKit
 import XCTest
 
-/// One rendering configuration in the state matrix. Names are shared with Android (see fixtures/README.md).
+/// One rendering configuration in the state matrix (light, dark, largest text).
 struct Variant: Sendable {
     let name: String
     let colorScheme: ColorScheme
