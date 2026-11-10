@@ -2,7 +2,7 @@ import XCTest
 
 /// Apple's automated accessibility audit on the real app: contrast, hit-region size, Dynamic Type clipping,
 /// missing labels, element detection. Screenshots cannot see any of this (a golden of an unlabelled button looks
-/// perfect), and the a11y review found such bugs by hand. Android runs the equivalent ATF checks.
+/// perfect), and the a11y review found such bugs by hand.
 final class AccessibilityAuditTests: XCTestCase {
     private var app: XCUIApplication!
     private static let tabLabels: Set<String> = ["Nachrichten", "Spiele", "Konto"]

@@ -1,6 +1,6 @@
 import XCTest
 
-/// Behaviour, not pixels: drives the real app on the pinned simulator, like Android's Robolectric InteractionTests
+/// Behaviour, not pixels: drives the real app on the pinned simulator
 /// (same scenarios, same names where they exist on both). The app starts in fixture mode via launch arguments.
 final class InteractionTests: XCTestCase {
     private var app: XCUIApplication!
@@ -32,7 +32,7 @@ final class InteractionTests: XCTestCase {
         XCTAssertTrue(app.buttons["Feld 5: O"].exists, "computer took the centre")
     }
 
-    /// Regression guard (the bug was found on Android): the board must survive switching tabs.
+    /// Regression guard: the board must survive switching tabs.
     func test_gameProgress_survivesSwitchingTabs() {
         launch(["-tab", "games"])
         app.buttons["game-ticTacToe"].firstMatch.tap()

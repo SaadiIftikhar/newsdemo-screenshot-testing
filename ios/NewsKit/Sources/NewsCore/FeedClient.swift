@@ -25,7 +25,7 @@ extension FeedClient {
             do {
                 (data, response) = try await session.data(from: url)
             } catch let error as URLError where FeedClient.offlineCodes.contains(error.code) {
-                // Same mapping as Android (every connectivity IOException → offline).
+                // Every connectivity failure maps to offline, not to the generic error screen.
                 throw FeedError.offline
             }
             if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {

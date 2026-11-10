@@ -35,7 +35,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.newsdemo
         SWIFT_VERSION: "6.0"
         CODE_SIGNING_ALLOWED: NO
-  # UI interaction tests (XCUITest): the iOS counterpart of Android's Robolectric InteractionTests.
+  # UI interaction tests (XCUITest) and the accessibility audit, run against the real app.
   NewsDemoUITests:
     type: bundle.ui-testing
     platform: iOS

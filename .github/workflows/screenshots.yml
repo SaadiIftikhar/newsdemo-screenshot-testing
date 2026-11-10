@@ -1,24 +1,24 @@
-# Screenshot-test gate for every PR, on both platforms.
+# Screenshot-test gate for every pull request (iOS).
 #
 #  - verify (default): runs on the PR's MERGE result (what main will look like), fails on any unintended pixel
 #    change, uploads a diff gallery and keeps ONE sticky PR comment up to date.
 #  - record: add the label `record-snapshots` (or run manually). CI re-records on the pinned image, then proves
 #    the new goldens (golden lint + a full verify run) BEFORE pushing them as a bot commit. Goldens never come
 #    from someone's laptop. The golden diff is then reviewed in the PR (CODEOWNERS: design/QA).
-#  - lint: every run fails if a golden is blank or iOS/Android golden names diverge.
+#  - lint: every run fails if a golden is blank or unreadable.
 #
 # When it runs:
 #  - every PR (opened / new commits / label added): the gate. Verifies the MERGE result.
 #  - merge queue (merge_group): re-verifies against the latest main right before merging, so two PRs that are
 #    green on their own cannot turn main red together.
-#  - push to main: post-merge confirmation; keeps main's badge honest.
-#  - nightly 03:00 UTC: the same suite on a fresh runner image (catches drift: runner, runtime, dependencies), plus
-#    the iOS-vs-Android side-by-side gallery for design review.
+#  - push to main: post-merge confirmation.
 #  - manually (workflow_dispatch), optionally in record mode.
+#  A nightly run on a fresh runner image (STRATEGY §5) is left out of the demo repo to save CI minutes; add
+#  `schedule: - cron: "0 3 * * *"` to switch it on.
 #
 # Push token: a push made with the default GITHUB_TOKEN does NOT start a new workflow run, so the re-recorded
-# commit would never be verified and a required check would hang. Set the secret SNAPSHOT_BOT_TOKEN (a GitHub
-# App / fine-grained token with contents:write) so the bot commit re-triggers this workflow.
+# commit is not verified automatically. Set the secret SNAPSHOT_BOT_TOKEN (a GitHub App / fine-grained token with
+# contents:write) so the bot commit re-triggers this workflow; without it, push any commit or re-run.
 #
 # Branch protection to pair with it: require this check, require code-owner review, dismiss stale approvals.
 # Action versions checked against their GitHub releases on 2026-11-05.
@@ -30,8 +30,6 @@ on:
   merge_group:
   push:
     branches: [main]
-  schedule:
-    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       record:
@@ -47,8 +45,7 @@ env:
   RECORD: ${{ github.event.label.name == 'record-snapshots' || inputs.record == true }}
   # The pins goldens depend on. Bump them together with a re-baseline, in ONE reviewed PR.
   XCODE_MAJOR: "27"
-  # iOS 27.0 + iPhone 17: on the xcode-27 runner image (27.0/27.1/27.2) AND on the dev Macs (26.5 was not on the
-  # image; the local 27.1 runtime only supports one device). Bump together with a re-baseline, in one PR.
+  # iOS 27.0 + iPhone 17: on the xcode-27 runner image (27.0/27.1/27.2) AND on the dev Macs.
   IOS_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-27-0
 
 jobs:
@@ -60,15 +57,14 @@ jobs:
         with:
           lfs: true
       - run: make lint-goldens
-      - name: iOS vs Android gallery (cross-platform design review)
+      - name: Gallery of every golden (design review)
         run: make gallery
       - uses: actions/upload-artifact@v7
         with:
-          name: side-by-side-gallery
+          name: golden-gallery
           path: |
-            artifacts/side-by-side
+            artifacts/gallery
             ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
-            android/app/src/test/screenshots
 
   ios:
     # Xcode 27 is only offered on the `xcode-27` preview image (macos-26 ships Xcode 26.x).
@@ -92,7 +88,7 @@ jobs:
           xcodebuild -version
       - name: Ensure pinned simulator runtime
         # Fail loudly or fetch EXACTLY the pinned version: a bare `-downloadPlatform iOS` silently installed the
-        # image default instead (first CI run).
+        # image default instead (found on the first CI run).
         run: |
           xcrun simctl list runtimes | grep -q "$IOS_RUNTIME" && exit 0
           xcodebuild -downloadPlatform iOS -buildVersion 27.0
@@ -126,7 +122,7 @@ jobs:
         if: env.RECORD == 'true'
         run: |
           make ios-record || true      # record mode always reports "failed"
-          make lint-goldens            # no blank goldens, names still match Android
+          make lint-goldens            # no blank goldens
           make ios-test                # the freshly recorded goldens must verify, or nothing is pushed
       - name: "Diff summary (what KIND of change: layout, visible or subtle)"
         id: diffsum
@@ -149,88 +145,8 @@ jobs:
           paths: ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
           message: "chore(snapshots): re-record iOS goldens"
 
-  android:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    permissions:
-      contents: write
-    outputs:
-      diff_summary: ${{ steps.diffsum.outputs.md }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          lfs: true
-          ref: ${{ env.RECORD == 'true' && github.head_ref || '' }}
-          token: ${{ env.RECORD == 'true' && secrets.SNAPSHOT_BOT_TOKEN || github.token }}
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: 21
-      - uses: gradle/actions/setup-gradle@v6
-      - name: Install SDK 37 platform
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" > /dev/null
-      - name: Verify snapshots + logic + interaction + accessibility (ATF) tests
-        if: env.RECORD != 'true'
-        run: make android-test
-      - name: Re-record, then prove the new goldens
-        if: env.RECORD == 'true'
-        run: |
-          make android-record
-          make android-test
-      - name: "Diff summary (what KIND of change: layout, visible or subtle)"
-        id: diffsum
-        if: failure()
-        run: |
-          f=artifacts/android/diffs/summary.md
-          [ -f "$f" ] || exit 0
-          cat "$f" >> "$GITHUB_STEP_SUMMARY"
-          { echo 'md<<EOF_SUMMARY'; cat "$f"; echo 'EOF_SUMMARY'; } >> "$GITHUB_OUTPUT"
-      - name: Upload diffs (gallery + _compare.png)
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: android-snapshot-diffs
-          path: |
-            artifacts/android/diffs
-            android/app/build/outputs/roborazzi
-      - name: Push re-recorded goldens
-        if: env.RECORD == 'true'
-        uses: ./.github/actions/commit-goldens
-        with:
-          paths: android/app/src/test/screenshots
-          message: "chore(snapshots): re-record Android goldens"
-
-  android-diffs:
-    # The diff report uses CoreGraphics (macOS); Linux Swift has no CoreGraphics. When Android fails, build the same
-    # gallery + summary on a short macOS job from the images the Android job uploaded.
-    needs: android
-    if: always() && needs.android.result == 'failure'
-    runs-on: macos-26
-    timeout-minutes: 10
-    outputs:
-      diff_summary: ${{ steps.diffsum.outputs.md }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          lfs: true
-      - uses: actions/download-artifact@v7
-        with:
-          name: android-snapshot-diffs
-          path: ci-android
-      - name: Build the diff gallery and summary
-        id: diffsum
-        run: |
-          swift scripts/diff-report.swift android/app/src/test/screenshots ci-android/android/app/build/outputs/roborazzi artifacts/android/diffs
-          f=artifacts/android/diffs/summary.md
-          cat "$f" >> "$GITHUB_STEP_SUMMARY"
-          { echo 'md<<EOF_SUMMARY'; cat "$f"; echo 'EOF_SUMMARY'; } >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: android-diff-gallery
-          path: artifacts/android/diffs
-
   report:
-    needs: [lint-goldens, ios, android, android-diffs]
+    needs: [lint-goldens, ios]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     permissions:
@@ -241,22 +157,21 @@ jobs:
           RESULTS: ${{ toJSON(needs) }}
         with:
           script: |
-            // ONE sticky comment, updated in place (it used to post a new comment on every failing push).
+            // ONE sticky comment, updated in place (never a new comment per push).
             const marker = '<!-- screenshot-report -->';
             const results = JSON.parse(process.env.RESULTS);
             const failed = Object.entries(results).filter(([, r]) => r.result === 'failure').map(([job]) => job);
             const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const summary = results.ios?.outputs?.diff_summary;
             const body = failed.length === 0
-              ? `${marker}\n### ✅ Screenshot tests passed\nAll goldens match on iOS and Android ([run](${run})).`
+              ? `${marker}\n### ✅ Screenshot tests passed\nAll goldens match ([run](${run})).`
               : [
                   marker,
-                  `### 📸 Screenshot tests found visual changes in: ${failed.join(', ')}`,
+                  `### 📸 Screenshot tests found visual changes (${failed.join(', ')})`,
                   `Diff gallery (golden / this PR / changed pixels) is attached to [this run](${run}).`,
                   '',
                   // What kind of change, before anyone opens an image. "subtle" = colour/anti-aliasing only.
-                  ...[['ios', 'ios'], ['android', 'android-diffs']].filter(([, job]) => results[job]?.outputs?.diff_summary)
-                    .map(([p, job]) => `<details><summary><b>${p}</b> changed snapshots</summary>\n\n${results[job].outputs.diff_summary}\n</details>\n`),
-                  '',
+                  ...(summary ? [`<details open><summary><b>Changed snapshots</b></summary>\n\n${summary}\n</details>\n`] : []),
                   '- **Unintended?** Fix the code and push.',
                   '- **Intended?** Add the `record-snapshots` label. CI re-records, verifies and pushes the goldens;',
                   '  a design/QA code owner then approves the golden diff in this PR.',

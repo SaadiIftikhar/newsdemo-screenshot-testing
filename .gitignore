@@ -8,13 +8,10 @@ ios/NewsDemo.xcodeproj/
 .swiftpm/
 xcuserdata/
 
-# Android / Gradle
-.gradle/
-local.properties
-android/**/build/
-.kotlin/
-*.iml
-.idea/
-
 # macOS
 .DS_Store
+
+# Presentation build tooling (scripts/presentation)
+node_modules/
+.venv/
+package-lock.json

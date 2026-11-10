@@ -47,22 +47,16 @@ struct Row {
 var rows: [Row] = []
 var missingReferences: [String] = []
 
-/// Golden for a failure image. iOS mirrors the golden folder structure; Android (Roborazzi) writes flat
-/// `<test>.<variant>_actual.png` files, so we look the golden up by file name.
+/// Golden for a failure image: the failures folder mirrors the golden folder (<TestClass>/<test>.<variant>.png).
+/// No golden at that path means a NEW screenshot, which is reported, never silently skipped.
 func reference(for relative: String) -> URL? {
     let direct = goldens.appendingPathComponent(relative)
-    if fm.fileExists(atPath: direct.path) { return direct }
-    let name = (relative as NSString).lastPathComponent.replacingOccurrences(of: "_actual.png", with: ".png")
-    let all = fm.enumerator(at: goldens, includingPropertiesForKeys: nil)
-    while let candidate = all?.nextObject() as? URL {
-        if candidate.lastPathComponent == name { return candidate }
-    }
-    return nil
+    return fm.fileExists(atPath: direct.path) ? direct : nil
 }
 
 let enumerator = fm.enumerator(at: failures, includingPropertiesForKeys: nil)
 while let url = enumerator?.nextObject() as? URL {
-    guard url.pathExtension == "png", !url.lastPathComponent.hasSuffix("_compare.png") else { continue }
+    guard url.pathExtension == "png" else { continue }
     var relative = url.path.replacingOccurrences(of: failures.path + "/", with: "")
     guard let actual = load(url) else { continue }
     guard let refURL = reference(for: relative), let reference = load(refURL) else {

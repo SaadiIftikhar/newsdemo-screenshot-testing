@@ -6,12 +6,12 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 | Decision | What I chose | Why it matters |
 |---|---|---|
-| Demo scope | **Both platforms**, iOS first, sharing one fixture set | Proves the "both platforms without doubling effort" claim with code |
+| Demo scope | First **both platforms** sharing one fixture set; then **cut to iOS only** to keep the presentation focused, with Android described in the strategy (§10) | The two-platform version proved the shared-fixture idea and found real bugs (docs/EVIDENCE.md); one platform is easier to show well |
 | Article content | **Real public headlines + link out**, no copied article text (I rejected bundling full articles) | Copyright-safe; the publisher's page opens in-app |
 | Games tab | Built-in classics (Tic-Tac-Toe, pairs, Mini-Sudoku) instead of embedded web games | Offline, deterministic, so every state can be snapshot-tested |
 | Deliverable format | Markdown + PDF in a local git repo with a CI workflow; regression on its own branch | Reviewers can run it and see the failing diff |
 | Attribution | No AI co-author in the git history | The submission is mine |
-| Hosting and CI | A **private** GitHub repo under my personal account; commit authorship rewritten to my GitHub no-reply address before the first push | No work e-mail published; CI proven on real runners |
+| Hosting and CI | My personal GitHub account; commit authorship rewritten to my GitHub no-reply address before the first push; finally a fresh **public** repo without the Android code (public Actions minutes are free) | No work e-mail published; CI proven on real runners |
 | Merges | I review the golden diffs and merge PRs myself; the agent was not allowed to merge | Mirrors the proposed process: a human code owner approves goldens |
 | Quality bar | Asked for repeated audits, including **five role-based reviews** (product manager, senior developer, senior QA, accessibility/design, hiring panel), and had their findings implemented | See docs/EVIDENCE.md |
 
@@ -81,6 +81,62 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 > jutst the 9nes left
 
 > merge done
+
+> done what is left
+
+> what is left
+
+> what is github actions its saying i have used 90 percent and will be charged for more, so did we use that and how can we remove that or do we want to
+
+> is the CI/CD part of the cahlenge or delivarbles?
+
+> run locally from end to end also verofy comamnds etc and if CI/CD is not needed then we can ignore for now, okay now give me an unserstanding of how the process will work with commands etc so I can unserstand what you have done
+
+> come up with a script on the best way to present this  that and if you can give me power point presentation that I can use while representing , if you cant make then give me a pormt with words that will be part of it so i can give it to LCaude for the power point
+
+> also keep in mind for the presentationa nd script that I will be running code alongs side it showing , so kindly in the notes wirte what commands to run , where to show in folder etc for results golden standards etc
+
+> i will ask a few questios while going through the script and presentation right now , keep the answer to minum Two: we render the real production screen with that data, inside a fast test. No network, no emulator., what is a fast test and how it works
+
+> why simulator on ios and not android
+
+> (a screenshot of the slide text "one regression fails on both, in the same places") in rpesentation what does mena
+
+> incase android an IOS apps are visaully slightly difrent how do we deal with that
+
+> when and how are we revieing these diffrences and what commands are connected to this rpocess
+
+> okay lets do this first give me a discription of hwere everything is put folder etc, the commands to run , and explain the rpocess to me step by step with comamnds in a dev/qa workflow way so I have an undetstnading from end to end, also keep in mind negative screnrios like a test failing how we decide etc and if we need to add new screen shot and if there are changes that change the approence and how we comapre like the golden how do we add that for new changes etc
+
+> i dont see these 2 in fictures (the `artifacts/ios/diffs` and `artifacts/android/diffs` folders)
+
+> in the commands also add what the command does a little desciption and why
+
+> as some of these files are missing from the folder like in artifcats etc just put a files there so i can view and undetadn better also for other places where wemihgt get it
+
+> now imrpove the presentation script etc and guide me the best way to present my project and what should i do in each step. for exmaple i am on slides 1 the script and int he script it alwso should say which and a seperate scirpts file for commands to run before my presentation so its ready and the commands to run while rpesenting for the slides etc and he coands file should have a decpriotn of what the comamnds do . and in a way that makes it clear for me now and who I am repsenting to later how its done
+
+> kindly also give me a script for just running the project and exmapling it and not showing the presentation
+
+> okay now lets do a few things
+>
+> before optimize your self so oyou get all the context for this task
+>
+> 1: Let remove the whole android verion from this project if its the app the test, artificats etc as we only need to show 1 of them i think it would be better if we just focus on IOS, form the app to the tests, to ci/cd we will be better and at the end we can also tell them what can be done on android in the same way. also remove from the github the code for related to android
+>
+> 2: make folder more neat and contenets in it
+>
+> 3: make sure every deliverable is accounted for for this task
+>
+> 4: run the IOS test from end to end even on the CI/CD piepe line and audit everything is working and ready
+>
+> 5: then remve all the files form te presentation folder and make 1 power point presentation, one scrit that has all the commands i should run before the presentation then the script plus each commands and folder to show (should the temrinal and can the copied easily for every command,  with copy button)  etc also. and also one script which i should use if powerpoint presentation is not needed then the flow
+>
+> you can ask me to do thing in between which you might now be able to do
+
+(Decisions for that round: the repo becomes public for the CI runs, since it is presented the next day; the nightly CI run is removed to save minutes.)
+
+> I have dleted the repo so once you have done the task i have given you you can upload as public with android removed and other things done
 
 ## 3. How the AI was used
 

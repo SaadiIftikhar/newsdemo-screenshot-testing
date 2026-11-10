@@ -22,7 +22,7 @@ final class FixtureContractTests: XCTestCase {
     }
 
     /// Every image any fixture references exists under EXACTLY that file name. iOS's UIImage(contentsOfFile:)
-    /// silently found "politics" for "politics.png" while Android showed the placeholder: compare names, not loads.
+    /// silently found "politics" for "politics.png", which another loader would not: compare names, not loads.
     /// `missing-image.png` is the one deliberate exception (the broken-image state in feed_edge_cases).
     func test_everyReferencedImageExists_withItsExactFileName() throws {
         let files = try FileManager.default.contentsOfDirectory(atPath: store.root.appendingPathComponent("images").path)

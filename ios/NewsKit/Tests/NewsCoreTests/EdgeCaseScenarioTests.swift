@@ -5,12 +5,12 @@ import NewsFixtures
 import NewsUI
 import XCTest
 
-// Edge cases of a news app whose content changes every minute. Each class has an Android twin in
-// FeatureLogicTests.kt that asserts the SAME literals, so the platforms cannot drift apart.
+// Edge cases of a news app whose content changes every minute. The expectations are exact literals, so another
+// platform's tests can assert the very same values against the same fixtures.
 
 /// Messy editorial text, as CMS/RSS sources really deliver it (fixtures/feed/feed_hostile_content.json).
 final class HostileContentContractTests: XCTestCase {
-    func test_hostileContent_isCleanedTheSameWayAsOnAndroid() throws {
+    func test_hostileContent_isCleanedAsContracted() throws {
         let feed = try FixtureStore.repository().feed("feed_hostile_content")
         XCTAssertEqual(feed.breaking?.headline,
                        "Bundestag stimmt über „Sondervermögen“ ab & Opposition kündigt Klage an")

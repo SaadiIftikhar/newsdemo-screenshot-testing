@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 /// Raw colour tokens as UIColors (light/dark aware), so `ContrastTests` can resolve and measure them.
-/// Mirrors `NewsPalette` in the Android app. Every text/background pair is checked against WCAG AA.
+/// Every text/background pair is checked against WCAG AA (ContrastTests).
 public enum NewsPalette {
     static func dynamic(light: UIColor, dark: UIColor) -> UIColor {
         UIColor { $0.userInterfaceStyle == .dark ? dark : light }
@@ -54,7 +54,7 @@ public enum NewsTheme {
 /// Relative German timestamps, driven by injected `now` and time zone.
 public enum NewsDateFormatter {
     /// The product is German: absolute dates are ALWAYS formatted in de_DE, never with the device locale.
-    /// (On an en_US device the 12-hour preference once leaked in as "11:05 PM Uhr".) Same on Android.
+    /// (On an en_US device the 12-hour preference once leaked in as "11:05 PM Uhr".)
     public static func relative(_ date: Date, now: Date, locale: Locale = Locale(identifier: "de_DE"),
                                 timeZone: TimeZone) -> String {
         let minutes = Int(now.timeIntervalSince(date) / 60)

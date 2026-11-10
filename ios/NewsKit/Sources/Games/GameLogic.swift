@@ -1,7 +1,7 @@
 import Foundation
 
 // Pure game rules: no UI, no randomness without a seed, so every state is reproducible in tests.
-// The Android app implements the same rules (and the same RNG), so a seed gives the same board on both.
+// A seeded RNG makes every shuffle reproducible: the same seed always gives the same board (tests pin it).
 
 // MARK: - Catalog
 
@@ -79,7 +79,7 @@ public struct TicTacToe: Equatable, Sendable {
 
 // MARK: - Pairs (memory-style card matching)
 
-/// SplitMix64: tiny, well-known PRNG. Same algorithm in the Android app → same shuffle per seed.
+/// SplitMix64: tiny, well-known PRNG, portable to any platform → the same shuffle per seed everywhere.
 public struct SplitMix64: RandomNumberGenerator, Sendable {
     private var state: UInt64
     public init(seed: UInt64) { state = seed }
@@ -108,7 +108,7 @@ public struct PairsGame: Equatable, Sendable {
     public init(seed: UInt64) {
         var deck = Self.symbols + Self.symbols
         var rng = SplitMix64(seed: seed)
-        // Explicit Fisher–Yates (not `shuffle(using:)`), so Android can mirror it exactly.
+        // Explicit Fisher–Yates (not `shuffle(using:)`), so another platform can reproduce it exactly.
         var i = deck.count - 1
         while i > 0 {
             let j = Int(rng.next() % UInt64(i + 1))

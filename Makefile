@@ -1,18 +1,19 @@
-# One entry point for humans and CI. `make help` lists targets.
+# One entry point for people and CI. `make help` lists every command.
 SHELL := /bin/bash
 ROOT := $(shell pwd)
 IOS_PKG := ios/NewsKit
 IOS_ARTIFACTS := $(ROOT)/artifacts/ios
-ANDROID_DIR := android
-# Keep the Mac awake during long runs: a sleeping laptop turned green runs into wall-clock timeouts (STRATEGY §6).
+IOS_GOLDENS := ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
+# Keep the Mac awake during long runs: a sleeping laptop turns green runs into wall-clock timeouts (STRATEGY §6).
 AWAKE := $(shell command -v caffeinate >/dev/null 2>&1 && echo "caffeinate -i")
+FIXTURE ?= feed_default
 
-.PHONY: help gallery ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run android-test android-record android-compare android-run lint-goldens clean
+.PHONY: help ios-test ios-record ios-record-missing ios-ui-test ios-app ios-run lint-goldens gallery clean
 
-help:
-	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-18s %s\n", $$1, $$2}'
+help: ## List every command
+	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
-# --- iOS ---------------------------------------------------------------------
+# --- Screenshot + logic tests (what CI runs on every pull request) ------------
 
 define ios_xcodebuild
 	@UDID=$$(scripts/ios-sim.sh) && rm -rf $(IOS_ARTIFACTS) && mkdir -p $(IOS_ARTIFACTS) && \
@@ -25,24 +26,31 @@ define ios_xcodebuild
 	cd $(ROOT) && scripts/ios-export-diffs.sh $(IOS_ARTIFACTS) ; exit $$status
 endef
 
-ios-test: ## Verify iOS snapshots against committed goldens (what CI runs)
+ios-test: ## Compare every screenshot with its golden + run logic tests (diffs → artifacts/ios/diffs on failure)
 	$(call ios_xcodebuild,never)
 
-IOS_GOLDENS := ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__
-ANDROID_GOLDENS := $(ANDROID_DIR)/app/src/test/screenshots
-
-ios-record: ## Re-record ALL iOS goldens (review the git diff before committing!)
-	@# Start from an empty folder: goldens of deleted/renamed tests show up as deletions instead of lingering.
-	@find $(IOS_GOLDENS) -name '*.png' -delete
-	$(call ios_xcodebuild,all)
-
-ios-ui-test: ## Run iOS UI interaction tests (XCUITest) against the real app on the simulator
+ios-ui-test: ## Tap through the real app on the simulator + Apple's accessibility audit (~5 min)
 	cd ios && xcodegen generate --quiet
 	@UDID=$$(scripts/ios-sim.sh) && $(AWAKE) xcodebuild test -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
 	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet
 
-ios-record-missing: ## Record only goldens that don't exist yet (new tests)
+lint-goldens: ## Fail on blank or unreadable goldens (a blank golden makes a test pass while protecting nothing)
+	@swift scripts/lint-goldens.swift $(IOS_GOLDENS)
+
+gallery: ## Every golden on one page (artifacts/gallery/index.html), for design review
+	@swift scripts/gallery.swift $(IOS_GOLDENS) artifacts/gallery
+
+# --- Updating goldens (only after an INTENDED visual change) -------------------
+
+ios-record: ## Re-record ALL goldens from an empty folder (review git status before committing!)
+	@# Start from an empty folder: goldens of deleted/renamed tests show up as deletions instead of lingering.
+	@find $(IOS_GOLDENS) -name '*.png' -delete
+	$(call ios_xcodebuild,all)
+
+ios-record-missing: ## Record goldens only for NEW tests (existing ones are still compared)
 	$(call ios_xcodebuild,missing)
+
+# --- Running the app ------------------------------------------------------------
 
 ios-app: ## Generate the Xcode project and build the demo app for the pinned simulator
 	cd ios && xcodegen generate --quiet
@@ -50,38 +58,8 @@ ios-app: ## Generate the Xcode project and build the demo app for the pinned sim
 	@UDID=$$(scripts/ios-sim.sh) && xcodebuild build -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
 	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet
 
-FIXTURE ?= feed_default
-
-ios-run: ## Launch the iOS app: make ios-run [FIXTURE=...] [OFFLINE=1] [DROP_CONNECTION=1] [TAB=games|account] [SIGNED_IN=1]
+ios-run: ## Open the app: make ios-run [FIXTURE=…] [OFFLINE=1] [DROP_CONNECTION=1] [TAB=games|account] [SIGNED_IN=1]
 	@OFFLINE=$(OFFLINE) DROP_CONNECTION=$(DROP_CONNECTION) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/ios-run.sh $(FIXTURE)
 
-# --- Android -----------------------------------------------------------------
-
-android-test: ## Verify Android (Roborazzi) snapshots against committed goldens
-	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android   # stale diffs would mislead reviewers
-	@cd $(ANDROID_DIR) && $(AWAKE) ./gradlew verifyRoborazziDebug --stacktrace; status=$$?; cd $(ROOT); \
-	if ls $(ANDROID_DIR)/app/build/outputs/roborazzi/*_actual.png >/dev/null 2>&1; then \
-	  if [ "$$(uname)" = Darwin ]; then \
-	    swift scripts/diff-report.swift $(ANDROID_GOLDENS) $(ANDROID_DIR)/app/build/outputs/roborazzi artifacts/android/diffs; \
-	  else echo "diff gallery needs macOS (CoreGraphics); on CI the android-diffs job builds it"; fi; \
-	fi; exit $$status
-
-android-record: ## Re-record ALL Android goldens
-	@find $(ANDROID_GOLDENS) -name '*.png' -delete   # orphans of deleted/renamed tests show up as deletions
-	cd $(ANDROID_DIR) && ./gradlew recordRoborazziDebug
-
-android-compare: ## Produce _compare.png diff images without failing the build
-	@rm -rf $(ANDROID_DIR)/app/build/outputs/roborazzi
-	cd $(ANDROID_DIR) && ./gradlew compareRoborazziDebug
-
-android-run: ## Launch the Android app (phone or emulator): same options as ios-run
-	@OFFLINE=$(OFFLINE) DROP_CONNECTION=$(DROP_CONNECTION) TAB=$(TAB) SIGNED_IN=$(SIGNED_IN) scripts/android-run.sh $(FIXTURE)
-
-gallery: ## iOS vs Android goldens side by side (artifacts/side-by-side/index.html) for cross-platform design review
-	@swift scripts/side-by-side.swift $(IOS_GOLDENS) $(ANDROID_GOLDENS) artifacts/side-by-side
-
-lint-goldens: ## Fail if any golden image is blank/uniform (a blank golden makes a test pass while protecting nothing)
-	@swift scripts/lint-goldens.swift ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__ $(ANDROID_DIR)/app/src/test/screenshots
-
-clean:
-	rm -rf artifacts ios/NewsKit/.build ios/DerivedData $(ANDROID_DIR)/build $(ANDROID_DIR)/app/build
+clean: ## Delete build output and artifacts (the next run rebuilds)
+	rm -rf artifacts ios/NewsKit/.build ios/DerivedData

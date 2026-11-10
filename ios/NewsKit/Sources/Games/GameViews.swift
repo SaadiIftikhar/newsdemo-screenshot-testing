@@ -4,7 +4,7 @@ import SwiftUI
 
 // MARK: - Games tab
 
-/// Everything the Games tab must remember while another tab is shown (mirror of Android's hoisted `GamesState`).
+/// Everything the Games tab must remember while another tab is shown.
 /// Owned by the app shell, so the tab's view can leave the hierarchy without the board being reset.
 @MainActor
 @Observable
@@ -149,7 +149,7 @@ public struct TicTacToeView: View {
                     }
                 }
             }
-            // Explicit width: a Grid with only maxWidth collapsed to its content (≈173pt vs 293dp on Android).
+            // Explicit width: a Grid with only maxWidth collapsed to its content (≈173pt wide).
             .containerRelativeFrame(.horizontal) { width, _ in min(width - 2 * NewsTheme.spacing, 320) }
             Button("Neues Spiel") { game = TicTacToe() }
                 .buttonStyle(.borderedProminent)

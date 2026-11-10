@@ -7,24 +7,18 @@ Supporting material for [STRATEGY.md](../STRATEGY.md): what building and running
 **Product bugs caught before any deliberate regression:**
 - the banner timestamp was grey on red
 - the kicker was truncated, and "EILMEL-DUNG" hyphenated, at large text sizes
-- Android didn't hyphenate German headlines while iOS did (found by comparing the same fixture across platforms)
-- a 60-letter compound word breaks mid-word on both platforms. This is a **content** finding: the fix is soft hyphens from the CMS
+- a 60-letter compound word breaks mid-word. This is a **content** finding: the fix is soft hyphens from the CMS
 - an e-mail placeholder rendered as a Markdown link
-- "11:05 PM Uhr" on an en_US device (found by Layer 2)
+- "11:05 PM Uhr" on an en_US device (found by running the real app, i.e. Layer 2, not by snapshots)
 
 **Found by the edge-case and accessibility round:**
 - a video over one hour showed "62:03"
-- Android used the device locale for durations, so an Arabic phone would show non-Latin digits
 - a live ticker without entries was dropped from the feed
 - raw `&amp;` and line breaks from the CMS would reach the screen
-- a fixture image without `.png` loaded on iOS but not on Android (the image contract now checks exact file names)
-- **hidden tabs were still reachable by VoiceOver** (found by the iOS audit); the sign-out button failed contrast
-- after a failed refresh, Android inserted the offline notice just above the visible list, so readers never saw it (found by the pull-to-refresh interaction test)
-- Google's official Compose accessibility hook silently checks nothing under Robolectric: a deliberately broken button passed. A guard that can't fail protects nothing, so every new check was first shown to fail.
+- a fixture image without `.png` loaded only because `UIImage(contentsOfFile:)` guesses the extension (the image contract now checks exact file names)
+- **hidden tabs were still reachable by VoiceOver** (found by Apple's accessibility audit, invisible in every screenshot); the sign-out button failed contrast
 
 **Tooling incidents, each now guarded against:**
-- 44 of 62 Android goldens blank but green (capture guard and golden lint)
-- a transitive Espresso crash on SDK 37 (pinned test dependencies)
 - the Liquid Glass tab bar can't be captured in-process (custom bar in the demo; Layer 2 in production)
 - tall components clipped by the harness
 - stale diff files shown to reviewers (cleared before every run)
@@ -32,20 +26,22 @@ Supporting material for [STRATEGY.md](../STRATEGY.md): what building and running
 - the pinned simulator runtime vanished mid-session (re-pin plus re-baseline in one commit)
 - the first CI run failed before any test: the pinned iOS runtime was not on the CI image, and the fallback silently installed a different one (now: pin a runtime that exists on both, fetch exactly that version or fail)
 - `xcodegen` is not on the GitHub macOS image, so the UI tests could not even start on CI (now installed, pinned to the version the dev Macs use)
-- the diff report needs CoreGraphics, which Linux does not have, so Android failures on CI had no gallery or summary (now built by a short macOS job from the Android job's images)
 - the bot's golden commit, pushed with the default CI token, does not start a new run by design (a repo-scoped `SNAPSHOT_BOT_TOKEN` fixes it)
-- **the first CI flake:** a paywall UI test passed on PR #1 and failed on PR #3 with no iOS change. It tapped and asserted without waiting, which a laptop tolerates and a slower runner does not. Fixed at the root (explicit waits, a polling wait for the selected tab), not retried; failing UI runs now upload their result bundle
+- **the first CI flake:** a paywall UI test passed on one run and failed on the next with no iOS change. It tapped and asserted without waiting, which a laptop tolerates and a slower runner does not. Fixed at the root (explicit waits, a polling wait for the selected tab), not retried; failing UI runs now upload their result bundle
 
-**Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found:
-- the missing paywall/entitlement states
-- decoding differences between the platforms
-- Android losing state on tab switches and rotation
-- Android dark-mode buttons that were purple on red (about 2.3:1) in *approved* goldens
-- undersized iOS game boards
-- low-contrast secondary text
-- CI record-mode gaps
+**Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found the missing paywall/entitlement states, decoding gaps, undersized game boards, low-contrast secondary text and CI record-mode gaps. All are fixed and covered by tests.
 
-All are fixed and covered by tests. **Deliberate regression** (PLUS badge dropped, banner −2pt), on GitHub Actions (PR #2): the **same 29 of 89** snapshots fail on both platforms, with the same triage (10 layout, 19 visible), including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green.
+**Deliberate regression** (PLUS badge dropped, banner −2pt), on GitHub Actions: **29 of 89** snapshots fail, triaged as 10 layout and 19 visible changes, including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green. See [docs/regression/](regression/).
+
+### From the earlier Android version of the demo
+
+The demo first shipped on both platforms (Compose + Roborazzi on Robolectric, same fixtures and test names) and was then cut to iOS to keep the presentation focused. What the Android side taught, which §10 of the strategy builds on:
+- **Shared fixtures made the platforms comparable:** the same regression failed the same 29 snapshots on iOS and Android, and comparing them exposed real differences: Android didn't hyphenate German headlines, its decoder treated a missing `premium` as free while iOS dropped the whole feed, and it lost game state on tab switches and rotation.
+- **A green test can protect nothing:** after a Robolectric SDK upgrade, 44 of 62 Android goldens were blank and still passed (blank equals blank). Hence the capture guard and the golden lint.
+- **Approved goldens hid a contrast bug:** dark-mode buttons were purple on red (about 2.3:1). Hence the token contrast tests.
+- **Every check must be shown to fail:** Google's official Compose accessibility hook silently checked nothing under Robolectric; a deliberately broken button passed, so it was replaced by Roborazzi's ATF integration.
+- **Hostile device settings:** Android formatted durations with the device locale, so an Arabic phone would have shown non-Latin digits.
+- **Mac vs Linux:** Mac- and Linux-rendered goldens differed on 0.005% of pixels by at most 2/255, inside the tolerance, so goldens were portable between developer Macs and Linux CI.
 
 ## B. Devil's advocate
 
