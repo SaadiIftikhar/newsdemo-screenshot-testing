@@ -145,64 +145,188 @@ ${s.next ? `<p class="bridge">Bridge to the next slide: <i>"${esc(s.next)}"</i><
 }
 
 // ---------- 3. Demo without slides ----------
-const flow = [
-  ["1. What's in the repo", [
-    ["One repo, one small news app in SwiftUI, and one folder of fake data that every test uses.", ["VS Code", "Open the project.", `${VSC} .`, "fixtures/, ios/, scripts/, docs/, Makefile."]],
-    ["Every action is one make command; here they all are.", ["Terminal", "List the commands.", "make help", "ios-test, ios-ui-test, lint-goldens, gallery, ios-record, ios-run…"]],
-  ]],
-  ["2. The app itself", [
-    ["The app runs on fake data: a feed, games and an account. Tap the PLUS article (the Tesla one): without a subscription you get the paywall. Log in as demo@newsdemo.app / demo1234 and it opens.", ["Simulator", "Open the app.", "make ios-run", "The NewsDemo feed in the simulator."]],
-  ]],
-  ["3. How one screenshot test works", [
-    ["This is the fake API response the tests read. tsr-002 has premium: true: that's the PLUS article.", ["VS Code", "Open the fixture.", `${VSC} fixtures/feed/feed_default.json`, "The feed JSON."]],
-    ["A screenshot test: one line renders the real feed with that data and compares it with the approved picture.", ["VS Code", "Open the test.", `${VSC} ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift`, "func test_feed_default."]],
-    ["These are the goldens: one approved PNG per test and variant.", ["Finder", "Open the goldens folder.", "open ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests", "test_feed_default.light.png, .dark.png, .light_xxxl.png…"]],
-    ["And all 89 on one page.", ["Browser", "Open the gallery.", "make gallery && open artifacts/gallery/index.html", "Every golden, grouped by test."]],
-  ]],
-  ["4. Everything is green", [
-    ["The whole suite: 89 screenshots and 35 logic tests.", ["Terminal", "Run the tests.", "make ios-test", "~40–60 s: \"no snapshot failures\"."]],
-  ]],
-  ["5. Break it on purpose", [
-    ["This branch is a plausible refactor: one file. It drops the PLUS badge and tightens the banner by 2 points.", ["Terminal", "Show the change.", "git diff main demo/regression --stat", "1 file changed."]],
-    ["Switching to the branch with the bug.", ["Terminal", "Check out the branch.", "git checkout demo/regression", "Switched to branch 'demo/regression'."]],
-    ["This should fail. Watch how many screenshots catch it.", ["Terminal", "Run the tests.", "make ios-test", "~1 min, fails: 29 failures."]],
-    ["Approved picture, new picture, changed pixels in magenta. Scroll to teaserCard_premium: the badge is gone.", ["Browser", "Open the diff page.", "open artifacts/ios/diffs/index.html", "golden | new | magenta diff."]],
-    ["The triage table the CI bot posts on the pull request.", ["Terminal", "Show the summary.", "cat artifacts/ios/diffs/summary.md", "29 changed: 10 layout, 19 visible, 0 subtle."]],
-    ["Back to the correct code. Always.", ["Terminal", "Switch back.", "git checkout main", "Switched to branch 'main'."]],
-  ]],
-  ["6. What happens next: a human decides", [
-    ["A bug, like here: fix the code, the goldens stay. This pull request is blocked.", ["Browser", "The regression PR.", `open ${PR_REGRESSION}`, "Red check and the bot's triage table."]],
-    ["An intended change: CI re-records the goldens and a code owner approves them. This PR did exactly that.", ["Browser", "The redesign PR's commits.", `open ${PR_REDESIGN}/commits`, "A \"snapshot-bot\" commit: \"re-record iOS goldens\"."]],
-  ]],
-  ["7. Content that changes every minute", [
-    ["News content is messy: HTML entities, line breaks, emoji, a ticker with no entries, a one-hour video.", ["VS Code", "Open the messy fixture.", `${VSC} fixtures/feed/feed_hostile_content.json`, "&amp;, line breaks, durationSeconds 3723."]],
-    ["The app cleans it: readable headlines, \"Noch keine Einträge\", 1:02:03.", ["Simulator", "Open the app with that fixture.", "make ios-run FIXTURE=feed_hostile_content", "Clean headlines in the simulator."]],
-    ["Offline: the first load works, then the connection drops. Pull the feed down: the articles stay, with the time they were loaded.", ["Simulator", "Open the app in drop-connection mode.", "make ios-run DROP_CONNECTION=1", "\"Offline – gespeicherte Artikel · Stand 15:13 Uhr\"."]],
-  ]],
-  ["8. Safety nets", [
-    ["A blank golden would make a test pass while protecting nothing; the lint catches it.", ["Terminal", "Run the golden lint.", "make lint-goldens", "checked 89 image(s)."]],
-    ["Apple's accessibility audit runs on every screen; it found hidden tabs VoiceOver could still reach. (Running it takes ~5 min.)", ["VS Code", "Show the audit test.", `${VSC} ios/UITests/AccessibilityAuditTests.swift`, "The audit and its documented exceptions."]],
-  ]],
-  ["9. The same thing in CI", [
-    ["Every pull request runs all of this on GitHub.", ["Browser", "The Actions tab.", `open ${GH}/actions`, "Red for the regression, green for main."]],
-  ]],
-  ["10. Android", [
-    ["The same fixtures and test names work on Android with Roborazzi on Robolectric; I built that version first and cut it to keep the demo focused (STRATEGY §10).", ["Preview", "Open the strategy.", "open STRATEGY.pdf", "§10: Android, the same approach."]],
-  ]],
+// Each section: a full talk track (say), the commands (steps), what you'll see, a fallback and the bridge.
+// steps: [where, what, command, what you'll see]
+const demo = [
+  {
+    title: "Opening", min: 1,
+    goal: "Say who you are, what they'll see, and that everything is real.",
+    say: `Hi, I'm Saad. Instead of slides, I'll show you the project itself: a small news app in SwiftUI, the screenshot tests around it, and the CI pipeline on GitHub.
+
+The question it answers: how do we catch visual bugs in the BILD and WELT apps, like a PLUS badge that silently disappears, before a reader sees them, even though the news content changes every minute? I'll show how it works, break it on purpose, and show what happens next. At the end, how the same approach works on Android.`,
+    steps: [["Terminal", "Make sure you're on the correct code (prepare.sh already did this).", "git branch --show-current", "main"]],
+    next: "Let me start with what's in the repo.",
+  },
+  {
+    title: "1. What's in the repo", min: 1.5,
+    goal: "Give them a map before you go into details.",
+    say: `It's one repository. fixtures holds the fake data every test uses. ios holds the app and its tests. scripts holds small helpers like the diff report, and docs holds the strategy evidence and the captured regression.
+
+Everything you can do is one make command, so nobody has to remember long Xcode commands. Here they all are.`,
+    steps: [
+      ["VS Code", "Open the project.", `${VSC} .`, "fixtures/, ios/, scripts/, docs/, presentation/, Makefile, README.md."],
+      ["Terminal", "List every command.", "make help", "ios-test, ios-ui-test, lint-goldens, gallery, ios-record, ios-run… each with a one-line description."],
+    ],
+    next: "First, the app itself, so you know what we're testing.",
+  },
+  {
+    title: "2. The app", min: 2,
+    goal: "They see the real product the tests protect, including the PLUS paywall.",
+    say: `This is the app, running on fake data. A news feed with a breaking banner, a live ticker, teasers, video and ads; a games tab; and an account tab.
+
+The important one for today is this PLUS article. If I'm not a subscriber and I tap it, I get the paywall. If I log in as the demo subscriber, it opens. That PLUS badge is exactly the thing a refactor could break without anyone noticing.`,
+    steps: [
+      ["Simulator", "Open the app (already built by prepare.sh, ~15 s).", "make ios-run", "The NewsDemo feed. Tap the Tesla article (PLUS) → paywall. Konto tab: demo@newsdemo.app / demo1234 → tap it again → it opens."],
+    ],
+    fallback: "If the simulator is slow, describe the screens and move on; you'll see them as goldens in section 3.",
+    next: "So how do we test all these states without clicking through them?",
+  },
+  {
+    title: "3. How one screenshot test works", min: 3,
+    goal: "They understand fixture → render → golden, with real files.",
+    say: `Three pieces. One: the fixture, frozen fake API data. This file is the feed the tests read; this item has premium: true, that's the PLUS article.
+
+Two: the test. One line renders the real production feed screen with that data, in memory, and compares it with an approved picture.
+
+Three: that approved picture, the golden, stored in git. One PNG per screen and variant: light, dark, the largest text size. If the new picture matches, the test passes. If not, it fails and shows me the difference. And here are all 89 approved states on one page.`,
+    steps: [
+      ["VS Code", "The fixture.", `${VSC} fixtures/feed/feed_default.json`, "Point at \"premium\": true on tsr-002."],
+      ["VS Code", "The test.", `${VSC} ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift`, "func test_feed_default: one line."],
+      ["Finder", "The goldens folder.", "open ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests", "test_feed_default.light.png, .dark.png, .light_xxxl.png…"],
+      ["Browser", "Every golden on one page.", "make gallery && open artifacts/gallery/index.html", "89 screenshots, grouped by test, variants side by side."],
+    ],
+    next: "But a news app changes every minute. Won't these pictures be outdated tomorrow?",
+  },
+  {
+    title: "4. Content changes, goldens don't", min: 1.5,
+    goal: "Answer the obvious question before they ask it.",
+    say: `No, because a golden belongs to a fixture, not to live news. The fixture is frozen, and so is everything else that varies: the clock, the German locale, the Berlin time zone, random numbers, animations and images. "vor 9 Min." stays "vor 9 Min." forever, so a difference can only mean the code changed.
+
+What does change in reality is the shape of the data, and that's tested without screenshots: contract tests, a fuzz test, and messy-content fixtures. I'll show those later.`,
+    steps: [
+      ["VS Code", "Where the clock, locale and time zone are pinned.", `${VSC} ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift`, "FixtureEnvironment: now = 2026-11-05 14:13:20Z, de_DE, Europe/Berlin."],
+    ],
+    next: "Let me show you everything is green right now.",
+  },
+  {
+    title: "5. Everything is green", min: 1.5,
+    goal: "A real, passing run on the correct code.",
+    say: `This runs every screenshot and every logic test: 89 screenshots and 35 logic tests. It takes about 40 seconds, because the screens are drawn in memory: no app launch, no tapping, no network. [While it runs:] The same command runs in CI on every pull request.`,
+    steps: [["Terminal", "Run all tests.", "make ios-test", "~40–60 s, ends with \"no snapshot failures\"."]],
+    fallback: "If it's slow, keep talking; prepare.sh already ran it green.",
+    next: "Now the interesting part: does it catch a real bug?",
+  },
+  {
+    title: "6. Break it on purpose", min: 3.5,
+    goal: "The core moment: a harmless-looking change is caught.",
+    say: `This branch contains a plausible refactor: "simplify the kicker row, tighten the banner". It's one file, a few lines, and it looks harmless in a code review. By accident it drops the PLUS badge and takes 2 points of padding off the breaking banner.
+
+This is supposed to fail. [While it runs, ~1 min:] Every screen with a PLUS teaser or the banner should go red; everything else should stay green.
+
+29 of 89 screenshots fail, and the other 60 stay green: games, account, the paywall. Here is the diff: the approved picture, the new one, and in magenta the pixels that changed. The badge is simply gone. And the summary already says what kind of change each one is: 10 layout changes, because the banner got shorter, and 19 visible ones. That table is what CI posts on the pull request.`,
+    steps: [
+      ["Terminal", "Show how small the change is.", "git diff main demo/regression --stat", "1 file changed."],
+      ["Terminal", "Switch to the branch with the bug.", "git checkout demo/regression", "Switched to branch 'demo/regression'."],
+      ["Terminal", "Run the tests: they must fail.", "make ios-test", "~1 min, fails: \"diff report: 29 failure(s)\"."],
+      ["Browser", "Open the diff page.", "open artifacts/ios/diffs/index.html", "Scroll to ComponentSnapshotTests/test_teaserCard_premium.dark: golden with PLUS | new without | magenta."],
+      ["Terminal", "Show the triage summary.", "cat artifacts/ios/diffs/summary.md", "29 changed (layout: 10, visible: 19, subtle: 0)."],
+      ["Terminal", "ALWAYS switch back to the correct code.", "git checkout main", "Switched to branch 'main'."],
+    ],
+    fallback: "If anything goes wrong: git checkout main, then open docs/regression (the captured CI result). \"Here's the captured run.\"",
+    next: "The gate failed. What happens next is a human decision.",
+  },
+  {
+    title: "7. A human decides", min: 2,
+    goal: "Show both outcomes, live on GitHub.",
+    say: `When a pull request fails, a person looks at the diff and decides.
+
+If it's a bug, like this one, we fix the code and the goldens stay. This is that change as a pull request: blocked, with the bot's table.
+
+If the change is intended, like a redesign, we add the record-snapshots label. CI re-records the goldens on its fixed machine, proves them, and pushes them as a bot commit; then a design or QA code owner approves the new pictures. This second pull request did exactly that: rounder cards, 33 screenshots changed on purpose, re-recorded by the bot, then green. Goldens never come from someone's laptop, and approval is never automatic.`,
+    steps: [
+      ["Browser", "The regression pull request.", `open ${PR_REGRESSION}`, "Red check; the bot comment: 29 changed."],
+      ["Browser", "The redesign pull request's commits.", `open ${PR_REDESIGN}/commits`, "\"snapshot-bot: re-record iOS goldens\", then green."],
+      ["Terminal", "Who must approve golden changes.", "cat .github/CODEOWNERS", "Golden folders need design/QA review."],
+    ],
+    fallback: "Offline? open docs/regression and show summary.md: \"this is what the bot posts\".",
+    next: "One more question: how small a difference do we allow?",
+  },
+  {
+    title: "8. How much difference is allowed", min: 1,
+    goal: "Show you thought about tolerance and human confirmation.",
+    say: `Rendering noise no person can see is ignored: a perceptual precision of 0.98 absorbs GPU anti-aliasing. Anything beyond that fails, however small: a 2-point shift and a missing badge are both small, and both are bugs. A pixel count can't tell intent, so the labels are triage, never approval. And tolerance is never loosened globally.`,
+    steps: [["VS Code", "(Optional) The tolerance in code.", `${VSC} ios/NewsKit/Tests/NewsUISnapshotTests/SnapshotSupport.swift`, "perceptualPrecision: 0.98, with the reason in a comment."]],
+    next: "Now the messy reality of news content.",
+  },
+  {
+    title: "9. Messy content and offline", min: 2.5,
+    goal: "Product thinking: real content is messy, and the app handles it.",
+    say: `This fixture is what a content system really sends: ampersand entities, line breaks inside headlines, emoji, a live ticker with no entries yet, and a video over an hour long.
+
+In the app it's cleaned: readable headlines, "Noch keine Einträge", and 1:02:03 instead of 62:03. And offline: the first load works, then the connection drops. When I pull to refresh, the articles stay, with the time they were loaded, instead of an error screen.`,
+    steps: [
+      ["VS Code", "The messy fixture.", `${VSC} fixtures/feed/feed_hostile_content.json`, "&amp;, line breaks, \"durationSeconds\": 3723."],
+      ["Simulator", "The app with that fixture.", "make ios-run FIXTURE=feed_hostile_content", "Clean headlines, \"Noch keine Einträge\", 1:02:03."],
+      ["Simulator", "Offline after the first load.", "make ios-run DROP_CONNECTION=1", "Drag the feed down: \"Offline – gespeicherte Artikel · Stand 15:13 Uhr\"."],
+    ],
+    fallback: "If the simulator is slow, show the fixture only and describe the result.",
+    next: "Screenshots only see pixels, so there are checks that see more.",
+  },
+  {
+    title: "10. Safety nets", min: 1.5,
+    goal: "Show the tests can't pass while protecting nothing.",
+    say: `A blank golden would make a test pass while protecting nothing, so a lint rejects them. Apple's accessibility audit runs on every screen of the real app; it found hidden tabs that VoiceOver could still reach, which no screenshot can show. And my rule: every check is shown to fail once before I trust it.`,
+    steps: [
+      ["Terminal", "Run the golden lint.", "make lint-goldens", "\"checked 89 image(s)\" in ~2 s."],
+      ["VS Code", "(Optional) The accessibility audit test.", `${VSC} ios/UITests/AccessibilityAuditTests.swift`, "The audit and its documented exceptions. Don't run it live (~5 min)."],
+    ],
+    next: "All of this also runs automatically on every pull request.",
+  },
+  {
+    title: "11. CI", min: 1.5,
+    goal: "It works beyond your laptop.",
+    say: `On GitHub every pull request runs all of this on the merged result: screenshots, UI tests and the accessibility audit, in 12 to 19 minutes. Here's the history: red for the regression, green for main and for the approved redesign. Real CI also taught me things a laptop didn't, like a simulator version that didn't exist on GitHub's machines, which I fixed by re-pinning it and re-recording in one reviewed pull request.`,
+    steps: [["Browser", "The Actions tab.", `open ${GH}/actions`, "The run history; open one run to show its steps."]],
+    fallback: "Offline? Describe it; the numbers are in the README.",
+    next: "Finally, Android.",
+  },
+  {
+    title: "12. Android and rollout", min: 2,
+    goal: "Show the design transfers to Android, and that you can roll it out.",
+    say: `Everything I showed works on Android the same way. Android reads the same fixture files and uses the same test names, so one regression fails in the same places on both. The tool is Roborazzi on Robolectric: Compose rendered on the JVM, no emulator. I built that version first, and it found real bugs, like a decoder difference that made a PLUS article free on Android. I cut it from the demo to keep today focused; it's in section 10 of the strategy.
+
+To roll it out: start with one app and five design-system components in report-only mode, add the shared fixtures, then make the gate required, in about four sprints. Developers own the tests, QA owns the system around them, and design approves the goldens.`,
+    steps: [["Preview", "The strategy, for the details.", "open STRATEGY.pdf", "§9 rollout, §10 Android."]],
+    next: "To wrap up.",
+  },
+  {
+    title: "Close", min: 0.5,
+    goal: "Three sentences they'll remember, then questions.",
+    say: `Frozen data makes every difference meaningful. Machines compare, but a person decides what's intended. And the same fixtures carry the approach to Android. Everything is in the repository. Happy to take questions.`,
+    steps: [["Terminal", "Confirm you're back on main.", "git branch --show-current", "main"]],
+    next: null,
+  },
 ];
 {
-  let n = 0;
+  const dtotal = Math.round(demo.reduce((t, s) => t + s.min, 0));
   let body = `<h1>Demo without slides</h1>
-<p class="lead">Show the project itself: the repo, the app, the tests and a regression being caught. About 15–20 minutes. Run <a href="1-Before-the-presentation.html">1 · Before the presentation</a> first. For each step: say the line, then copy and run the command.</p>
-<div class="card"><h3>Tips</h3><ul class="tips">
-<li>Say the line <i>before</i> you run the command, so people know what to look for.</li>
-<li>Step 5's failing run is the point of the demo. Say so before you run it.</li>
-<li>Short on time? Start at section 5.</li>
-<li>If something breaks: <code>git checkout main</code>, then show the captured result: <code>open docs/regression</code>.</li></ul></div>`;
-  for (const [title, steps] of flow) {
-    body += `<section class="card"><h3>${esc(title)}</h3><ol class="steps" style="margin-top:12px">${steps.map(([say, [where, what, c, see]]) => { n++; return `<li><blockquote style="margin:0 0 8px"><p>${esc(say)}</p></blockquote><span class="where">${esc(where)}</span>${esc(what)}${cmd(c)}<div class="see"><b>You'll see:</b> ${esc(see)}</div></li>`; }).join("")}</ol></section>`;
-  }
-  body += `<div class="card"><h3>Close</h3><p class="goal">"That's the whole loop: frozen data, render, compare, and a person decides. Questions?"</p>${cmd("git branch --show-current")}<div class="see"><b>You'll see:</b> main</div></div>`;
+<p class="lead">Show the project itself, in this order: the repo, the app, how a test works, a green run, a bug caught live, the human decision on GitHub, messy content, safety nets, CI, then Android. About ${dtotal} minutes, then questions. Run <a href="1-Before-the-presentation.html">1 · Before the presentation</a> first.</p>
+<div class="card"><h3>How to run it</h3><ul class="tips">
+<li><b>For every section:</b> say the script (or your own words), then press <b>Copy</b> on each command, Cmd+Tab to Terminal, Cmd+V, Enter. Read the command out loud as you run it.</li>
+<li><b>Say what to look for <i>before</i> you run a command</b>, so people know where to look.</li>
+<li><b>Section 6 is the heart of the demo.</b> Never skip it. Short on time: skip sections 8 and 10.</li>
+<li><b>If something breaks:</b> don't debug in front of them. <code>git checkout main</code>, then use the fallback written in that section.</li></ul></div>
+<div class="card"><h3>Running order</h3><table><thead><tr><th>Section</th><th>Minutes</th><th>What happens</th></tr></thead><tbody>
+${demo.map((s) => `<tr><td><a href="#d${demo.indexOf(s)}">${esc(s.title)}</a></td><td>${s.min}</td><td>${esc(s.goal)}</td></tr>`).join("")}</tbody></table></div>`;
+  demo.forEach((s, i) => {
+    body += `<section class="card" id="d${i}"><h3>${esc(s.title)}</h3>
+<div class="meta"><span class="badge time">about ${s.min} min</span></div>
+<p class="goal"><b>Goal:</b> ${esc(s.goal)}</p><div class="label">Say</div><blockquote>${paragraphs(s.say)}</blockquote>
+<div class="label">Do</div>${stepsHtml(s.steps)}
+${s.fallback ? `<div class="fallback"><b>If it fails:</b> ${esc(s.fallback)}</div>` : ""}
+${s.next ? `<p class="bridge">Bridge to the next section: <i>"${esc(s.next)}"</i></p>` : ""}</section>`;
+  });
+  body += `<h2>Likely questions</h2><div class="card"><p class="see" style="margin:0">The same questions and short answers as in <a href="2-Presenting-with-slides.html#qa">2 · Presenting with slides</a>.</p></div>`;
   fs.writeFileSync(path.join(OUT, "3-Demo-without-slides.html"), page("Demo without slides", "3 · Demo without slides", body, emergency));
 }
 
