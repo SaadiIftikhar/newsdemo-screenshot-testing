@@ -87,7 +87,7 @@ Look at the new PNG yourself before committing: a new golden is approved by a pe
 
 - **Nachrichten (feed):** breaking banner, live ticker (live, ended, no entries yet), teasers with and without images, **PLUS** teasers behind a paywall, video, ads (and an ad that returned nothing), skeleton loading, empty, offline, error, and **offline with cached content** ("Stand 15:02 Uhr", pull to refresh). Headlines are **real public WELT/BILD articles**; tapping one opens the publisher's page.
 - **Spiele:** Tic-Tac-Toe against the computer, a pairs game, a 4×4 Mini-Sudoku.
-- **Konto:** login with validation, profile. Demo logins (password `demo1234`): `demo@newsdemo.app` (PLUS subscriber), `basis@newsdemo.app` (no subscription: PLUS articles show the paywall).
+- **Konto:** login with validation, profile. Demo logins (password `demo1234`): `demo@newsdemo.app` (PLUS subscriber), `basis@newsdemo.app` (no subscription: PLUS articles show the paywall). The demo app pre-fills the PLUS account, so signing in is one tap (`-emptyLogin` starts with an empty form).
 - Messy CMS text (`&amp;`, stray line breaks, soft hyphens, emoji) is cleaned before it reaches the screen.
 
 ## Content and licensing

@@ -144,6 +144,12 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decision for that round: the brief asks only for an optional recording or notes, not slides, so the PowerPoint and its scripts were removed. presentation/ now holds one talk track and one setup script, both generated from scripts/presentation/generate.js.)
 
+> okat also in the script without code add the files you want me to show wiht the say part that is connectd to it no speratly as it is easier that wya
+
+> 1: lets shorten the scirpt plus commands as we are going too deep into things , make the judgemnt call and reduce it atlest 40 pecent 2: ALSO IN THE APP LOGIN SCREEN THE USER EMAIL AND APPSWORD SHOULD ALREADY BE FILLED AND YOU CAN UPDATE STEUP AND SCREEN SHOT TEST ACCORDINGLY … ONCE EVERYTHING IS DONE RESTART MY PC
+
+(Decisions for that round: the script went from 14 sections and 12 live commands to 9 and 6, about 68% fewer words. Tolerance, safety nets and CI details moved to the "If they ask" answers. The login pre-fill applies only to the demo app; the screenshot tests pass explicit values, so no golden changed, and the empty-form golden still covers the placeholders.)
+
 ## 3. How the AI was used
 
 - **Research:**

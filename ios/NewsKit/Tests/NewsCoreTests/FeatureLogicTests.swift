@@ -118,6 +118,16 @@ final class AccountLogicTests: XCTestCase {
         XCTAssertEqual(model.password, "", "password must not linger in memory after sign-in")
         model.signOut()
         XCTAssertEqual(model.state, .signedOut)
+        XCTAssertEqual(model.email, "", "a normal sign-out clears the form")
+
+        // Demo app: the form is pre-filled with the demo account, signs in with one tap, and is pre-filled again after sign-out.
+        let demo = AccountViewModel(client: .demo, prefillDemoAccount: true)
+        XCTAssertEqual(demo.email, AuthClient.demoEmail)
+        await demo.signIn()
+        guard case .signedIn = demo.state else { return XCTFail("pre-filled demo account must sign in") }
+        demo.signOut()
+        XCTAssertEqual(demo.email, AuthClient.demoEmail)
+        XCTAssertEqual(demo.password, AuthClient.demoPassword)
     }
 
     func test_signIn_wrongPassword_andOffline() async {

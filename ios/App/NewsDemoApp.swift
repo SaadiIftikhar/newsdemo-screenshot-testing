@@ -14,6 +14,7 @@ import SwiftUI
 ///   -baseURL http://localhost:8080 -> live HTTP client, e.g. against a WireMock serving /fixtures
 ///   -tab games | account           -> start on another tab
 ///   -signedIn                      -> start logged in as the demo PLUS subscriber
+///   -emptyLogin                    -> login form starts empty (by default it is pre-filled with the demo account)
 ///   -pairsSeed 42                  -> pin the pairs deal (fixture mode defaults to 42)
 @main
 struct NewsDemoApp: App {
@@ -54,7 +55,8 @@ struct NewsDemoApp: App {
         feedViewModel = FeedViewModel(client: client, now: { pinnedNow ?? Date() })
 
         let demoUser = UserProfile(name: "Demo Leser", email: AuthClient.demoEmail, isPremium: true)
-        accountModel = AccountViewModel(client: .demo, state: arguments.contains("-signedIn") ? .signedIn(demoUser) : .signedOut)
+        accountModel = AccountViewModel(client: .demo, state: arguments.contains("-signedIn") ? .signedIn(demoUser) : .signedOut,
+                                        prefillDemoAccount: !arguments.contains("-emptyLogin"))
 
         if let fixtures {
             imageProvider = .local { fixtures.image($0) }

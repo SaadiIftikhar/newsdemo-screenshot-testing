@@ -47,14 +47,12 @@ make ios-run > "$LOG/ios-run.log" 2>&1 && ok "NewsDemo is running in the simulat
 
 step "6/6 Opening the windows, in the order the demo uses them"
 "$VSCODE" . >/dev/null 2>&1; sleep 3   # reuses the project window if it is already open (no duplicates on re-runs)
-"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" "ios/NewsKit/Sources/NewsFixtures/FixtureStore.swift" ".github/CODEOWNERS" "ios/NewsKit/Tests/NewsUISnapshotTests/SnapshotSupport.swift" "fixtures/feed/feed_hostile_content.json" "ios/UITests/AccessibilityAuditTests.swift" ".github/workflows/screenshots.yml" >/dev/null 2>&1
-ok "VS Code tabs: 1 feed_default.json, 2 FeedScreenSnapshotTests.swift, 3 FixtureStore.swift, 4 CODEOWNERS, 5 SnapshotSupport.swift, 6 feed_hostile_content.json, 7 AccessibilityAuditTests.swift, 8 screenshots.yml"
-open "ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/FeedScreenSnapshotTests" && ok "Finder: the goldens folder FeedScreenSnapshotTests"
+"$VSCODE" --reuse-window "fixtures/feed/feed_default.json" "ios/NewsKit/Tests/NewsUISnapshotTests/FeedScreenSnapshotTests.swift" "fixtures/feed/feed_hostile_content.json" >/dev/null 2>&1
+ok "VS Code tabs: 1 feed_default.json, 2 FeedScreenSnapshotTests.swift, 3 feed_hostile_content.json"
 open "artifacts/gallery/index.html"; sleep 1
 open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/1"; sleep 1
 open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/pull/2/commits"; sleep 1
-open "https://github.com/SaadiIftikhar/newsdemo-screenshot-testing/actions"; sleep 1
-ok "Browser tabs: 1 gallery, 2 PR #1, 3 PR #2 commits, 4 Actions"
+ok "Browser tabs: 1 gallery, 2 PR #1, 3 PR #2 commits"
 open STRATEGY.pdf && ok "Preview: STRATEGY.pdf"
 open presentation/Demo-script.html && ok "This script: presentation/Demo-script.html (move it to your second device)"
 
