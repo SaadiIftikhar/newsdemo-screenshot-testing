@@ -13,7 +13,7 @@ The strategy covers iOS and Android; this demo implements **iOS end to end** (ap
 | Deliberate regression with diff | branch `demo/regression` · captured result: [docs/regression/](docs/regression/) |
 | How to run and regenerate | this README |
 | Prompts used | [PROMPTS.md](PROMPTS.md) |
-| Walkthrough | [presentation/Demo-script.html](presentation/Demo-script.html): the live-demo talk track (what to say, which window/tab to show, the few commands to run); [presentation/setup.sh](presentation/setup.sh) prepares and opens everything in one command |
+| Walkthrough | [presentation/Script.html](presentation/Script.html): the presentation script (what to say, what to show, the live commands with Copy buttons); [presentation/setup.sh](presentation/setup.sh) prepares and opens everything in one command |
 | CI/CD | [.github/workflows/screenshots.yml](.github/workflows/screenshots.yml), running on GitHub Actions |
 
 ## Quick start
@@ -43,7 +43,7 @@ git checkout main                   # always switch back
 │   └── App/, project.yml         the app target (XcodeGen)
 ├── scripts/                      simulator pinning, diff report, golden lint, gallery, run helper, PDF export
 ├── docs/                         EVIDENCE.md, regression/ (captured result of the deliberate regression)
-├── presentation/                 Demo-script.html (talk track) + setup.sh (one-command demo setup)
+├── presentation/                 Script.html (presentation script) + setup.sh (one-command setup)
 ├── .github/                      CI workflow, CODEOWNERS (who approves goldens)
 └── artifacts/                    OUTPUT of test runs (not in git; recreated by every run)
 ```

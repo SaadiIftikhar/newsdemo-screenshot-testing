@@ -150,6 +150,12 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decisions for that round: the script went from 14 sections and 12 live commands to 9 and 6, about 68% fewer words. Tolerance, safety nets and CI details moved to the "If they ask" answers. The login pre-fill applies only to the demo app; the screenshot tests pass explicit values, so no golden changed, and the empty-form golden still covers the placeholders.)
 
+> in the presentation folder make another file which has the script but more details on the steps so if someone read that for the first time they will underttand and also add visual aid in the file and also explain simpler things like , also cover questions and other deatils like scrfnearios for exmaple when no change when there is some change etc and visual aids will be great ake a presentation just to undertand everythign related and how everything is in the worklfow so a new person cna easily undetand it
+
+> okay then lets remove the CI part fromm the script tabs in setup script etc and just imrpove if needed the document stragry i think it was right , and see if script is working also remove the fnial html form the rpesentation file delete it and the rest delete everything in roesnetaion fodoler and then make a script form new without old thinking just the task and this projecy in mind and make a new script and focus on the flow of the scirpt too and update test steup accrdintly and make a run then resart this pc immdtialty … so presnetation script and steup sct two deliverable right now
+
+(Decisions for that round: the CI pipeline stays in the repo and the strategy, but the live script no longer shows GitHub. The script was rebuilt from scratch on two demo practices found in research, "show the result first" (Great Demo!) and tell–show–tell, with the decisions and trade-offs spoken out. The strategy was reviewed and left unchanged.)
+
 ## 3. How the AI was used
 
 - **Research:**
