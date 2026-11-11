@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Presentation Script</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f3b;--ink2:#4a5270;--muted:#6b7389;--line:#e1e5ee;--teal:#0e8c99;--teal-bg:#e4f4f6;--magenta:#c2185b;
+--green:#2e7d4f;--chip:#eef1f6;--code-bg:#1b1f3b;--code-ink:#e8ecf5;--warn-bg:#fdf0f4;--shadow:0 1px 2px rgba(27,31,59,.06),0 4px 16px rgba(27,31,59,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2c3150;
+--teal:#3cc2cf;--teal-bg:#173a44;--magenta:#ff6fa3;--green:#5fd18f;--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--warn-bg:#35202c;--shadow:none}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2c3150;--teal:#3cc2cf;--teal-bg:#173a44;--magenta:#ff6fa3;
+--green:#5fd18f;--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--warn-bg:#35202c;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 80px}
+header.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
+.brand{font-weight:700;margin-right:auto}
+.sos{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}.sos .cmd{margin:0}.sos .cmd code{padding:6px 10px;font-size:13px}
+h1{font-size:30px;line-height:1.2;margin:30px 0 6px}h2{font-size:21px;margin:0}h3{font-size:17px;margin:0 0 8px}
+.lead{color:var(--ink2);margin:0 0 20px;max-width:70ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin:0 0 16px;box-shadow:var(--shadow)}
+.part-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.num{color:var(--teal);font-weight:800;font-size:21px}
+.badge{border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--chip);color:var(--ink2)}
+.badge.live{background:var(--magenta);color:#fff}
+.tell{background:var(--teal-bg);border-radius:10px;padding:10px 14px;margin:0 0 14px}
+.tell .k,.say .k{display:block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--teal);margin-bottom:2px}
+.tell p,.say p{margin:0 0 6px}.tell p:last-child,.say p:last-child{margin:0}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps>li{counter-increment:s;position:relative;padding:0 0 18px 38px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--card);
+font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.where{display:inline-block;font-size:12px;font-weight:700;color:var(--teal);background:var(--chip);border-radius:6px;padding:1px 8px;margin-right:6px}
+.see{color:var(--muted);font-size:14px;margin-top:6px}.see b{color:var(--ink2)}
+.say{margin-top:10px;border-left:3px solid var(--teal);padding:4px 0 4px 14px}
+.say .k{color:var(--muted)}
+.cmd{display:flex;align-items:stretch;margin-top:8px;border-radius:8px;overflow:hidden;background:var(--code-bg)}
+.cmd code{flex:1;min-width:0;padding:10px 12px;color:var(--code-ink);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+.cmd code::before{content:"$ ";color:#7f88a8}
+.cmd button{flex:none;border:0;border-left:1px solid #2f3557;background:#262b4a;color:#e8ecf5;font:600 13px -apple-system,sans-serif;padding:0 14px;cursor:pointer;min-width:70px}
+.cmd button:hover{background:#323866}.cmd button.ok{background:var(--green);color:#0b0d1d}
+.cmd button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.takeaway{border-top:1px dashed var(--line);padding-top:12px;margin-top:2px}
+.takeaway .k{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-right:6px}
+.fallback{margin-top:12px;font-size:14px;background:var(--warn-bg);border-radius:8px;padding:8px 12px;color:var(--ink2)}
+.bridge{margin:12px 0 0;font-size:14px;color:var(--muted)}.bridge i{color:var(--ink2)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}td code,li code,p code{font:13px ui-monospace,Menlo,monospace;background:var(--chip);padding:1px 5px;border-radius:4px}
+.arc{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 0;font-size:13px}
+.arc span{background:var(--chip);border-radius:999px;padding:3px 10px}.arc span.hot{background:var(--magenta);color:#fff}.arc i{color:var(--muted);font-style:normal}
+ul.tips{margin:0;padding-left:20px}ul.tips li{margin:0 0 6px}
+a{color:var(--teal)}
+.qa dt{font-weight:700;margin-top:12px}.qa dd{margin:4px 0 0;color:var(--ink2)}
+@media (max-width:600px){h1{font-size:24px}ol.steps>li{padding-left:34px}.cmd{flex-direction:column}.cmd button{min-height:36px;border-left:0;border-top:1px solid #2f3557}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<span class="brand">Presentation script</span>
+<div class="sos"><span>Lost? Back to the correct code:</span><div class="cmd"><code>git checkout main</code><button type="button">Copy</button></div></div>
+</div></header>
+
+<main class="wrap">
+<h1>Screenshot testing with mocked data: the demo</h1>
+<p class="lead">About 15 minutes plus questions. It follows two demo rules: <b>show the result first</b>, then how it works; and for each part <b>tell</b> what they'll see, <b>show</b> it, then <b>tell</b> what it means.</p>
+
+<div class="card">
+<h3>Before you start</h3>
+<p>Run this in Terminal 15–30 minutes before. It checks main passes and the regression fails on exactly 29 screenshots, then opens every window in the order below. About 3 minutes.</p>
+<div class="cmd"><code>cd ~/Desktop/Task &amp;&amp; presentation/setup.sh</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see at the end:</b> READY on main.</div>
+<table style="margin-top:14px">
+<thead><tr><th>Window</th><th>What setup.sh left open</th></tr></thead>
+<tbody>
+<tr><td><b>Terminal</b></td><td>The project folder, on main. Commands go here.</td></tr>
+<tr><td><b>Preview</b></td><td>The captured diff (part 2) and <code>STRATEGY.pdf</code> (part 10).</td></tr>
+<tr><td><b>Simulator</b></td><td>The NewsDemo app on the feed, logged out.</td></tr>
+<tr><td><b>VS Code</b></td><td>Tab 1 <code>feed_default.json</code> · tab 2 <code>FeedScreenSnapshotTests.swift</code> · tab 3 <code>FixtureStore.swift</code> · tab 4 <code>feed_hostile_content.json</code></td></tr>
+<tr><td><b>Browser</b></td><td>The golden gallery (part 4).</td></tr>
+</tbody></table>
+<ul class="tips" style="margin-top:14px">
+<li>Each numbered step: show it (click the window/tab, or <b>Copy</b> → Terminal → Cmd+V → Enter), then say the line under it.</li>
+<li>Part 7 is the heart of the demo: never skip it. Short on time: shorten parts 5 and 9.</li>
+<li>If something breaks, keep talking, press the button at the top (<code>git checkout main</code>) and use that part's fallback.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>The flow</h3>
+<div class="arc">
+<span>1 Problem</span><i>→</i><span>2 Result first</span><i>→</i><span>3 The app</span><i>→</i><span>4 How it works</span><i>→</i><span>5 Why it doesn't go stale</span><i>→</i>
+<span>6 Green</span><i>→</i><span class="hot">7 Break it</span><i>→</i><span>8 Who decides</span><i>→</i><span>9 Messy content</span><i>→</i><span>10 Strategy</span><i>→</i><span>11 Close</span>
+</div>
+<p class="see" style="margin-top:10px">Why this order: the audience sees the payoff in minute 2, so everything after it answers "how?". The live failure (7) comes once they understand what a golden is (4–5), so the red result means something to them.</p>
+</div>
+
+<!-- 1 -->
+<section class="card" id="p1">
+<div class="part-head"><span class="num">1</span><h2>The problem</h2><span class="badge">1 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>Hi, I'm Saad. The challenge: how do we catch visual bugs in the BILD and WELT apps before readers see them, when the news on screen changes every minute?</p></div>
+<ol class="steps">
+<li><span class="where">Terminal</span>Just talk; nothing to show yet.
+<div class="say"><span class="k">Say</span><p>Some bugs don't break any logic, they break the look: a PLUS badge disappears, a headline gets cut off, a banner shrinks. Normal tests don't notice, because the code still works. Readers do. Screenshot tests catch this: they compare every screen with a picture someone approved. The catch is live news: if the data changes, every picture changes. So my answer has two parts: screenshot tests, and frozen fake data.</p></div></li>
+</ol>
+<p class="bridge">Bridge: <i>"Let me show you the result first."</i></p>
+</section>
+
+<!-- 2 -->
+<section class="card" id="p2">
+<div class="part-head"><span class="num">2</span><h2>The result first</h2><span class="badge">1 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>This is what the system gives you when something breaks.</p></div>
+<ol class="steps">
+<li><span class="where">Preview</span>The captured diff image (golden | new | magenta).
+<div class="say"><span class="k">Say</span><p>A developer did a small, harmless-looking refactor: one file, a few lines. It passed code review. By accident it removed the PLUS badge. Left is the approved picture, middle is the new one, and in magenta what changed. The tests caught it, on 29 screens, before it was merged. In the next minutes I'll show how, and then I'll break it live.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>A bug no reviewer saw is caught automatically, with a picture of exactly what changed.</div>
+<p class="bridge">Bridge: <i>"First, the app it protects."</i></p>
+</section>
+
+<!-- 3 -->
+<section class="card" id="p3">
+<div class="part-head"><span class="num">3</span><h2>The app</h2><span class="badge">1.5 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>A small SwiftUI news app I built for this, running on fake data.</p></div>
+<ol class="steps">
+<li><span class="where">Simulator</span>Scroll the feed. Tap the Tesla article with the PLUS badge: the paywall opens. Close it.
+<div class="say"><span class="k">Say</span><p>A feed with a breaking banner, a live ticker, teasers, video and ads, plus games and an account tab. This PLUS article is for subscribers: logged out, I get the paywall.</p></div></li>
+<li><span class="where">Simulator</span>Konto → <b>Anmelden</b> (the demo account is pre-filled) → Nachrichten → tap the Tesla article: it opens.
+<div class="say"><span class="k">Say</span><p>Logged in as a subscriber, it opens. That badge is a business feature: if it disappears, readers don't know what's premium.</p></div></li>
+</ol>
+<div class="fallback"><b>If the simulator is closed:</b> run <code>make ios-run</code> (~15 s), or skip: the screens appear as pictures in part 4.</div>
+<p class="bridge">Bridge: <i>"How do we test all these screens without clicking through them?"</i></p>
+</section>
+
+<!-- 4 -->
+<section class="card" id="p4">
+<div class="part-head"><span class="num">4</span><h2>How a screenshot test works</h2><span class="badge">2.5 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>Three pieces: fake data, a test, and an approved picture.</p></div>
+<ol class="steps">
+<li><span class="where">VS Code</span>Tab 1 <code>feed_default.json</code>. Point at <code>"premium": true</code>.
+<div class="say"><span class="k">Say</span><p>One: a fixture. Fake API data, shaped exactly like the real server's. This is the feed every test reads, and this flag is the PLUS article.</p></div></li>
+<li><span class="where">VS Code</span>Tab 2 <code>FeedScreenSnapshotTests.swift</code>, the function <code>test_feed_default</code>.
+<div class="say"><span class="k">Say</span><p>Two: the test. One line builds the real feed screen with that data, draws it in memory, and compares it with the approved picture. No app launch, no tapping, no network.</p></div></li>
+<li><span class="where">Browser</span>The golden gallery. Scroll a little.
+<div class="say"><span class="k">Say</span><p>Three: the approved pictures, called goldens, stored in git next to the tests. Every screen in light, dark and the largest text size, plus small phone and tablet: 89 in total. Same picture: the test passes. Different: it fails and shows the diff you saw.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>Fixture + real screen → picture → compare with the golden.</div>
+<p class="bridge">Bridge: <i>"But the news changes every minute, so won't these pictures be wrong tomorrow?"</i></p>
+</section>
+
+<!-- 5 -->
+<section class="card" id="p5">
+<div class="part-head"><span class="num">5</span><h2>Why the pictures don't go stale</h2><span class="badge">1 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>The key design decision: freeze everything that varies.</p></div>
+<ol class="steps">
+<li><span class="where">VS Code</span>Tab 3 <code>FixtureStore.swift</code>, <code>FixtureEnvironment</code>.
+<div class="say"><span class="k">Say</span><p>A golden belongs to a fixture, not to live news. The data is frozen, and so are the clock, the German locale, the Berlin time zone, images, animations and random numbers, on one pinned simulator. "vor 9 Min." stays "vor 9 Min." forever. So when a picture changes, the only possible reason is the code. Changes in the real API's shape are caught separately, by contract tests, without pictures.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>Every failure means something, so nobody learns to ignore red.</div>
+<p class="bridge">Bridge: <i>"Let me prove it's green right now."</i></p>
+</section>
+
+<!-- 6 -->
+<section class="card" id="p6">
+<div class="part-head"><span class="num">6</span><h2>Everything is green</h2><span class="badge">1 min</span><span class="badge live">1 live command</span></div>
+<div class="tell"><span class="k">Tell</span><p>All 89 screenshots plus 35 logic tests, live.</p></div>
+<ol class="steps">
+<li><span class="where">Terminal</span>Run every test.
+<div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see:</b> ~45 s, ends with "no snapshot failures".</div>
+<div class="say"><span class="k">Say</span><p>[While it runs] It's fast because the screens are drawn in memory: under a minute for everything. That's what makes it practical to run on every change. … Green: every screen matches its approved picture.</p></div></li>
+</ol>
+<div class="fallback"><b>If it's slow:</b> keep talking; setup.sh already ran it green.</div>
+<p class="bridge">Bridge: <i>"Now, does it catch a real bug?"</i></p>
+</section>
+
+<!-- 7 -->
+<section class="card" id="p7">
+<div class="part-head"><span class="num">7</span><h2>Break it, live</h2><span class="badge">3 min</span><span class="badge live">5 live commands</span></div>
+<div class="tell"><span class="k">Tell</span><p>I'll switch to the branch with the refactor from part 2 and run the same tests. They should fail.</p></div>
+<ol class="steps">
+<li><span class="where">Terminal</span>Switch to the branch with the bug.
+<div class="cmd"><code>git checkout demo/regression</code><button type="button">Copy</button></div>
+<div class="say"><span class="k">Say</span><p>One file changed: "simplify the kicker row, tighten the banner". It drops the PLUS badge and takes 2 points of padding off the breaking banner.</p></div></li>
+<li><span class="where">Terminal</span>Run the tests again.
+<div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see:</b> ~1 min, fails with "diff report: 29 failure(s)".</div>
+<div class="say"><span class="k">Say</span><p>[While it runs] Every screen with a PLUS teaser or the banner should go red; games, account and paywall should stay green. … 29 of 89 fail. The other 60 pass, so it's precise, not noisy.</p></div></li>
+<li><span class="where">Browser</span>Open the diff report.
+<div class="cmd"><code>open artifacts/ios/diffs/index.html</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see:</b> one row per failed screenshot. Scroll to <code>test_teaserCard_premium.dark</code>.</div>
+<div class="say"><span class="k">Say</span><p>Every failure, as golden, new and magenta. Here's the badge from part 2, gone.</p></div></li>
+<li><span class="where">Terminal</span>Show the summary.
+<div class="cmd"><code>cat artifacts/ios/diffs/summary.md</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see:</b> "29 changed (layout: 10, visible: 19, subtle: 0)".</div>
+<div class="say"><span class="k">Say</span><p>The report also sorts the failures: 10 are layout changes, because the banner got shorter, and 19 are visible changes. A reviewer knows what kind of change it is before opening one picture.</p></div></li>
+<li><span class="where">Terminal</span>Always switch back.
+<div class="cmd"><code>git checkout main</code><button type="button">Copy</button></div>
+<div class="say"><span class="k">Say</span><p>Back to the correct code.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>A harmless-looking change is caught in a minute, precisely, with proof.</div>
+<div class="fallback"><b>If anything goes wrong:</b> <code>git checkout main</code> (button at the top), then go back to the captured diff in Preview: "this is the same run, captured earlier".</div>
+<p class="bridge">Bridge: <i>"So the test failed. Who decides what happens next?"</i></p>
+</section>
+
+<!-- 8 -->
+<section class="card" id="p8">
+<div class="part-head"><span class="num">8</span><h2>A person decides</h2><span class="badge">1 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>A failing test doesn't mean "bug". It means "something changed, look at it".</p></div>
+<ol class="steps">
+<li><span class="where">Browser</span>Stay on the diff report.
+<div class="say"><span class="k">Say</span><p>If the change is a bug, like this one, the developer fixes the code and the goldens stay. If it's intended, say a redesign, the goldens are re-recorded on one fixed machine, never on someone's laptop, and a design or QA owner approves the new pictures. A machine can tell <i>what</i> changed; only a person can tell whether it was <i>meant</i> to. Approval is never automatic.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>Machines compare; people approve.</div>
+<p class="bridge">Bridge: <i>"One more real-world problem: news content is messy."</i></p>
+</section>
+
+<!-- 9 -->
+<section class="card" id="p9">
+<div class="part-head"><span class="num">9</span><h2>Messy real content</h2><span class="badge">1.5 min</span><span class="badge live">1 live command</span></div>
+<div class="tell"><span class="k">Tell</span><p>Fixtures aren't only happy paths. Some hold the worst a content system sends.</p></div>
+<ol class="steps">
+<li><span class="where">VS Code</span>Tab 4 <code>feed_hostile_content.json</code>.
+<div class="say"><span class="k">Say</span><p>HTML entities like <code>&amp;amp;</code>, line breaks inside headlines, emoji, a live ticker with no entries yet, and a video over an hour long.</p></div></li>
+<li><span class="where">Simulator</span>Relaunch the app with that data.
+<div class="cmd"><code>make ios-run FIXTURE=feed_hostile_content</code><button type="button">Copy</button></div>
+<div class="see"><b>You'll see:</b> ~30 s (it rebuilds after the branch switch): clean headlines, "Noch keine Einträge", 1:02:03.</div>
+<div class="say"><span class="k">Say</span><p>The app cleans it up, and this state has its own goldens, so if the cleanup ever breaks, the tests fail.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>Edge cases are fixtures too, so they're protected like any other screen.</div>
+<div class="fallback"><b>If the simulator is slow:</b> show the fixture only and describe the result.</div>
+<p class="bridge">Bridge: <i>"That's the demo. Now the bigger picture: both platforms and the rollout."</i></p>
+</section>
+
+<!-- 10 -->
+<section class="card" id="p10">
+<div class="part-head"><span class="num">10</span><h2>The strategy: both platforms, and the rollout</h2><span class="badge">2 min</span></div>
+<div class="tell"><span class="k">Tell</span><p>The demo is iOS; the strategy covers iOS and Android.</p></div>
+<ol class="steps">
+<li><span class="where">Preview</span><code>STRATEGY.pdf</code>, the Android section (§10).
+<div class="say"><span class="k">Say</span><p>Android works the same way. It reads the same fixture files and uses the same test names, so one regression fails in the same places on both. The tool there is Roborazzi, which draws Compose screens on the JVM, no emulator. I built the Android version first too, and it found a real bug: a decoder difference that made a PLUS article free on Android. I cut it from the demo to keep the scope tight and the demo deep rather than wide.</p></div></li>
+<li><span class="where">Preview</span>The rollout section (§9).
+<div class="say"><span class="k">Say</span><p>Rollout: start with one app and a few design-system components in report-only mode, so nothing blocks; add the shared fixtures; then make the check required on every pull request, in about four sprints. Developers write the tests with the feature, QA owns the system around them, and design approves the goldens.</p></div></li>
+</ol>
+<div class="takeaway"><span class="k">Takeaway</span>Shared fixtures make it one approach across both platforms, introduced without slowing teams down.</div>
+<p class="bridge">Bridge: <i>"To wrap up."</i></p>
+</section>
+
+<!-- 11 -->
+<section class="card" id="p11">
+<div class="part-head"><span class="num">11</span><h2>Close</h2><span class="badge">0.5 min</span></div>
+<ol class="steps">
+<li><span class="where">Terminal</span>Stay on main.
+<div class="say"><span class="k">Say</span><p>Three things to remember. Frozen data makes every difference meaningful. Machines compare, but a person decides. And the same fixtures carry it to Android. Everything is in the repository: the strategy, the README and the prompts I used. Happy to take questions.</p></div></li>
+</ol>
+</section>
+
+<h2 style="margin:36px 0 12px">If they ask</h2>
+<div class="card"><dl class="qa">
+<dt>"How do you stop tests failing on tiny rendering differences?"</dt><dd>A perceptual precision of 0.98 ignores noise no person can see. Anything visible fails, however small: a 2-point shift and a missing badge are both bugs.</dd>
+<dt>"Where does this run, and when?"</dt><dd>Locally with one command, and in CI on every pull request as a required check (STRATEGY §5). Goldens are recorded only there, on one pinned machine.</dd>
+<dt>"How do you add a new screen?"</dt><dd>Write the test, run <code>make ios-record-missing</code> to record only the new goldens, look at them, and commit them for review.</dd>
+<dt>"What if the API changes?"</dt><dd>Contract tests fail first, not screenshots. Update the shared fixture, then re-record what changed on purpose.</dd>
+<dt>"What doesn't a screenshot catch?"</dt><dd>Behaviour and accessibility. UI tests tap through the real app, and Apple's accessibility audit checks every screen.</dd>
+<dt>"Flaky tests?"</dt><dd>No automatic retries, because they hide flakiness. Quarantine within 24 hours with an owner, then fix the cause.</dd>
+<dt>"How did you use AI?"</dt><dd>As a pair programmer for research, code and docs. I made the scope and product decisions and approved every result; PROMPTS.md lists the prompts and decisions.</dd>
+<dt>"What would you do differently?"</dt><dd>Start report-only on a real BILD/WELT module earlier, to measure flakiness and run time on real code before making the gate required.</dd>
+</dl></div>
+</main>
+
+<script>
+function copyText(t){if(navigator.clipboard&&window.isSecureContext){return navigator.clipboard.writeText(t)}
+return new Promise(function(res,rej){var a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();
+try{document.execCommand('copy')?res():rej()}catch(e){rej(e)}finally{document.body.removeChild(a)}})}
+document.addEventListener('click',function(e){var b=e.target.closest('.cmd button');if(!b)return;var t=b.parentElement.querySelector('code').textContent;
+copyText(t).then(function(){b.textContent='Copied';b.classList.add('ok');setTimeout(function(){b.textContent='Copy';b.classList.remove('ok')},1400)},
+function(){b.textContent='Select'})});
+</script>
+</body>
+</html>
