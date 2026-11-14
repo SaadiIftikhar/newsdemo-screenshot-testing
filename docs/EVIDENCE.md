@@ -31,7 +31,7 @@ Supporting material for [STRATEGY.md](../STRATEGY.md): what building and running
 
 **Five role-based reviews**, by a product manager, a senior developer, a senior QA, an accessibility/design reviewer and a hiring-panel reviewer, found the missing paywall/entitlement states, decoding gaps, undersized game boards, low-contrast secondary text and CI record-mode gaps. All are fixed and covered by tests.
 
-**Deliberate regression** (PLUS badge dropped, banner −2pt): **21 of 76** snapshots fail, triaged as 6 layout and 15 visible changes (29 of 89 while the largest-text variants were still in the suite), including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green. See [docs/regression/](regression/).
+**Deliberate regression** (PLUS badge dropped, banner −2pt): **29 of 89** snapshots fail, triaged as 10 layout and 19 visible changes, including a real WELTplus teaser silently losing its paywall badge. Every unaffected screen (games, account, paywall) stays green. See [docs/regression/](regression/).
 
 ### From the earlier Android version of the demo
 

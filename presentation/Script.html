@@ -68,17 +68,15 @@ a{color:var(--teal)}
 
 <div class="card">
 <h3>Before you start</h3>
-<p>Run this in Terminal 15–30 minutes before. It checks main passes and the regression fails on exactly 21 screenshots, then opens every window in the order below. About 3 minutes.</p>
+<p>Run this in Terminal 15–30 minutes before. It checks main passes and the regression fails on exactly 29 screenshots, builds the golden gallery, warms the build so live runs are fast, and starts the app in the simulator. It opens no other windows: you open files yourself as the script says. About 3 minutes.</p>
 <div class="cmd"><code>cd ~/Desktop/Task &amp;&amp; presentation/setup.sh</code><button type="button">Copy</button></div>
 <div class="see"><b>You'll see at the end:</b> READY on main.</div>
 <table style="margin-top:14px">
-<thead><tr><th>Window</th><th>What setup.sh left open</th></tr></thead>
+<thead><tr><th>Have open before you start</th><th></th></tr></thead>
 <tbody>
 <tr><td><b>Terminal</b></td><td>The project folder, on main. Commands go here.</td></tr>
-<tr><td><b>Preview</b></td><td>The captured diff (part 2) and <code>STRATEGY.pdf</code> (part 10).</td></tr>
-<tr><td><b>Simulator</b></td><td>The NewsDemo app on the feed, logged out.</td></tr>
-<tr><td><b>VS Code</b></td><td>Tab 1 <code>feed_default.json</code> · tab 2 <code>FeedScreenSnapshotTests.swift</code> · tab 3 <code>FixtureStore.swift</code> · tab 4 <code>feed_hostile_content.json</code></td></tr>
-<tr><td><b>Browser</b></td><td>The golden gallery (part 4).</td></tr>
+<tr><td><b>Simulator</b></td><td>The NewsDemo app on the feed (setup.sh started it).</td></tr>
+<tr><td><b>VS Code</b></td><td>The project folder, no files open yet. You open each file when the script says.</td></tr>
 </tbody></table>
 <ul class="tips" style="margin-top:14px">
 <li>Each numbered step: show it (click the window/tab, or <b>Copy</b> → Terminal → Cmd+V → Enter), then say the line under it.</li>
@@ -112,8 +110,9 @@ a{color:var(--teal)}
 <div class="part-head"><span class="num">2</span><h2>The result first</h2><span class="badge">1 min</span></div>
 <div class="tell"><span class="k">Tell</span><p>This is what the system gives you when something breaks.</p></div>
 <ol class="steps">
-<li><span class="where">Preview</span>The captured diff image (golden | new | magenta).
-<div class="say"><span class="k">Say</span><p>A developer did a small, harmless-looking refactor: one file, a few lines. It passed code review. By accident it removed the PLUS badge. Left is the approved picture, middle is the new one, and in magenta what changed. The tests caught it, on 21 screenshots, before it was merged. In the next minutes I'll show how, and then I'll break it live.</p></div></li>
+<li><span class="where">Preview</span>Open the captured diff image (golden | new | magenta).
+<div class="cmd"><code>open docs/regression/ComponentSnapshotTests__test_teaserCard_premium.dark.png</code><button type="button">Copy</button></div>
+<div class="say"><span class="k">Say</span><p>A developer did a small, harmless-looking refactor: one file, a few lines. It passed code review. By accident it removed the PLUS badge. Left is the approved picture, middle is the new one, and in magenta what changed. The tests caught it, on 29 screenshots, before it was merged. In the next minutes I'll show how, and then I'll break it live.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>A bug no reviewer saw is caught automatically, with a picture of exactly what changed.</div>
 <p class="bridge">Bridge: <i>"First, the app it protects."</i></p>
@@ -138,12 +137,13 @@ a{color:var(--teal)}
 <div class="part-head"><span class="num">4</span><h2>How a screenshot test works</h2><span class="badge">2.5 min</span></div>
 <div class="tell"><span class="k">Tell</span><p>Three pieces: fake data, a test, and an approved picture.</p></div>
 <ol class="steps">
-<li><span class="where">VS Code</span>Tab 1 <code>feed_default.json</code>. Point at <code>"premium": true</code>.
+<li><span class="where">VS Code</span>Open <code>fixtures/feed/feed_default.json</code> (Cmd+P, type the name). Point at <code>"premium": true</code>.
 <div class="say"><span class="k">Say</span><p>One: a fixture. Fake API data, shaped exactly like the real server's. This is the feed every test reads, and this flag is the PLUS article.</p></div></li>
-<li><span class="where">VS Code</span>Tab 2 <code>FeedScreenSnapshotTests.swift</code>, the function <code>test_feed_default</code>.
+<li><span class="where">VS Code</span>Open <code>FeedScreenSnapshotTests.swift</code> (Cmd+P), the function <code>test_feed_default</code>. Then show its goldens in the Explorer: <code>__Snapshots__/FeedScreenSnapshotTests/</code>.
 <div class="say"><span class="k">Say</span><p>Two: the test. One line builds the real feed screen with that data, draws it in memory, and compares it with the approved picture. No app launch, no tapping, no network.</p></div></li>
-<li><span class="where">Browser</span>The golden gallery. Scroll a little.
-<div class="say"><span class="k">Say</span><p>Three: the approved pictures, called goldens, stored in git next to the tests. Every screen in light and dark, plus small phone and tablet: 76 in total. Same picture: the test passes. Different: it fails and shows the diff you saw.</p></div></li>
+<li><span class="where">Browser</span>Open the golden gallery and scroll a little.
+<div class="cmd"><code>open artifacts/gallery/index.html</code><button type="button">Copy</button></div>
+<div class="say"><span class="k">Say</span><p>Three: the approved pictures, called goldens, stored in git next to the tests. Every screen in light and dark, text-heavy ones also at the largest font size, plus small phone and tablet: 89 in total. Same picture: the test passes. Different: it fails and shows the diff you saw.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>Fixture + real screen → picture → compare with the golden.</div>
 <p class="bridge">Bridge: <i>"But the news changes every minute, so won't these pictures be wrong tomorrow?"</i></p>
@@ -154,7 +154,7 @@ a{color:var(--teal)}
 <div class="part-head"><span class="num">5</span><h2>Why the pictures don't go stale</h2><span class="badge">1 min</span></div>
 <div class="tell"><span class="k">Tell</span><p>The key design decision: freeze everything that varies.</p></div>
 <ol class="steps">
-<li><span class="where">VS Code</span>Tab 3 <code>FixtureStore.swift</code>, <code>FixtureEnvironment</code>.
+<li><span class="where">VS Code</span>Open <code>FixtureStore.swift</code> (Cmd+P), <code>FixtureEnvironment</code>.
 <div class="say"><span class="k">Say</span><p>A golden belongs to a fixture, not to live news. The data is frozen, and so are the clock, the German locale, the Berlin time zone, images, animations and random numbers, on one pinned simulator. "vor 9 Min." stays "vor 9 Min." forever. So when a picture changes, the only possible reason is the code. Changes in the real API's shape are caught separately, by contract tests, without pictures.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>Every failure means something, so nobody learns to ignore red.</div>
@@ -164,7 +164,7 @@ a{color:var(--teal)}
 <!-- 6 -->
 <section class="card" id="p6">
 <div class="part-head"><span class="num">6</span><h2>Everything is green</h2><span class="badge">1 min</span><span class="badge live">1 live command</span></div>
-<div class="tell"><span class="k">Tell</span><p>All 76 screenshots plus 34 logic tests, live.</p></div>
+<div class="tell"><span class="k">Tell</span><p>All 89 screenshots plus 34 logic tests, live.</p></div>
 <ol class="steps">
 <li><span class="where">Terminal</span>Run every test.
 <div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
@@ -185,22 +185,22 @@ a{color:var(--teal)}
 <div class="say"><span class="k">Say</span><p>One file changed: "simplify the kicker row, tighten the banner". It drops the PLUS badge and takes 2 points of padding off the breaking banner.</p></div></li>
 <li><span class="where">Terminal</span>Run the tests again.
 <div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
-<div class="see"><b>You'll see:</b> ~1 min, fails with "diff report: 21 failure(s)".</div>
-<div class="say"><span class="k">Say</span><p>[While it runs] Every screen with a PLUS teaser or the banner should go red; games, account and paywall should stay green. … 21 of 76 fail. The other 55 pass, so it's precise, not noisy.</p></div></li>
+<div class="see"><b>You'll see:</b> ~1 min, fails with "diff report: 29 failure(s)".</div>
+<div class="say"><span class="k">Say</span><p>[While it runs] Every screen with a PLUS teaser or the banner should go red; games, account and paywall should stay green. … 29 of 89 fail. The other 60 pass, so it's precise, not noisy.</p></div></li>
 <li><span class="where">Browser</span>Open the diff report.
 <div class="cmd"><code>open artifacts/ios/diffs/index.html</code><button type="button">Copy</button></div>
 <div class="see"><b>You'll see:</b> one row per failed screenshot. Scroll to <code>test_teaserCard_premium.dark</code>.</div>
 <div class="say"><span class="k">Say</span><p>Every failure, as golden, new and magenta. Here's the badge from part 2, gone.</p></div></li>
 <li><span class="where">Terminal</span>Show the summary.
 <div class="cmd"><code>cat artifacts/ios/diffs/summary.md</code><button type="button">Copy</button></div>
-<div class="see"><b>You'll see:</b> "21 changed (layout: 6, visible: 15, subtle: 0)".</div>
-<div class="say"><span class="k">Say</span><p>The report also sorts the failures: 6 are layout changes, because the banner got shorter, and 15 are visible changes. A reviewer knows what kind of change it is before opening one picture.</p></div></li>
+<div class="see"><b>You'll see:</b> "29 changed (layout: 10, visible: 19, subtle: 0)".</div>
+<div class="say"><span class="k">Say</span><p>The report also sorts the failures: 10 are layout changes, because the banner got shorter, and 19 are visible changes. A reviewer knows what kind of change it is before opening one picture.</p></div></li>
 <li><span class="where">Terminal</span>Always switch back.
 <div class="cmd"><code>git checkout main</code><button type="button">Copy</button></div>
 <div class="say"><span class="k">Say</span><p>Back to the correct code.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>A harmless-looking change is caught in a minute, precisely, with proof.</div>
-<div class="fallback"><b>If anything goes wrong:</b> <code>git checkout main</code> (button at the top), then go back to the captured diff in Preview: "this is the same run, captured earlier".</div>
+<div class="fallback"><b>If anything goes wrong:</b> <code>git checkout main</code> (button at the top), then show the captured diff from part 2: "this is the same run, captured earlier".</div>
 <p class="bridge">Bridge: <i>"So the test failed. Who decides what happens next?"</i></p>
 </section>
 
@@ -221,7 +221,7 @@ a{color:var(--teal)}
 <div class="part-head"><span class="num">9</span><h2>Messy real content</h2><span class="badge">1.5 min</span><span class="badge live">1 live command</span></div>
 <div class="tell"><span class="k">Tell</span><p>Fixtures aren't only happy paths. Some hold the worst a content system sends.</p></div>
 <ol class="steps">
-<li><span class="where">VS Code</span>Tab 4 <code>feed_hostile_content.json</code>.
+<li><span class="where">VS Code</span>Open <code>fixtures/feed/feed_hostile_content.json</code> (Cmd+P).
 <div class="say"><span class="k">Say</span><p>HTML entities like <code>&amp;amp;</code>, line breaks inside headlines, emoji, a live ticker with no entries yet, and a video over an hour long.</p></div></li>
 <li><span class="where">Simulator</span>Relaunch the app with that data.
 <div class="cmd"><code>make ios-run FIXTURE=feed_hostile_content</code><button type="button">Copy</button></div>
@@ -238,7 +238,8 @@ a{color:var(--teal)}
 <div class="part-head"><span class="num">10</span><h2>The strategy: both platforms, and the rollout</h2><span class="badge">2 min</span></div>
 <div class="tell"><span class="k">Tell</span><p>The demo is iOS; the strategy covers iOS and Android.</p></div>
 <ol class="steps">
-<li><span class="where">Preview</span><code>STRATEGY.pdf</code>, the Android section (§10).
+<li><span class="where">Preview</span>Open <code>STRATEGY.pdf</code>, the Android section (§10).
+<div class="cmd"><code>open STRATEGY.pdf</code><button type="button">Copy</button></div>
 <div class="say"><span class="k">Say</span><p>Android works the same way. It reads the same fixture files and uses the same test names, so one regression fails in the same places on both. The tool there is Roborazzi, which draws Compose screens on the JVM, no emulator. I built the Android version first too, and it found a real bug: a decoder difference that made a PLUS article free on Android. I cut it from the demo to keep the scope tight and the demo deep rather than wide.</p></div></li>
 <li><span class="where">Preview</span>The rollout section (§9).
 <div class="say"><span class="k">Say</span><p>Rollout: start with one app and a few design-system components in report-only mode, so nothing blocks; add the shared fixtures; then make the check required on every pull request, in about four sprints. Developers write the tests with the feature, QA owns the system around them, and design approves the goldens.</p></div></li>

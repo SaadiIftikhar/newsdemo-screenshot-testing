@@ -160,6 +160,14 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decision for that round: removed the VoiceOver audit (6 UI tests), the 13 largest-text screenshot variants and the colour-contrast test, and took accessibility out of the strategy's gate. The VoiceOver labels in the app code stay, because they don't affect any picture. New numbers: 76 goldens; the regression fails 21 of 76.)
 
+> make two visuals … one showing the normal flow when a developer pushes their change if there are no issues, and one where how it changes when we do have an issue … a third HTML that explains the flow of the tests itself … put one test there … And also one HTML where like the flow on how I add new states or tests
+
+(Result: docs/visuals/, four linked pages with diagrams built from the real workflow, test code and goldens.)
+
+> Okay, first of all, from the script setup script, remove the Chrome tabs or the browser tabs it opens, and also the tabs it open in VS Code … audit everything go through the task again, see that everything is covered that is necessary … for the flow of the positive and negative cases for the flow, have it like the graph in the HTML … remove the fixtures, the tests, those kind of things … research things online that will help you make a better presentation
+
+(Decisions for that round: the audit found the brief asks for "dynamic font sizes", so the 13 largest-text screenshots were restored as font-size coverage: 89 goldens again, the regression fails 29 of 89. The VoiceOver audit and the contrast test stay removed. setup.sh now only prepares (checks, warm builds, gallery, app in the simulator) and opens no windows; files are shown by hand.)
+
 ## 3. How the AI was used
 
 - **Research:**
