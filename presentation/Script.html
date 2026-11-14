@@ -76,6 +76,7 @@ a{color:var(--teal)}
 <h3>Before you start (15–30 minutes before)</h3>
 <div class="cmd"><code>cd ~/Desktop/Task &amp;&amp; presentation/setup.sh</code><button type="button">Copy</button></div>
 <p class="desc">Checks the tools; clears old test output; runs all tests on main (must be green) and on the regression branch (must fail on exactly 29); builds the golden gallery; starts the app in the simulator. This also warms the build, so the live runs are fast. Opens no other windows. About 3 minutes; ends with “READY”.</p>
+<p style="margin-top:12px"><b>Optional: run commands from the slides.</b> <code class="p">presentation/run/</code> has one clickable file per live command: <code class="p">1-run-tests</code>, <code class="p">2-break-it</code>, <code class="p">3-show-diff</code>, <code class="p">4-back-to-main</code>. Download the deck as PowerPoint, select the command text on the live slides (9, 10, 11), Insert → Link → choose the file. In the slideshow, clicking it opens a Terminal window and runs the command. Click each once before the interview to get past macOS’s first-time prompt. The Copy buttons below still work as a backup.</p>
 <table style="margin-top:12px"><thead><tr><th>Have open</th><th></th></tr></thead><tbody>
 <tr><td><b>The deck</b></td><td>In presenting mode, on the first slide.</td></tr>
 <tr><td><b>Simulator</b></td><td>The NewsDemo app on the feed (setup.sh started it).</td></tr>

@@ -43,7 +43,7 @@ git checkout main                   # always switch back
 │   └── App/, project.yml         the app target (XcodeGen)
 ├── scripts/                      simulator pinning, diff report, golden lint, gallery, run helper, PDF export
 ├── docs/                         EVIDENCE.md, regression/ (captured result of the deliberate regression), visuals/ (4 explainer pages: flows, how a test works, adding a test)
-├── presentation/                 Script.html (presentation script) + setup.sh (one-command setup)
+├── presentation/                 Script.html (presentation script), setup.sh (one-command setup), run/ (clickable live commands)
 ├── .github/                      CI workflow, CODEOWNERS (who approves goldens)
 └── artifacts/                    OUTPUT of test runs (not in git; recreated by every run)
 ```
