@@ -42,7 +42,7 @@
 
 ## 4. What is covered, and by which layer
 
-- **Matrix (curated, not every combination):** every component in light + dark; error, selected and interactive states also in dark; the feed also on the smallest phone, a tablet and at **full length**; paywall and PLUS badge always. Demo: 76 goldens.
+- **Matrix (curated, not every combination):** every component in light + dark; text-heavy and interactive screens also at the largest dynamic font size (iOS AX3, Android font scale 2.0 with non-linear scaling); error, selected and interactive states also in dark; the feed also on the smallest phone, a tablet and at **full length**; paywall and PLUS badge always. Demo: 89 goldens.
 - **Layer 2 (nightly):** what in-process rendering cannot see: system chrome (iOS 26's Liquid Glass tab bar renders blank in-process), real fonts and devices, and hostile settings (e.g. en_US 12-hour time). It found an "11:05 PM Uhr" bug no snapshot could.
 
 ## 5. CI/CD and the Scrum process

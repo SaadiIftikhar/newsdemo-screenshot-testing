@@ -25,7 +25,7 @@ final class ComponentSnapshotTests: XCTestCase {
     }
 
     func test_breakingBanner_longHeadline() throws {
-        assertComponent(BreakingNewsBanner(news: try XCTUnwrap(longFeed.breaking)), variants: [.light])
+        assertComponent(BreakingNewsBanner(news: try XCTUnwrap(longFeed.breaking)), variants: [.light, .largeText])
     }
 
     // MARK: Teaser cards
@@ -44,7 +44,7 @@ final class ComponentSnapshotTests: XCTestCase {
     }
 
     func test_teaserCard_premium_longHeadline() throws {
-        assertComponent(TeaserCard(teaser: try teaser("tsr-101", in: longFeed)), variants: [.light])
+        assertComponent(TeaserCard(teaser: try teaser("tsr-101", in: longFeed)), variants: [.light, .largeText])
     }
 
     // MARK: Live ticker / video / ad

@@ -164,6 +164,10 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Result: docs/visuals/, four linked pages with diagrams built from the real workflow, test code and goldens.)
 
+> Okay, first of all, from the script setup script, remove the Chrome tabs or the browser tabs it opens, and also the tabs it open in VS Code … audit everything go through the task again, see that everything is covered that is necessary … for the flow of the positive and negative cases for the flow, have it like the graph in the HTML … remove the fixtures, the tests, those kind of things … research things online that will help you make a better presentation
+
+(Decisions for that round: the audit found the brief asks for "dynamic font sizes", so the 13 largest-text screenshots were restored as font-size coverage: 89 goldens again, the regression fails 29 of 89. The VoiceOver audit and the contrast test stay removed. setup.sh now only prepares (checks, warm builds, gallery, app in the simulator) and opens no windows; files are shown by hand.)
+
 ## 3. How the AI was used
 
 - **Research:**
