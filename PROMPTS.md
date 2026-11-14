@@ -168,6 +168,10 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decisions for that round: the audit found the brief asks for "dynamic font sizes", so the 13 largest-text screenshots were restored as font-size coverage: 89 goldens again, the regression fails 29 of 89. The VoiceOver audit and the contrast test stay removed. setup.sh now only prepares (checks, warm builds, gallery, app in the simulator) and opens no windows; files are shown by hand.)
 
+> Can you update the script according to the presentation we made? And also, the script have a little more details, like which commands to run, what folders to show, which tests to show, and explain like one test, or a few tests to me
+
+(Result: Script.html rebuilt to follow the 19-slide deck. Each slide has "Show / do" (folders, files, commands with a description), "Say", and "For you" (background, not read out), plus four real tests explained line by line and a commands cheat sheet.)
+
 ## 3. How the AI was used
 
 - **Research:**
