@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How a Test Works</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f3b;--ink2:#4a5270;--muted:#6b7389;--line:#dfe3ec;--teal:#0e8c99;--teal-bg:#e3f4f6;
+--red:#c62828;--red-bg:#fdecec;--green:#2e7d4f;--green-bg:#e6f4ec;--amber:#a15c00;--amber-bg:#fff3df;--violet:#5b4bc4;--violet-bg:#eeebfb;
+--chip:#eef1f6;--code-bg:#1b1f3b;--code-ink:#e8ecf5;--shadow:0 1px 2px rgba(27,31,59,.06),0 4px 16px rgba(27,31,59,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;
+--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;
+--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;
+--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 80px}
+nav.top{border-bottom:1px solid var(--line);background:var(--card)}
+nav.top .wrap{display:flex;gap:6px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;align-items:center}
+nav.top a{font-size:14px;text-decoration:none;color:var(--ink2);padding:4px 10px;border-radius:999px}
+nav.top a.on{background:var(--teal);color:#fff;font-weight:600}
+nav.top a:not(.on):hover{background:var(--chip)}
+h1{font-size:32px;line-height:1.2;margin:32px 0 6px}h2{font-size:22px;margin:40px 0 10px}h3{font-size:17px;margin:0 0 6px}
+p{margin:0 0 10px;max-width:74ch}.lead{font-size:18px;color:var(--ink2);margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 16px;box-shadow:var(--shadow)}
+code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;word-break:break-word}
+pre{background:var(--code-bg);color:var(--code-ink);padding:16px;border-radius:10px;overflow-x:auto;font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0}
+pre .c{color:#8b94b8}pre .k{color:#ff9ac1}pre .s{color:#9fe3a8}pre .m{display:inline-block;background:#3cc2cf;color:#0b0d1d;border-radius:50%;width:18px;height:18px;
+text-align:center;font:700 11px/18px -apple-system,sans-serif;margin-left:8px;vertical-align:1px}
+svg.diagram{width:100%;height:auto;display:block}
+svg .box{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+svg .teal{fill:var(--teal-bg);stroke:var(--teal)}svg .green{fill:var(--green-bg);stroke:var(--green)}svg .red{fill:var(--red-bg);stroke:var(--red)}
+svg .violet{fill:var(--violet-bg);stroke:var(--violet)}svg .amber{fill:var(--amber-bg);stroke:var(--amber)}
+svg .lane{fill:var(--chip);stroke:none}svg .group{fill:none;stroke:var(--teal);stroke-width:1.5;stroke-dasharray:6 5}
+svg text{fill:var(--ink);font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+svg text.sm{font-weight:400;font-size:12.5px;fill:var(--ink2)}svg text.lbl{font-size:12.5px;font-weight:700;fill:var(--muted)}
+svg text.lanelbl{font-size:13px;font-weight:800;fill:var(--muted);letter-spacing:.04em}
+svg .arrow{stroke:var(--muted);stroke-width:2;fill:none}svg .head{fill:var(--muted)}
+.steps{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){.steps{grid-template-columns:1fr}h1{font-size:26px}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;border-left:5px solid var(--line)}
+.step .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--card);font-weight:700;font-size:13px;align-items:center;justify-content:center;margin-right:8px}
+.step h3{display:flex;align-items:center}
+.step.teal{border-left-color:var(--teal)}.step.green{border-left-color:var(--green)}.step.red{border-left-color:var(--red)}
+.step.violet{border-left-color:var(--violet)}.step.amber{border-left-color:var(--amber)}
+.who{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px;background:var(--chip);color:var(--ink2);margin-bottom:6px}
+.step p{margin:0 0 6px;color:var(--ink2)}.step p:last-child{margin:0}
+.flow{display:flex;flex-direction:column;align-items:stretch}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.stage .badge{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:var(--teal)}
+.stage.violet .badge{background:var(--violet)}.stage.green .badge{background:var(--green)}.stage.red .badge{background:var(--red)}.stage.amber .badge{background:var(--amber)}
+.stage h3{margin-bottom:4px}.stage p{margin:0 0 6px;color:var(--ink2)}.stage p:last-child{margin:0}
+.down{text-align:center;color:var(--muted);font-size:22px;line-height:1;padding:6px 0}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+.out{border-radius:12px;padding:14px 16px;border:1px solid var(--line)}
+.out.green{background:var(--green-bg);border-color:var(--green)}.out.red{background:var(--red-bg);border-color:var(--red)}
+.out h3{margin-bottom:4px}
+.shot{background:var(--chip);border-radius:10px;padding:10px;display:flex;justify-content:center}
+.shot img{max-width:100%;height:auto;display:block;border-radius:6px}
+.imgs{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:620px){.imgs{grid-template-columns:1fr}}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.comment{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.comment .hd{background:var(--chip);padding:8px 12px;font-size:13px;color:var(--muted)}
+.comment .bd{padding:12px 14px;font-size:14px}
+.comment table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+.comment td,.comment th{border:1px solid var(--line);padding:4px 8px;text-align:left}
+.note{background:var(--teal-bg);border-left:4px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+.note p:last-child{margin:0}
+table.plain{width:100%;border-collapse:collapse;font-size:15px}table.plain th,table.plain td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.plain th{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+</style></head><body>
+<nav class="top"><div class="wrap"><a href="1-normal-flow.html">1 · Normal flow</a><a href="2-flow-with-a-change.html">2 · When something changes</a><a href="3-how-a-test-works.html" class=on>3 · How a test works</a><a href="4-adding-a-test.html">4 · Adding a test or state</a></div></nav>
+<main class="wrap"><h1>How one screenshot test works</h1>
+<p class="lead">One real test from this project, what each line does, and everything that happens between typing <code>make ios-test</code> and seeing pass or fail.</p>
+
+<h2>The test</h2>
+<div class="flow" style="gap:14px">
+<div class="card" style="margin:0"><pre><span class="c">// ComponentSnapshotTests.swift</span>
+<span class="k">final class</span> ComponentSnapshotTests: XCTestCase {
+    <span class="k">private var</span> feed: Feed!
+
+    <span class="k">override func</span> setUp() <span class="k">async throws</span> {
+        feed = <span class="k">try</span> Snap.store.feed(<span class="s">"feed_default"</span>)        <span class="m">1</span>
+    }
+
+    <span class="c">/// WELT-style paywalled item: the PLUS badge must survive refactors in both themes.</span>
+    <span class="k">func</span> test_teaserCard_premium() <span class="k">throws</span> {                 <span class="m">2</span>
+        assertComponent(                                         <span class="m">4</span>
+            TeaserCard(teaser: <span class="k">try</span> teaser(<span class="s">"tsr-002"</span>, in: feed))  <span class="m">3</span>
+        )
+    }
+}</pre></div>
+<div class="card" style="margin:0">
+<table class="plain"><tbody>
+<tr><td><b>1</b></td><td>Before each test, load the frozen fake feed from <code>fixtures/feed/feed_default.json</code>.</td></tr>
+<tr><td><b>2</b></td><td>One test = one state of one thing. The <b>function name</b> also names the golden files.</td></tr>
+<tr><td><b>3</b></td><td>Build the <b>real</b> teaser card from the app's code, with the PLUS article (<code>tsr-002</code>) from the fixture.</td></tr>
+<tr><td><b>4</b></td><td>The helper (<code>SnapshotSupport.swift</code>) draws it in light and dark, and compares each picture with its golden.</td></tr>
+</tbody></table>
+<p style="margin-top:12px">That's the whole test. No app launch, no login, no tapping: the card is created directly with the data it should show.</p></div>
+</div>
+
+<h2>What happens when it runs</h2>
+<div class="flow">
+<div class="stage "><div class="badge">▶</div><div><h3>You run <code>make ios-test</code></h3><p>It boots the pinned simulator (iPhone 17, iOS 27.0) in the background if it isn't running, then runs every test in the NewsKit package. Nothing appears on screen.</p></div></div>
+<div class="down">↓</div>
+<div class="stage violet"><div class="badge">1</div><div><h3>Load the fixture</h3><p>The fake API response is read from the JSON file. This is the part of it the test uses:</p></div></div>
+<div class="card" style="margin:8px 0 0 58px"><pre>{
+  "type": "teaser",
+  "id": "tsr-002",
+  "kicker": "WIRTSCHAFT",
+  "headline": "Tesla, SpaceX, Nebius – die neuen Verlierer …",
+  "image": "economy.png",
+  "publishedAt": "2026-11-05T13:33:06Z",
+  "premium": true,
+  "source": "WELT"
+}</pre></div>
+<div class="down">↓</div>
+<div class="stage "><div class="badge">2</div><div><h3>Build the real screen</h3><p><code>TeaserCard</code> is the same SwiftUI view the app shows in the feed. The test passes it the article directly, which is why no navigation is needed.</p></div></div>
+<div class="down">↓</div>
+<div class="stage "><div class="badge">3</div><div><h3>Freeze everything, then draw it in memory</h3><p>The helper pins the clock (5 Nov 2026, 15:13), German locale, Berlin time zone, bundled images and no animations. It then renders the view into an image at a fixed width, once for <b>light</b> and once for <b>dark</b>.</p></div></div>
+<div class="down">↓</div>
+<div class="stage "><div class="badge">4</div><div><h3>Find the golden by name</h3><p>The snapshot library builds the path from test class + function + variant:<br><code>__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.light.png</code></p></div></div>
+<div class="down">↓</div>
+<div class="stage "><div class="badge">5</div><div><h3>Compare</h3><p>Every pixel is compared. Differences the eye can't see (graphics noise) are allowed (perceptual precision 0.98); anything visible fails.</p></div></div>
+<div class="down">↓</div>
+<div class="split">
+<div class="out green"><h3>✓ Same: the test passes</h3><p>Nothing is written. For the whole suite: "no snapshot failures".</p></div>
+<div class="out red"><h3>✗ Different: the test fails</h3><p>The new picture is saved in <code>artifacts/ios/failures/</code>. After the run, <code>scripts/diff-report.swift</code> turns every failure into a golden | new | magenta image in <code>artifacts/ios/diffs/index.html</code>, plus <code>summary.md</code>.</p></div>
+</div>
+</div>
+
+<h2>The pictures involved</h2>
+<div class="imgs">
+<div class="card" style="margin:0"><h3>The goldens (approved)</h3>
+<div class="imgs"><figure class="shot"><img src="../../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.light.png" alt="golden, light"></figure>
+<figure class="shot"><img src="../../ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/ComponentSnapshotTests/test_teaserCard_premium.dark.png" alt="golden, dark"></figure></div>
+<figcaption><code>test_teaserCard_premium.light.png</code> and <code>.dark.png</code></figcaption></div>
+<div class="card" style="margin:0"><h3>A failure (from the regression)</h3>
+<figure class="shot"><img src="../regression/ComponentSnapshotTests__test_teaserCard_premium.dark.png" alt="diff: golden, new, changed pixels"></figure>
+<figcaption>Golden | new picture without the PLUS badge | changed pixels in magenta.</figcaption></div>
+</div>
+<div class="note"><p><b>Why it's reliable:</b> the data and environment never change, so the same code always draws the same pixels. A difference can only mean the code changed.</p></div></main></body></html>

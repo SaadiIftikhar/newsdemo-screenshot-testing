@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Normal Flow</title><style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f3b;--ink2:#4a5270;--muted:#6b7389;--line:#dfe3ec;--teal:#0e8c99;--teal-bg:#e3f4f6;
+--red:#c62828;--red-bg:#fdecec;--green:#2e7d4f;--green-bg:#e6f4ec;--amber:#a15c00;--amber-bg:#fff3df;--violet:#5b4bc4;--violet-bg:#eeebfb;
+--chip:#eef1f6;--code-bg:#1b1f3b;--code-ink:#e8ecf5;--shadow:0 1px 2px rgba(27,31,59,.06),0 4px 16px rgba(27,31,59,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;
+--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;
+--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}}
+:root[data-theme="dark"]{--bg:#11142a;--card:#1a1e38;--ink:#eef0f7;--ink2:#c3c8db;--muted:#9aa2bb;--line:#2e3354;--teal:#3cc2cf;--teal-bg:#173a44;--red:#ff7b7b;--red-bg:#3a1d26;
+--green:#5fd18f;--green-bg:#183528;--amber:#ffbe5c;--amber-bg:#3a2e17;--violet:#a99cff;--violet-bg:#2a2650;--chip:#262b4a;--code-bg:#0b0d1d;--code-ink:#e8ecf5;--shadow:none}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 80px}
+nav.top{border-bottom:1px solid var(--line);background:var(--card)}
+nav.top .wrap{display:flex;gap:6px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;align-items:center}
+nav.top a{font-size:14px;text-decoration:none;color:var(--ink2);padding:4px 10px;border-radius:999px}
+nav.top a.on{background:var(--teal);color:#fff;font-weight:600}
+nav.top a:not(.on):hover{background:var(--chip)}
+h1{font-size:32px;line-height:1.2;margin:32px 0 6px}h2{font-size:22px;margin:40px 0 10px}h3{font-size:17px;margin:0 0 6px}
+p{margin:0 0 10px;max-width:74ch}.lead{font-size:18px;color:var(--ink2);margin-bottom:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin:0 0 16px;box-shadow:var(--shadow)}
+code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--chip);padding:1px 6px;border-radius:5px;word-break:break-word}
+pre{background:var(--code-bg);color:var(--code-ink);padding:16px;border-radius:10px;overflow-x:auto;font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0}
+pre .c{color:#8b94b8}pre .k{color:#ff9ac1}pre .s{color:#9fe3a8}pre .m{display:inline-block;background:#3cc2cf;color:#0b0d1d;border-radius:50%;width:18px;height:18px;
+text-align:center;font:700 11px/18px -apple-system,sans-serif;margin-left:8px;vertical-align:1px}
+svg.diagram{width:100%;height:auto;display:block}
+svg .box{fill:var(--card);stroke:var(--line);stroke-width:1.5}
+svg .teal{fill:var(--teal-bg);stroke:var(--teal)}svg .green{fill:var(--green-bg);stroke:var(--green)}svg .red{fill:var(--red-bg);stroke:var(--red)}
+svg .violet{fill:var(--violet-bg);stroke:var(--violet)}svg .amber{fill:var(--amber-bg);stroke:var(--amber)}
+svg .lane{fill:var(--chip);stroke:none}svg .group{fill:none;stroke:var(--teal);stroke-width:1.5;stroke-dasharray:6 5}
+svg text{fill:var(--ink);font:600 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+svg text.sm{font-weight:400;font-size:12.5px;fill:var(--ink2)}svg text.lbl{font-size:12.5px;font-weight:700;fill:var(--muted)}
+svg text.lanelbl{font-size:13px;font-weight:800;fill:var(--muted);letter-spacing:.04em}
+svg .arrow{stroke:var(--muted);stroke-width:2;fill:none}svg .head{fill:var(--muted)}
+.steps{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){.steps{grid-template-columns:1fr}h1{font-size:26px}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;border-left:5px solid var(--line)}
+.step .n{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--card);font-weight:700;font-size:13px;align-items:center;justify-content:center;margin-right:8px}
+.step h3{display:flex;align-items:center}
+.step.teal{border-left-color:var(--teal)}.step.green{border-left-color:var(--green)}.step.red{border-left-color:var(--red)}
+.step.violet{border-left-color:var(--violet)}.step.amber{border-left-color:var(--amber)}
+.who{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:1px 9px;background:var(--chip);color:var(--ink2);margin-bottom:6px}
+.step p{margin:0 0 6px;color:var(--ink2)}.step p:last-child{margin:0}
+.flow{display:flex;flex-direction:column;align-items:stretch}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.stage .badge{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#fff;background:var(--teal)}
+.stage.violet .badge{background:var(--violet)}.stage.green .badge{background:var(--green)}.stage.red .badge{background:var(--red)}.stage.amber .badge{background:var(--amber)}
+.stage h3{margin-bottom:4px}.stage p{margin:0 0 6px;color:var(--ink2)}.stage p:last-child{margin:0}
+.down{text-align:center;color:var(--muted);font-size:22px;line-height:1;padding:6px 0}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+.out{border-radius:12px;padding:14px 16px;border:1px solid var(--line)}
+.out.green{background:var(--green-bg);border-color:var(--green)}.out.red{background:var(--red-bg);border-color:var(--red)}
+.out h3{margin-bottom:4px}
+.shot{background:var(--chip);border-radius:10px;padding:10px;display:flex;justify-content:center}
+.shot img{max-width:100%;height:auto;display:block;border-radius:6px}
+.imgs{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:620px){.imgs{grid-template-columns:1fr}}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.comment{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.comment .hd{background:var(--chip);padding:8px 12px;font-size:13px;color:var(--muted)}
+.comment .bd{padding:12px 14px;font-size:14px}
+.comment table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+.comment td,.comment th{border:1px solid var(--line);padding:4px 8px;text-align:left}
+.note{background:var(--teal-bg);border-left:4px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0}
+.note p:last-child{margin:0}
+table.plain{width:100%;border-collapse:collapse;font-size:15px}table.plain th,table.plain td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.plain th{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+</style></head><body>
+<nav class="top"><div class="wrap"><a href="1-normal-flow.html" class=on>1 · Normal flow</a><a href="2-flow-with-a-change.html">2 · When something changes</a><a href="3-how-a-test-works.html">3 · How a test works</a><a href="4-adding-a-test.html">4 · Adding a test or state</a></div></nav>
+<main class="wrap"><h1>The normal flow: no visual change</h1>
+<p class="lead">What happens when a developer pushes a change that doesn't alter how any screen looks. This is most pull requests: bug fixes, refactors, new logic.</p>
+<div class="card"><svg class="diagram" viewBox="0 0 1000 460" role="img" aria-label="Normal flow: the developer changes code and opens a pull request, CI runs two jobs automatically, everything is green, a reviewer reviews the code and merges."><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs><rect class="lane" x="0" y="10" width="1000" height="130" rx="12"/><text class="lanelbl" x="16" y="36">DEVELOPER</text><rect class="lane" x="0" y="150" width="1000" height="160" rx="12"/><text class="lanelbl" x="16" y="176">GITHUB CI</text><rect class="lane" x="0" y="320" width="1000" height="130" rx="12"/><text class="lanelbl" x="16" y="346">REVIEWER</text>
+<rect class="box box" x="30" y="45" width="220" height="74" rx="12"/><text x="140.0" y="69.0" text-anchor="middle">① Change the code</text><text class="sm" x="140.0" y="87.0" text-anchor="middle">on a branch; optional local check:</text><text class="sm" x="140.0" y="105.0" text-anchor="middle">make ios-test (under 1 min)</text>
+<path class="arrow" d="M250,82 H298" marker-end="url(#ah)"/>
+<rect class="box box" x="300" y="45" width="200" height="74" rx="12"/><text x="400.0" y="78.0" text-anchor="middle">② Push + open a PR</text><text class="sm" x="400.0" y="96.0" text-anchor="middle">a pull request on GitHub</text>
+<path class="arrow" d="M400,119 V178" marker-end="url(#ah)"/>
+<rect class="group" x="270" y="180" width="420" height="120" rx="12"/><text class="lbl" x="284" y="200">③ CI starts by itself, two jobs in parallel</text>
+<rect class="box teal" x="285" y="210" width="190" height="78" rx="12"/><text x="380.0" y="236.0" text-anchor="middle">lint-goldens job</text><text class="sm" x="380.0" y="254.0" text-anchor="middle">no blank goldens</text><text class="sm" x="380.0" y="272.0" text-anchor="middle">+ gallery of all goldens</text>
+<rect class="box teal" x="490" y="210" width="190" height="78" rx="12"/><text x="585.0" y="236.0" text-anchor="middle">ios job</text><text class="sm" x="585.0" y="254.0" text-anchor="middle">screenshots + logic tests,</text><text class="sm" x="585.0" y="272.0" text-anchor="middle">then UI tests</text>
+<path class="arrow" d="M690,240 H738" marker-end="url(#ah)"/>
+<rect class="box green" x="740" y="205" width="230" height="70" rx="12"/><text x="855.0" y="236.0" text-anchor="middle">④ All green ✓</text><text class="sm" x="855.0" y="254.0" text-anchor="middle">every new picture = its golden</text>
+<path class="arrow" d="M855,275 V358" marker-end="url(#ah)"/>
+<rect class="box box" x="740" y="360" width="230" height="74" rx="12"/><text x="855.0" y="384.0" text-anchor="middle">⑤ Normal code review</text><text class="sm" x="855.0" y="402.0" text-anchor="middle">no golden changed, so no</text><text class="sm" x="855.0" y="420.0" text-anchor="middle">design/QA approval needed</text>
+<path class="arrow" d="M740,397 H578" marker-end="url(#ah)"/>
+<rect class="box green" x="380" y="360" width="196" height="74" rx="12"/><text x="478.0" y="393.0" text-anchor="middle">⑥ Merge</text><text class="sm" x="478.0" y="411.0" text-anchor="middle">CI checks main once more</text>
+</svg></div>
+<h2>Step by step</h2>
+<div class="steps">
+<div class="step "><span class="who">Developer</span><h3><span class="n">1</span>Change the code</h3><p>Work on a branch as usual. Before pushing, <code>make ios-test</code> runs every screenshot and logic test locally in under a minute. It's optional, because CI runs the same tests anyway.</p></div>
+<div class="step "><span class="who">Developer</span><h3><span class="n">2</span>Push and open a pull request</h3><p>A pull request asks for the change to be merged into <code>main</code>. Opening it, or pushing new commits to it, starts CI automatically.</p></div>
+<div class="step teal"><span class="who">GitHub CI</span><h3><span class="n">3</span>Two jobs run in parallel</h3><p><b>lint-goldens</b> checks that no golden is blank or broken, and builds a gallery of all goldens. <b>ios</b> runs on GitHub's Mac with the pinned simulator: all screenshot and logic tests (the same as <code>make ios-test</code>), then the UI tests that tap through the real app.</p><p>CI tests the <b>merge result</b>: the code as <code>main</code> will look after merging.</p></div>
+<div class="step green"><span class="who">GitHub CI</span><h3><span class="n">4</span>Everything is green</h3><p>Every new picture matches its golden and every other test passes. The pull request shows a green check. If the bot commented earlier, it updates the same comment to &quot;✅ Screenshot tests passed&quot;.</p></div>
+<div class="step "><span class="who">Reviewer</span><h3><span class="n">5</span>Normal code review</h3><p>A colleague reviews the code as usual. No golden image changed, so design/QA approval isn't needed.</p></div>
+<div class="step green"><span class="who">Reviewer</span><h3><span class="n">6</span>Merge</h3><p>The change goes into <code>main</code>. With a merge queue, CI re-checks it against the latest <code>main</code> first, so two green pull requests can't break <code>main</code> together. After the merge, CI runs once more on <code>main</code> as confirmation.</p></div>
+</div>
+<div class="note"><p><b>In short:</b> nobody has to do anything extra. The screenshot tests run on their own, and when nothing visual changed they stay green and out of the way.</p></div></main></body></html>
