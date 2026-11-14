@@ -1,8 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Raw colour tokens as UIColors (light/dark aware), so `ContrastTests` can resolve and measure them.
-/// Every text/background pair is checked against WCAG AA (ContrastTests).
+/// Raw colour tokens as UIColors (light/dark aware).
 public enum NewsPalette {
     static func dynamic(light: UIColor, dark: UIColor) -> UIColor {
         UIColor { $0.userInterfaceStyle == .dark ? dark : light }

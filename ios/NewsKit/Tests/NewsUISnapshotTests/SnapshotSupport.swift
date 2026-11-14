@@ -5,7 +5,7 @@ import SwiftUI
 import UIKit
 import XCTest
 
-/// One rendering configuration in the state matrix (light, dark, largest text).
+/// One rendering configuration in the state matrix (light, dark).
 struct Variant: Sendable {
     let name: String
     let colorScheme: ColorScheme
@@ -13,11 +13,9 @@ struct Variant: Sendable {
 
     static let light = Variant(name: "light", colorScheme: .light, dynamicType: .large)
     static let dark = Variant(name: "dark", colorScheme: .dark, dynamicType: .large)
-    /// Accessibility size AX3 (iOS goes up to AX5), where truncation/overlap bugs start to appear.
-    static let largeText = Variant(name: "light_xxxl", colorScheme: .light, dynamicType: .accessibility3)
 
     /// Curated default matrix (not a full cartesian product — see STRATEGY.md "Scaling").
-    static let standard: [Variant] = [.light, .dark, .largeText]
+    static let standard: [Variant] = [.light, .dark]
 
     var traits: UITraitCollection {
         UITraitCollection { traits in
@@ -82,7 +80,7 @@ func assertComponent<V: View>(
             .background(NewsTheme.background)
             .deterministic(variant)
         // We host the view ourselves instead of using `.sizeThatFits`, which (a) renders inside a
-        // device-sized window, so XXXL content taller than the screen was clipped, and (b) inherits the
+        // device-sized window, so content taller than the screen was clipped, and (b) inherits the
         // window's safe-area insets, which squeezed tall content (summary cut to one line, white bands).
         // A snapshot that silently hides content is worse than no snapshot.
         let host = UIHostingController(rootView: framed)

@@ -95,7 +95,7 @@ public struct BreakingNewsBanner: View {
     public init(news: BreakingNews) { self.news = news }
 
     /// At accessibility sizes the timestamp moves to its own line; sharing the row it forced
-    /// the label to hyphenate as "EILMEL-DUNG" (caught by the light_xxxl snapshot).
+    /// the label to hyphenate as "EILMEL-DUNG" (caught by an earlier large-text snapshot).
     private var headerLayout: AnyLayout {
         dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2))
@@ -179,7 +179,7 @@ public struct TeaserCard: View {
     public init(teaser: Teaser) { self.teaser = teaser }
 
     /// At accessibility text sizes badge + kicker stack vertically; side by side the kicker was
-    /// truncated to "GESELLSC…" (caught by the light_xxxl snapshot).
+    /// truncated to "GESELLSC…" (caught by an earlier large-text snapshot).
     private var badgeLayout: AnyLayout {
         dynamicTypeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))

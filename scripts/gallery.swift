@@ -52,7 +52,7 @@ section{background:#fff;padding:12px;margin:0 0 16px;border-radius:8px}h3{font-s
 .row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}figure{margin:0;max-width:300px}
 figcaption{color:#666;margin-bottom:4px}img{max-width:300px;max-height:70vh;border:1px solid #ddd}</style>
 <h1>All approved screenshots (\(files.count))</h1>
-<p>Every golden the tests compare against, grouped by test. Variants (light, dark, largest text) side by side.</p>
+<p>Every golden the tests compare against, grouped by test. Variants (light, dark) side by side.</p>
 \(html)
 """
 try page.write(to: out.appendingPathComponent("index.html"), atomically: true, encoding: .utf8)

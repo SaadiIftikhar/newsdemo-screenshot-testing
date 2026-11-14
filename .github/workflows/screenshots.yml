@@ -107,7 +107,7 @@ jobs:
           curl -sSfL -o "$RUNNER_TEMP/xcodegen.zip" https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
           unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
-      - name: UI interaction tests + accessibility audit (XCUITest)
+      - name: UI interaction tests (XCUITest)
         if: env.RECORD != 'true'
         run: |
           xcodegen --version

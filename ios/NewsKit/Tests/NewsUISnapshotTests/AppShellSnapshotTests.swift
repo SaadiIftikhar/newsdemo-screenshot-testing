@@ -18,7 +18,7 @@ final class AppShellSnapshotTests: XCTestCase {
     }
 
     func test_appShell_feedTab() async throws {
-        assertScreen(try await root(.feed)) // incl. light_xxxl: the floating bar must survive large text
+        assertScreen(try await root(.feed))
     }
 
     func test_appShell_gamesTab() async throws {
