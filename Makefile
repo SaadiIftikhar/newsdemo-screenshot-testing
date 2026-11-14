@@ -29,7 +29,7 @@ endef
 ios-test: ## Compare every screenshot with its golden + run logic tests (diffs → artifacts/ios/diffs on failure)
 	$(call ios_xcodebuild,never)
 
-ios-ui-test: ## Tap through the real app on the simulator + Apple's accessibility audit (~5 min)
+ios-ui-test: ## Tap through the real app on the simulator (~3 min)
 	cd ios && xcodegen generate --quiet
 	@UDID=$$(scripts/ios-sim.sh) && $(AWAKE) xcodebuild test -project ios/NewsDemo.xcodeproj -scheme NewsDemo \
 	  -destination "platform=iOS Simulator,id=$$UDID" -derivedDataPath ios/DerivedData -quiet

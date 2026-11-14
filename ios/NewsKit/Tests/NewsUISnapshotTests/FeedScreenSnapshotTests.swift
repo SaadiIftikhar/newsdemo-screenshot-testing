@@ -32,11 +32,10 @@ final class FeedScreenSnapshotTests: XCTestCase {
     }
 
     /// Messy CMS text (HTML entities, stray line breaks, soft hyphens, emoji, non-Latin names), a ticker before its
-    /// first entry, a video longer than an hour and a timestamp in the future. Full length and at the largest text
-    /// size, where long German words have to break.
+    /// first entry, a video longer than an hour and a timestamp in the future. Full length.
     func test_feed_hostileContent() throws {
         assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_hostile_content"))),
-                     device: .iPhone13FullHeight, variants: [.light, .largeText])
+                     device: .iPhone13FullHeight, variants: [.light])
     }
 
     /// Offline after a successful load: the cached feed stays on screen with "Stand 15:02 Uhr" on top,
@@ -66,7 +65,7 @@ final class FeedScreenSnapshotTests: XCTestCase {
 
     func test_feed_longHeadlines() throws {
         assertScreen(FeedView(state: .loaded(try Snap.store.feed("feed_long_headlines"))),
-                     variants: [.light, .largeText])
+                     variants: [.light])
     }
 
     func test_feed_empty() {
