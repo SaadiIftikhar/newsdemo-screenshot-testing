@@ -156,6 +156,10 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Decisions for that round: the CI pipeline stays in the repo and the strategy, but the live script no longer shows GitHub. The script was rebuilt from scratch on two demo practices found in research, "show the result first" (Great Demo!) and tell–show–tell, with the decisions and trade-offs spoken out. The strategy was reviewed and left unchanged.)
 
+> remove the accesability test faetures tests etc as app does not suuport that … the accebilty thing is for poeple who need to use voice over right all the tests are not like this right , if yes then remove everything related to accebility test, filesetc
+
+(Decision for that round: removed the VoiceOver audit (6 UI tests), the 13 largest-text screenshot variants and the colour-contrast test, and took accessibility out of the strategy's gate. The VoiceOver labels in the app code stay, because they don't affect any picture. New numbers: 76 goldens; the regression fails 21 of 76.)
+
 ## 3. How the AI was used
 
 - **Research:**

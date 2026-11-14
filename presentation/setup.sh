@@ -3,7 +3,7 @@
 #   cd ~/Desktop/Task && presentation/setup.sh
 #
 # 1. checks the tools          2. starts from clean output      3. main must be green
-# 4. the regression branch must fail on exactly 29 screenshots (then its diffs are removed again)
+# 4. the regression branch must fail on exactly 21 screenshots (then its diffs are removed again)
 # 5. builds the golden gallery 6. starts the app in the simulator
 # 7. opens every window the script uses, in script order, and the script itself
 #
@@ -41,10 +41,10 @@ LOG=artifacts/setup-logs
 step "3/7 main must be green (~1 min)"
 make ios-test > "$LOG/main.log" 2>&1 && ok "no snapshot failures" || die "main is red: see $LOG/main.log"
 
-step "4/7 demo/regression must fail on 29 screenshots (~1.5 min; failing is expected)"
+step "4/7 demo/regression must fail on 21 screenshots (~1.5 min; failing is expected)"
 git checkout -q demo/regression || die "could not switch to demo/regression"
 make ios-test > "$LOG/regression.log" 2>&1
-if grep -q '^\*\*29 changed\*\*' artifacts/ios/diffs/summary.md 2>/dev/null; then ok "$(head -1 artifacts/ios/diffs/summary.md | sed 's/\*//g')"
+if grep -q '^\*\*21 changed\*\*' artifacts/ios/diffs/summary.md 2>/dev/null; then ok "$(head -1 artifacts/ios/diffs/summary.md | sed 's/\*//g')"
 else warn "unexpected regression result: see $LOG/regression.log"; fi
 rm -rf artifacts/ios && ok "regression diffs removed: they appear again only after your live run (part 7)"
 git checkout -q main && ok "back on main"

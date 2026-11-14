@@ -68,7 +68,7 @@ a{color:var(--teal)}
 
 <div class="card">
 <h3>Before you start</h3>
-<p>Run this in Terminal 15–30 minutes before. It checks main passes and the regression fails on exactly 29 screenshots, then opens every window in the order below. About 3 minutes.</p>
+<p>Run this in Terminal 15–30 minutes before. It checks main passes and the regression fails on exactly 21 screenshots, then opens every window in the order below. About 3 minutes.</p>
 <div class="cmd"><code>cd ~/Desktop/Task &amp;&amp; presentation/setup.sh</code><button type="button">Copy</button></div>
 <div class="see"><b>You'll see at the end:</b> READY on main.</div>
 <table style="margin-top:14px">
@@ -113,7 +113,7 @@ a{color:var(--teal)}
 <div class="tell"><span class="k">Tell</span><p>This is what the system gives you when something breaks.</p></div>
 <ol class="steps">
 <li><span class="where">Preview</span>The captured diff image (golden | new | magenta).
-<div class="say"><span class="k">Say</span><p>A developer did a small, harmless-looking refactor: one file, a few lines. It passed code review. By accident it removed the PLUS badge. Left is the approved picture, middle is the new one, and in magenta what changed. The tests caught it, on 29 screens, before it was merged. In the next minutes I'll show how, and then I'll break it live.</p></div></li>
+<div class="say"><span class="k">Say</span><p>A developer did a small, harmless-looking refactor: one file, a few lines. It passed code review. By accident it removed the PLUS badge. Left is the approved picture, middle is the new one, and in magenta what changed. The tests caught it, on 21 screenshots, before it was merged. In the next minutes I'll show how, and then I'll break it live.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>A bug no reviewer saw is caught automatically, with a picture of exactly what changed.</div>
 <p class="bridge">Bridge: <i>"First, the app it protects."</i></p>
@@ -143,7 +143,7 @@ a{color:var(--teal)}
 <li><span class="where">VS Code</span>Tab 2 <code>FeedScreenSnapshotTests.swift</code>, the function <code>test_feed_default</code>.
 <div class="say"><span class="k">Say</span><p>Two: the test. One line builds the real feed screen with that data, draws it in memory, and compares it with the approved picture. No app launch, no tapping, no network.</p></div></li>
 <li><span class="where">Browser</span>The golden gallery. Scroll a little.
-<div class="say"><span class="k">Say</span><p>Three: the approved pictures, called goldens, stored in git next to the tests. Every screen in light, dark and the largest text size, plus small phone and tablet: 89 in total. Same picture: the test passes. Different: it fails and shows the diff you saw.</p></div></li>
+<div class="say"><span class="k">Say</span><p>Three: the approved pictures, called goldens, stored in git next to the tests. Every screen in light and dark, plus small phone and tablet: 76 in total. Same picture: the test passes. Different: it fails and shows the diff you saw.</p></div></li>
 </ol>
 <div class="takeaway"><span class="k">Takeaway</span>Fixture + real screen → picture → compare with the golden.</div>
 <p class="bridge">Bridge: <i>"But the news changes every minute, so won't these pictures be wrong tomorrow?"</i></p>
@@ -164,7 +164,7 @@ a{color:var(--teal)}
 <!-- 6 -->
 <section class="card" id="p6">
 <div class="part-head"><span class="num">6</span><h2>Everything is green</h2><span class="badge">1 min</span><span class="badge live">1 live command</span></div>
-<div class="tell"><span class="k">Tell</span><p>All 89 screenshots plus 35 logic tests, live.</p></div>
+<div class="tell"><span class="k">Tell</span><p>All 76 screenshots plus 34 logic tests, live.</p></div>
 <ol class="steps">
 <li><span class="where">Terminal</span>Run every test.
 <div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
@@ -185,16 +185,16 @@ a{color:var(--teal)}
 <div class="say"><span class="k">Say</span><p>One file changed: "simplify the kicker row, tighten the banner". It drops the PLUS badge and takes 2 points of padding off the breaking banner.</p></div></li>
 <li><span class="where">Terminal</span>Run the tests again.
 <div class="cmd"><code>make ios-test</code><button type="button">Copy</button></div>
-<div class="see"><b>You'll see:</b> ~1 min, fails with "diff report: 29 failure(s)".</div>
-<div class="say"><span class="k">Say</span><p>[While it runs] Every screen with a PLUS teaser or the banner should go red; games, account and paywall should stay green. … 29 of 89 fail. The other 60 pass, so it's precise, not noisy.</p></div></li>
+<div class="see"><b>You'll see:</b> ~1 min, fails with "diff report: 21 failure(s)".</div>
+<div class="say"><span class="k">Say</span><p>[While it runs] Every screen with a PLUS teaser or the banner should go red; games, account and paywall should stay green. … 21 of 76 fail. The other 55 pass, so it's precise, not noisy.</p></div></li>
 <li><span class="where">Browser</span>Open the diff report.
 <div class="cmd"><code>open artifacts/ios/diffs/index.html</code><button type="button">Copy</button></div>
 <div class="see"><b>You'll see:</b> one row per failed screenshot. Scroll to <code>test_teaserCard_premium.dark</code>.</div>
 <div class="say"><span class="k">Say</span><p>Every failure, as golden, new and magenta. Here's the badge from part 2, gone.</p></div></li>
 <li><span class="where">Terminal</span>Show the summary.
 <div class="cmd"><code>cat artifacts/ios/diffs/summary.md</code><button type="button">Copy</button></div>
-<div class="see"><b>You'll see:</b> "29 changed (layout: 10, visible: 19, subtle: 0)".</div>
-<div class="say"><span class="k">Say</span><p>The report also sorts the failures: 10 are layout changes, because the banner got shorter, and 19 are visible changes. A reviewer knows what kind of change it is before opening one picture.</p></div></li>
+<div class="see"><b>You'll see:</b> "21 changed (layout: 6, visible: 15, subtle: 0)".</div>
+<div class="say"><span class="k">Say</span><p>The report also sorts the failures: 6 are layout changes, because the banner got shorter, and 15 are visible changes. A reviewer knows what kind of change it is before opening one picture.</p></div></li>
 <li><span class="where">Terminal</span>Always switch back.
 <div class="cmd"><code>git checkout main</code><button type="button">Copy</button></div>
 <div class="say"><span class="k">Say</span><p>Back to the correct code.</p></div></li>
@@ -262,7 +262,7 @@ a{color:var(--teal)}
 <dt>"Where does this run, and when?"</dt><dd>Locally with one command, and in CI on every pull request as a required check (STRATEGY §5). Goldens are recorded only there, on one pinned machine.</dd>
 <dt>"How do you add a new screen?"</dt><dd>Write the test, run <code>make ios-record-missing</code> to record only the new goldens, look at them, and commit them for review.</dd>
 <dt>"What if the API changes?"</dt><dd>Contract tests fail first, not screenshots. Update the shared fixture, then re-record what changed on purpose.</dd>
-<dt>"What doesn't a screenshot catch?"</dt><dd>Behaviour and accessibility. UI tests tap through the real app, and Apple's accessibility audit checks every screen.</dd>
+<dt>"What doesn't a screenshot catch?"</dt><dd>Behaviour: taps, navigation, login. The UI tests cover that by tapping through the real app.</dd>
 <dt>"Flaky tests?"</dt><dd>No automatic retries, because they hide flakiness. Quarantine within 24 hours with an owner, then fix the cause.</dd>
 <dt>"How did you use AI?"</dt><dd>As a pair programmer for research, code and docs. I made the scope and product decisions and approved every result; PROMPTS.md lists the prompts and decisions.</dd>
 <dt>"What would you do differently?"</dt><dd>Start report-only on a real BILD/WELT module earlier, to measure flakiness and run time on real code before making the gate required.</dd>

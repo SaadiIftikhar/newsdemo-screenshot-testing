@@ -9,9 +9,9 @@ Branch **`demo/regression`** contains a plausible "refactor" ("simplify the kick
 
 | | |
 |---|---|
-| Failing snapshots | **29 of 89** (list: `failing-tests.txt`) |
+| Failing snapshots | **21 of 76** (list: `failing-tests.txt`) |
 | Failing test methods | 15 |
-| Triage (`summary.md`, what CI posts on the PR) | **10 layout** changes (the banner got 4pt shorter, so the image size changed), **19 visible**, 0 subtle |
+| Triage (`summary.md`, what CI posts on the PR) | **6 layout** changes (the banner got 4pt shorter, so the image size changed), **15 visible**, 0 subtle |
 | Unaffected (correctly green) | non-premium teasers, live ticker, video, ad, empty/offline/error states, all Games, Account and Paywall screens |
 
 The failures include the app shell's feed tab, the offline (cached content) and hostile-content feeds, and a real WELTplus teaser losing its PLUS badge.
@@ -24,7 +24,7 @@ The failures include the app shell's feed tab, the offline (cached content) and 
 | `ComponentSnapshotTests__test_breakingBanner_default.light.png` | the banner 4pt shorter: a "layout" change |
 | `AppShellSnapshotTests__test_appShell_feedTab.light.png` | the whole feed tab: both changes at once |
 | `summary.md` | the triage table (kind of change and pixel counts per snapshot) |
-| `failing-tests.txt` | the 29 failing snapshot names |
+| `failing-tests.txt` | the 21 failing snapshot names |
 
 These are a committed copy of what `scripts/diff-report.swift` produced on CI. Locally, `make ios-test` on the branch writes the full gallery to `artifacts/ios/diffs/index.html`.
 
@@ -37,7 +37,7 @@ Reproduce:
 
 ```bash
 git checkout demo/regression
-make ios-test                              # fails: 29 of 89
+make ios-test                              # fails: 21 of 76
 open artifacts/ios/diffs/index.html        # golden | this PR | changed pixels
 git checkout main
 ```
