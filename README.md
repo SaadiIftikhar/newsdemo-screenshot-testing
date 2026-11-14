@@ -9,7 +9,7 @@ The strategy covers iOS and Android; this demo implements **iOS end to end** (ap
 | Deliverable | Where |
 |---|---|
 | Strategy document (~3 pages) | [STRATEGY.md](STRATEGY.md) · [STRATEGY.pdf](STRATEGY.pdf) · evidence: [docs/EVIDENCE.md](docs/EVIDENCE.md) |
-| Working demo with goldens | `ios/` (app + tests), `fixtures/` (fake data), 89 goldens in `ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/` |
+| Working demo with goldens | `ios/` (app + tests), `fixtures/` (fake data), 76 goldens in `ios/NewsKit/Tests/NewsUISnapshotTests/__Snapshots__/` |
 | Deliberate regression with diff | branch `demo/regression` · captured result: [docs/regression/](docs/regression/) |
 | How to run and regenerate | this README |
 | Prompts used | [PROMPTS.md](PROMPTS.md) |
@@ -21,9 +21,9 @@ The strategy covers iOS and Android; this demo implements **iOS end to end** (ap
 **Needs:** macOS with **Xcode 27** (a beta/preview release at the time of writing), the **iOS 27.0 simulator runtime** (`xcodebuild -downloadPlatform iOS -buildVersion 27.0`) and **XcodeGen** (`brew install xcodegen`, for the app and UI tests). Run everything from the repository root.
 
 ```bash
-make ios-test                       # 89 screenshots + logic tests: green
+make ios-test                       # 76 screenshots + logic tests: green
 git checkout demo/regression        # a "refactor" that drops the PLUS badge
-make ios-test                       # fails: 29 of 89
+make ios-test                       # fails: 21 of 76
 open artifacts/ios/diffs/index.html # golden | this change | changed pixels
 git checkout main                   # always switch back
 ```
@@ -38,8 +38,8 @@ git checkout main                   # always switch back
 │   ├── NewsKit/Sources/          the app code: NewsCore (models), NewsUI (feed), Games, Account, AppShell
 │   ├── NewsKit/Tests/
 │   │   ├── NewsUISnapshotTests/  SCREENSHOT TESTS, and __Snapshots__/ = the GOLDENS (approved PNGs)
-│   │   └── NewsCoreTests/        logic, contract, edge-case and contrast tests (no pictures)
-│   ├── UITests/                  tap-through tests + Apple's accessibility audit on the real app
+│   │   └── NewsCoreTests/        logic, contract and edge-case tests (no pictures)
+│   ├── UITests/                  tap-through tests on the real app
 │   └── App/, project.yml         the app target (XcodeGen)
 ├── scripts/                      simulator pinning, diff report, golden lint, gallery, run helper, PDF export
 ├── docs/                         EVIDENCE.md, regression/ (captured result of the deliberate regression)
@@ -53,7 +53,7 @@ git checkout main                   # always switch back
 | Command | What it does | When |
 |---|---|---|
 | `make ios-test` | Renders every screen with the fake data, compares it with its golden, runs the logic tests. On failure: `artifacts/ios/diffs/index.html` + `summary.md` | After any change |
-| `make ios-ui-test` | Taps through the real app on the simulator + Apple's accessibility audit (~5 min) | Before merging |
+| `make ios-ui-test` | Taps through the real app on the simulator (~3 min) | Before merging |
 | `make lint-goldens` | Fails on blank or unreadable goldens | After recording |
 | `make gallery` | Every golden on one page: `artifacts/gallery/index.html` | Design review |
 | `make ios-record-missing` | Records goldens only for new tests | After adding a test |

@@ -12,7 +12,7 @@
 |---|---|---|
 | **PR gate (Layer 1)** | [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) 1.19.7 (pinned) | [Roborazzi](https://github.com/takahirom/roborazzi) 1.77 on Robolectric 4.17 (pinned) |
 | Why | In-process and fast. Same authors as TCA, so mocking reuses `withDependencies` | JVM, no emulator, works with Hilt. The same run drives interaction tests |
-| Also in the gate | Logic/contract tests; XCUITest interaction tests and `performAccessibilityAudit()` | Logic/contract tests; Robolectric interaction tests and Google ATF checks |
+| Also in the gate | Logic/contract tests; XCUITest interaction tests | Logic/contract tests; Robolectric interaction tests |
 | **Nightly (Layer 2)** | Maestro/XCUITest on a simulator, app started with `-fixture <name>` | Maestro on an emulator, `--es fixture <name>` |
 
 **Rejected for the gate:** Paparazzi (2.0 alpha, no Hilt or interactions; it is the fallback, because the test code is a thin layer over portable fixtures), Compose Preview Screenshot Testing (alpha), and Appium/Maestro with a paid visual service (minutes per screen, flakier, edge states hard to reach: that is Layer 2). Hosted review (e.g. Sentry Snapshots) is worth a later trial.
@@ -42,14 +42,13 @@
 
 ## 4. What is covered, and by which layer
 
-- **Matrix (curated, not every combination):** every component in light + dark; text-heavy and interactive screens also at the largest supported text (iOS AX3, Android font scale 2.0 with non-linear scaling); error, selected and interactive states also in dark; the feed also on the smallest phone, a tablet and at **full length**; paywall and PLUS badge always. Demo: 89 goldens.
-- **Accessibility in the gate:** a WCAG contrast test over every colour-token pair, plus automated audits on every screen (contrast, touch targets, labels, traits). The audit found that hidden tabs were still reachable by VoiceOver, invisible in every screenshot. Accepted audit exceptions are listed in code with the evidence for each.
-- **Layer 2 (nightly):** what in-process rendering cannot see: system chrome (iOS 26's Liquid Glass tab bar renders blank in-process), real fonts and devices, and hostile settings (en_US 12-hour time, bold text, increased contrast). It found an "11:05 PM Uhr" bug no snapshot could.
+- **Matrix (curated, not every combination):** every component in light + dark; error, selected and interactive states also in dark; the feed also on the smallest phone, a tablet and at **full length**; paywall and PLUS badge always. Demo: 76 goldens.
+- **Layer 2 (nightly):** what in-process rendering cannot see: system chrome (iOS 26's Liquid Glass tab bar renders blank in-process), real fonts and devices, and hostile settings (e.g. en_US 12-hour time). It found an "11:05 PM Uhr" bug no snapshot could.
 
 ## 5. CI/CD and the Scrum process
 
 - **When it runs:** every PR on its merge result (golden lint and iOS on the `xcode-27` runner; Android on Linux in parallel); the merge queue, so two green PRs cannot break main together; main after merge; nightly on a fresh runner image to catch toolchain drift (switched off in the demo repo to save CI minutes).
-- **Measured on GitHub Actions:** iOS 12–19 min (snapshots, UI tests and audits). Cost control: run iOS only when iOS or shared files change, build once for snapshots and UI tests, move the slowest audits to nightly. Target: under 10 minutes per PR.
+- **Measured on GitHub Actions:** iOS 12–19 min (snapshots and UI tests). Cost control: run iOS only when iOS or shared files change, build once for snapshots and UI tests, move the slowest checks to nightly. Target: under 10 minutes per PR.
 - **Rollout of the gate:** report-only first, then a required check. **Definition of Done:** a new UI state ships with a fixture and a snapshot; refinement asks "which states does this add?".
 - **Platform upgrades** (Xcode, simulator runtime, SDK, Robolectric, the snapshot library): one PR bumps the version *and* re-baselines, reviewed as such.
 
@@ -73,7 +72,7 @@
 - **Four apps, one design system:** component goldens are shared; app modules (WELT PLUS, Sport BILD tickers) own their screens and fixtures.
 - **Ownership:** developers write and maintain the tests. QA owns the strategy, the fixture catalog and the matrix rules. Design approves goldens. AI may triage diffs; a human approves.
 - **Enablement:** an "add a snapshot in 5 lines" guide, pairing with each squad, a diff-review session for designers, office hours in month one.
-- **Metrics:** escaped visual bugs per release, PR gate time, flake rate, share of UI states with fixtures, accessibility findings per release.
+- **Metrics:** escaped visual bugs per release, PR gate time, flake rate, share of UI states with fixtures.
 
 ## 9. Rollout (about 4 sprints)
 
@@ -82,12 +81,12 @@
 | 1 | One app (e.g. WELT News, iOS + Android): support module, 5 design-system components, CI **report-only** | Green for 5 days, no flakes |
 | 2 | Shared fixtures, feed and paywall states, diff gallery and sticky comment, CODEOWNERS; pairing with each squad | Every squad merged at least one snapshot test |
 | 3 | Gate **required** and in the Definition of Done; CI-only recording; Layer 2 nightly | Under 10 min, flake rate under 1% |
-| 4+ | Other three apps; accessibility snapshots; trial a hosted review tool | Visual bugs caught by the gate, not in release testing |
+| 4+ | Other three apps; trial a hosted review tool | Visual bugs caught by the gate, not in release testing |
 
 ## 10. Android: the same approach
 
 - **Same fixtures, same contracts, same names.** Android reads the same `fixtures/` JSON with its production decoder, asserts the same contract literals, and uses the same test and golden names, so one regression fails in the same places on both platforms; golden lint then also checks iOS/Android name parity.
-- **Tool:** Roborazzi on Robolectric, rendering Compose on the JVM (no emulator, about 20 s for the full suite in an earlier Android version of this demo). Seams via Hilt (`@TestInstallIn`) and Coil's fake image engine (§2). The same run drives interaction tests and Google ATF accessibility checks.
+- **Tool:** Roborazzi on Robolectric, rendering Compose on the JVM (no emulator, about 20 s for the full suite in an earlier Android version of this demo). Seams via Hilt (`@TestInstallIn`) and Coil's fake image engine (§2). The same run drives the interaction tests.
 - **CI:** a Linux job in parallel with iOS; the diff report needs CoreGraphics, so it runs on a short macOS job (or is ported).
-- **Lessons from building it:** pin the Robolectric SDK (a newer one rendered blank captures that still passed), pin transitive test dependencies, prove accessibility checks can fail (one official hook silently checked nothing), and keep tab state outside the composables.
+- **Lessons from building it:** pin the Robolectric SDK (a newer one rendered blank captures that still passed), pin transitive test dependencies, prove every new check can fail (one official hook silently checked nothing), and keep tab state outside the composables.
 
