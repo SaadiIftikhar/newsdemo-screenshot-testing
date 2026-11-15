@@ -20,7 +20,7 @@ The failures include the app shell's feed tab, the offline (cached content) and 
 
 | File | What it is |
 |---|---|
-| `ComponentSnapshotTests__test_teaserCard_premium.dark.png` | **golden \| this PR \| changed pixels (magenta)** for the PLUS teaser: the badge is gone |
+| `ComponentSnapshotTests__test_teaserCard_premium.dark.png` | **golden \| this PR \| difference** for the PLUS teaser: the badge is magenta (only in the golden), and the text that moved up shows in magenta (old place) and blue (new place) |
 | `ComponentSnapshotTests__test_breakingBanner_default.light.png` | the banner 4pt shorter: a "layout" change |
 | `AppShellSnapshotTests__test_appShell_feedTab.light.png` | the whole feed tab: both changes at once |
 | `summary.md` | the triage table (kind of change and pixel counts per snapshot) |

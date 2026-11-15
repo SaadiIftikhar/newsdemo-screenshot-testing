@@ -172,6 +172,10 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Result: Script.html rebuilt to follow the 19-slide deck. Each slide has "Show / do" (folders, files, commands with a description), "Say", and "For you" (background, not read out), plus four real tests explained line by line and a commands cheat sheet.)
 
+> can we edit how the diffrence shows as both the magenta color is used for what is being caompred with to what, or ami wonrg
+
+(Result: the diff's third panel now colours each changed pixel by where it comes from: magenta = only in the golden, blue = only in the new picture, orange = colour changed, so moved content shows as magenta (old place) next to blue (new place). Each composite carries its own labels and colour key. The report runs with optimisation on, so it's faster than before (18 s instead of 23 s for 29 diffs).)
+
 ## 3. How the AI was used
 
 - **Research:**

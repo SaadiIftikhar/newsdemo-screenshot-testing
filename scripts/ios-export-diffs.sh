@@ -13,4 +13,4 @@ if [[ ! -d "$FAILURES" ]] || [[ -z "$(find "$FAILURES" -name '*.png' -print -qui
   echo "no snapshot failures"
   exit 0
 fi
-swift "$(dirname "$0")/diff-report.swift" "$GOLDENS" "$FAILURES" "$OUT"
+swift -O "$(dirname "$0")/diff-report.swift" "$GOLDENS" "$FAILURES" "$OUT"
