@@ -176,6 +176,10 @@ This challenge was completed with **Claude Code** (Anthropic, model Claude Opus 
 
 (Result: the diff's third panel now colours each changed pixel by where it comes from: magenta = only in the golden, blue = only in the new picture, orange = colour changed, so moved content shows as magenta (old place) next to blue (new place). Each composite carries its own labels and colour key. The report runs with optimisation on, so it's faster than before (18 s instead of 23 s for 29 diffs).)
 
+> it says mac cant verify if this is free of malware … "1-run-tests.command" can't be opened because Microsoft PowerPoint is not allowed to open documents in Terminal.
+
+(Result: macOS doesn't let sandboxed apps like PowerPoint open scripts in Terminal. presentation/run/install-runner.sh now builds a small local AppleScript app, NewsDemo Runner, that handles newsdemo:// links from the slides and tells Terminal to run the matching script with bash.)
+
 ## 3. How the AI was used
 
 - **Research:**
