@@ -210,7 +210,7 @@ a{color:var(--teal)}
 <div class="block do"><span class="k">Show / do</span><ol class="do-list">
 <li>Open the diff report:
 <div class="cmd"><code>open artifacts/ios/diffs/index.html</code><button type="button">Copy</button></div>
-<p class="desc">One row per failed picture: golden | new | changed pixels in magenta. Scroll to <code class="p">ComponentSnapshotTests/test_teaserCard_premium.dark</code>.</p></li>
+<p class="desc">One row per failed picture: golden | new | difference. In the difference, magenta = only in the golden, blue = only in the new picture, orange = colour changed. Scroll to <code class="p">ComponentSnapshotTests/test_teaserCard_premium.dark</code>.</p></li>
 <li>Show the summary:
 <div class="cmd"><code>cat artifacts/ios/diffs/summary.md</code><button type="button">Copy</button></div>
 <p class="desc">Prints “29 changed (layout: 10, visible: 19, subtle: 0)” and a table: the same text CI posts on the pull request.</p></li>
@@ -218,7 +218,7 @@ a{color:var(--teal)}
 <div class="cmd"><code>git checkout main</code><button type="button">Copy</button></div>
 <p class="desc">Back to the correct code.</p></li>
 </ol></div>
-<div class="block say"><span class="k">Say</span><p>Golden, new picture, and in magenta what changed: the badge is simply gone. The report also sorts the failures: 10 are layout changes because the banner got shorter, 19 are visible changes. A reviewer knows what kind of change it is before opening a single picture. And back to the correct code.</p></div>
+<div class="block say"><span class="k">Say</span><p>Golden, new picture, and the difference: magenta is what was only in the golden, blue what’s only in the new picture. The badge is magenta: gone. And the headline shows in magenta and blue because it moved up into the badge’s space. The report also sorts the failures: 10 are layout changes because the banner got shorter, 19 are visible changes. A reviewer knows what kind of change it is before opening a single picture. And back to the correct code.</p></div>
 <div class="block you"><span class="k">For you</span><p><b>layout</b> = the picture changed size (something moved or shrank). <b>visible</b> = pixels a person can see changed. <b>subtle</b> = only a tiny colour shift. These labels only sort; a person always decides.</p></div>
 <div class="fallback"><b>If anything goes wrong:</b> <code class="p">git checkout main</code>, then show the slide (it’s the same result, captured earlier), or open the captured image:<div class="cmd"><code>open docs/regression/ComponentSnapshotTests__test_teaserCard_premium.dark.png</code><button type="button">Copy</button></div></div>
 </section>

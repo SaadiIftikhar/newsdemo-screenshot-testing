@@ -125,7 +125,7 @@ table.plain th{color:var(--muted);font-size:13px;text-transform:uppercase;letter
 <div class="down">↓</div>
 <div class="split">
 <div class="out green"><h3>✓ Same: the test passes</h3><p>Nothing is written. For the whole suite: "no snapshot failures".</p></div>
-<div class="out red"><h3>✗ Different: the test fails</h3><p>The new picture is saved in <code>artifacts/ios/failures/</code>. After the run, <code>scripts/diff-report.swift</code> turns every failure into a golden | new | magenta image in <code>artifacts/ios/diffs/index.html</code>, plus <code>summary.md</code>.</p></div>
+<div class="out red"><h3>✗ Different: the test fails</h3><p>The new picture is saved in <code>artifacts/ios/failures/</code>. After the run, <code>scripts/diff-report.swift</code> turns every failure into a golden | new | difference image in <code>artifacts/ios/diffs/index.html</code>, plus <code>summary.md</code>.</p></div>
 </div>
 </div>
 
@@ -137,6 +137,6 @@ table.plain th{color:var(--muted);font-size:13px;text-transform:uppercase;letter
 <figcaption><code>test_teaserCard_premium.light.png</code> and <code>.dark.png</code></figcaption></div>
 <div class="card" style="margin:0"><h3>A failure (from the regression)</h3>
 <figure class="shot"><img src="../regression/ComponentSnapshotTests__test_teaserCard_premium.dark.png" alt="diff: golden, new, changed pixels"></figure>
-<figcaption>Golden | new picture without the PLUS badge | changed pixels in magenta.</figcaption></div>
+<figcaption>Golden | new picture without the PLUS badge | difference: magenta = only in the golden, blue = only in the new picture, orange = colour changed.</figcaption></div>
 </div>
 <div class="note"><p><b>Why it's reliable:</b> the data and environment never change, so the same code always draws the same pixels. A difference can only mean the code changed.</p></div></main></body></html>

@@ -63,7 +63,7 @@ git checkout main                   # always switch back
 
 ## Workflows
 
-**A test fails and you did NOT mean it (a bug):** open `artifacts/ios/diffs/index.html` (golden | new | changed pixels in magenta) and `summary.md` (each change labelled *layout*, *visible* or *subtle*). Fix the code. **Never re-record to make a red test green.**
+**A test fails and you did NOT mean it (a bug):** open `artifacts/ios/diffs/index.html` (golden | new | difference: magenta = only in the golden, blue = only in the new picture, orange = colour changed) and `summary.md` (each change labelled *layout*, *visible* or *subtle*). Fix the code. **Never re-record to make a red test green.**
 
 **The appearance changes on purpose (a redesign):** check the diff shows only the intended change, then update the goldens. In a team, add the `record-snapshots` label to the pull request: CI re-records on its pinned machine, proves the new goldens and pushes them; a design/QA code owner approves the image diff. Locally:
 ```bash
